@@ -20,6 +20,8 @@ import { wireTreat, wirePlay } from "./ui/play.js";
 import { wireSettings } from "./ui/settings.js";
 import { wireIntro, needsIntro } from "./ui/intro.js";
 import { wireShare } from "./ui/share.js";
+import { wireAccount } from "./ui/account.js";
+import { initCloud } from "./cloud/sync.js";
 
 await initStore();
 
@@ -88,6 +90,7 @@ wireSettings({
   restore: $("backupRestore"),
   backupNote: $("backupNote"),
 });
+wireAccount($("accountBody"));
 wireShare({
   open: $("shareOpen"),
   dialog: $("shareDialog"),
@@ -112,6 +115,7 @@ if (needsIntro()) greetings.push(["hi!", "would love to know your name.", { hear
 if (greetings.length) setTimeout(() => mimi.announce(greetings), 700);
 
 preloadSound();
+initCloud();
 
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
   addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));

@@ -52,7 +52,10 @@ function indexedDBAdapter(db) {
       return { entries, kv: Object.fromEntries(keys.map((k, i) => [k, values[i]])) };
     },
     putEntries: (list) => run("entries", "readwrite", (s) => list.forEach((e) => s.put(e))),
-    deleteEntry: (id) => run("entries", "readwrite", (s) => s.delete(id)),
+    clearAll: async () => {
+      await run("entries", "readwrite", (s) => s.clear());
+      await run("kv", "readwrite", (s) => s.clear());
+    },
     setKV: (key, value) => run("kv", "readwrite", (s) => s.put(value, key)),
   };
 }
@@ -88,8 +91,8 @@ function localStorageAdapter() {
       for (const e of list) byId.set(e.id, e);
       set(ENTRIES, [...byId.values()]);
     },
-    async deleteEntry(id) {
-      set(ENTRIES, get(ENTRIES, []).filter((e) => e.id !== id));
+    async clearAll() {
+      for (const k of Object.keys(localStorage)) if (k.startsWith("mimi.db.")) localStorage.removeItem(k);
     },
     async setKV(key, value) {
       set(kvKey(key), value);

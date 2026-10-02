@@ -1,7 +1,8 @@
 // The app's data, kept in memory for fast synchronous reads and persisted to the
-// database (see db.js). Call initStore() once before anything reads the store.
+// on-device database (db.js). When signed in, cloud/sync.js mirrors it to Supabase.
+// Call initStore() once before anything reads the store.
 // Change entries with addEntry/removeEntry; change other data then call store.save(...).
-// Listeners registered with store.on() re-render after every save.
+// Listeners registered with store.on() re-render after every change.
 
 import { dayKey, daysBetween } from "./dates.js";
 import { openDatabase } from "./db.js";
@@ -9,6 +10,7 @@ import { openDatabase } from "./db.js";
 // Named records in the database's key-value store.
 export const KEYS = {
   settings: "settings",
+  settingsTimes: "settingsTimes",
   scrapbook: "scrapbook",
   treasures: "treasures",
   pets: "pets",
@@ -31,22 +33,29 @@ const DEFAULT_SETTINGS = {
 
 let db;
 let kv = {};
-let records = []; // entry records, oldest first
+let records = []; // { id, day, text, createdAt, updatedAt, deleted, synced }, oldest first
+let settingsSnapshot = {};
 
 export const store = {
-  days: {}, // derived view: { "2026-10-02": ["Coffee was perfect", ...] }
+  days: {}, // derived view of live entries: { "2026-10-02": ["Coffee was perfect", ...] }
   settings: { ...DEFAULT_SETTINGS },
   scrapbook: [], // [{ at: 25, key, text }]
   treasures: [], // [{ id: "button", key }]
 
   save(...names) {
-    for (const name of names) if (name !== "days") write(KEYS[name], this[name]);
-    document.dispatchEvent(new Event("mimi:change"));
+    for (const name of names) {
+      if (name === "days") continue;
+      if (name === "settings") stampSettingsChanges();
+      write(KEYS[name], this[name]);
+    }
+    emit();
   },
   on(listener) {
     document.addEventListener("mimi:change", listener);
   },
 };
+
+const emit = () => document.dispatchEvent(new Event("mimi:change"));
 
 export const read = (key, fallback) => kv[key] ?? fallback;
 
@@ -55,27 +64,46 @@ export function write(key, value) {
   db?.setKV(key, value).catch((err) => console.warn("Mimi couldn't save", key, err));
 }
 
+// Remember when each setting last changed so two devices can merge field by field.
+function stampSettingsChanges() {
+  const times = { ...read(KEYS.settingsTimes, {}) };
+  let changed = false;
+  for (const [key, value] of Object.entries(store.settings)) {
+    if (settingsSnapshot[key] !== value) {
+      times[key] = Date.now();
+      changed = true;
+    }
+  }
+  settingsSnapshot = { ...store.settings };
+  if (changed) write(KEYS.settingsTimes, times);
+}
+
+const live = () => records.filter((r) => !r.deleted);
+
 function rebuildDays() {
   store.days = {};
-  for (const r of records) (store.days[r.day] ??= []).push(r.text);
+  for (const r of live()) (store.days[r.day] ??= []).push(r.text);
 }
+
+const persistRecords = (list) => db?.putEntries(list).catch((err) => console.warn("Mimi couldn't save entries", err));
 
 const newId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 
 export function addEntry(text, day = dayKey(), createdAt = Date.now()) {
-  const record = { id: newId(), day, text, createdAt };
+  const record = { id: newId(), day, text, createdAt, updatedAt: createdAt, deleted: false, synced: false };
   records.push(record);
   (store.days[day] ??= []).push(text);
-  db?.putEntries([record]).catch((err) => console.warn("Mimi couldn't save an entry", err));
+  persistRecords([record]);
   return record;
 }
 
+// Deletions are kept as tombstones so synced devices hear about them too.
 export function removeEntry(day, index) {
-  const record = records.filter((r) => r.day === day)[index];
+  const record = live().filter((r) => r.day === day)[index];
   if (!record) return;
-  records = records.filter((r) => r !== record);
+  Object.assign(record, { deleted: true, updatedAt: Date.now(), synced: false });
   rebuildDays();
-  db?.deleteEntry(record.id).catch((err) => console.warn("Mimi couldn't remove an entry", err));
+  persistRecords([record]);
 }
 
 // Moves data saved by earlier versions (plain localStorage keys) into the database.
@@ -90,7 +118,10 @@ async function migrateFromLocalStorage() {
   const days = legacy("days") ?? {};
   const migrated = [];
   for (const day of Object.keys(days).sort()) {
-    days[day].forEach((text, i) => migrated.push({ id: newId(), day, text, createdAt: new Date(`${day}T12:00:00`).getTime() + i }));
+    days[day].forEach((text, i) => {
+      const at = new Date(`${day}T12:00:00`).getTime() + i;
+      migrated.push({ id: newId(), day, text, createdAt: at, updatedAt: at, deleted: false, synced: false });
+    });
   }
   if (migrated.length) await db.putEntries(migrated);
   for (const key of Object.values(KEYS)) {
@@ -103,21 +134,36 @@ async function migrateFromLocalStorage() {
   return migrated;
 }
 
+function loadMemory() {
+  records.sort((a, b) => a.createdAt - b.createdAt);
+  rebuildDays();
+  store.settings = { ...DEFAULT_SETTINGS, ...read(KEYS.settings, {}) };
+  settingsSnapshot = { ...store.settings };
+  store.scrapbook = read(KEYS.scrapbook, []);
+  store.treasures = read(KEYS.treasures, []);
+}
+
 export async function initStore() {
   db = await openDatabase();
   const loaded = await db.loadAll();
   kv = loaded.kv;
-  records = loaded.entries;
+  records = loaded.entries.map((r) => ({ deleted: false, synced: false, updatedAt: r.createdAt, ...r }));
   if (!kv.migrated) {
     if (!records.length) records = await migrateFromLocalStorage();
     write("migrated", true);
   }
-  records.sort((a, b) => a.createdAt - b.createdAt);
-  rebuildDays();
-  store.settings = { ...DEFAULT_SETTINGS, ...read(KEYS.settings, {}) };
-  store.scrapbook = read(KEYS.scrapbook, []);
-  store.treasures = read(KEYS.treasures, []);
+  loadMemory();
   return db.kind;
+}
+
+// Forget everything on this device (used when signing out on a shared device).
+export async function clearDevice() {
+  await db.clearAll();
+  kv = { migrated: true };
+  await db.setKV("migrated", true);
+  records = [];
+  loadMemory();
+  emit();
 }
 
 // ---- reads ----
@@ -137,14 +183,102 @@ export const userName = () => store.settings.userName.trim();
 
 export const entriesFor = (key) => store.days[key] ?? [];
 export const entriesToday = () => entriesFor(dayKey());
-export const totalThings = () => records.length;
-export const allEntries = () => [...records].sort((a, b) => a.day.localeCompare(b.day) || a.createdAt - b.createdAt).map(({ day, text }) => ({ key: day, text }));
+export const totalThings = () => live().length;
+export const allEntries = () => live()
+  .sort((a, b) => a.day.localeCompare(b.day) || a.createdAt - b.createdAt)
+  .map(({ day, text }) => ({ key: day, text }));
 
 // Days since the previous visit (0 on a first visit); records today's visit.
 export function daysAway() {
   const prev = read(KEYS.visit, null);
   write(KEYS.visit, dayKey());
   return prev ? daysBetween(prev, dayKey()) : 0;
+}
+
+// ---- sync support (used by cloud/sync.js) ----
+
+export const unsyncedEntries = () => records.filter((r) => !r.synced);
+
+export function markEntriesSynced(list) {
+  for (const r of list) r.synced = true;
+  persistRecords(list);
+}
+
+// Applies entries from the cloud; the newer edit of each entry wins.
+export function mergeRemoteEntries(rows) {
+  const byId = new Map(records.map((r) => [r.id, r]));
+  const changed = [];
+  for (const row of rows) {
+    const remote = {
+      id: row.id,
+      day: row.day,
+      text: row.text,
+      createdAt: Date.parse(row.created_at),
+      updatedAt: Date.parse(row.updated_at),
+      deleted: row.deleted,
+      synced: true,
+    };
+    const local = byId.get(row.id);
+    if (local && local.updatedAt >= remote.updatedAt) continue;
+    if (local) Object.assign(local, remote);
+    else records.push(remote);
+    changed.push(local ?? remote);
+  }
+  if (changed.length) {
+    persistRecords(changed);
+    loadMemory();
+    emit();
+  }
+  return changed.length;
+}
+
+// The parts of Mimi's memory that follow you across devices.
+export function cloudState() {
+  return {
+    settings: store.settings,
+    settingsTimes: read(KEYS.settingsTimes, {}),
+    scrapbook: store.scrapbook,
+    treasures: store.treasures,
+    milestones: read(KEYS.milestones, []),
+    firstMet: read(KEYS.firstMet, null),
+  };
+}
+
+const unionBy = (a = [], b = [], key) => [...a, ...b.filter((x) => !a.some((y) => key(y) === key(x)))];
+
+// Merges cloud state into this device. Returns the merged state for uploading.
+export function mergeCloudState(remote = {}) {
+  const local = cloudState();
+  const times = { ...local.settingsTimes };
+  const settings = { ...local.settings };
+  for (const [key, value] of Object.entries(remote.settings ?? {})) {
+    const remoteAt = remote.settingsTimes?.[key] ?? 0;
+    if (key in DEFAULT_SETTINGS && remoteAt > (times[key] ?? 0)) {
+      settings[key] = value;
+      times[key] = remoteAt;
+    }
+  }
+  const firstMets = [local.firstMet, remote.firstMet].filter(Boolean).sort();
+  const merged = {
+    settings,
+    settingsTimes: times,
+    scrapbook: unionBy(local.scrapbook, remote.scrapbook, (p) => p.at).sort((a, b) => a.at - b.at),
+    treasures: unionBy(local.treasures, remote.treasures, (t) => t.id),
+    milestones: [...new Set([...local.milestones, ...(remote.milestones ?? [])])],
+    firstMet: firstMets[0] ?? null,
+  };
+
+  if (JSON.stringify(merged) !== JSON.stringify(local)) {
+    store.settings = merged.settings;
+    settingsSnapshot = { ...merged.settings };
+    store.scrapbook = merged.scrapbook;
+    store.treasures = merged.treasures;
+    for (const key of ["settings", "settingsTimes", "scrapbook", "treasures", "milestones", "firstMet"]) {
+      if (merged[key] != null) write(KEYS[key], merged[key]);
+    }
+    emit();
+  }
+  return merged;
 }
 
 // ---- backup ----
@@ -155,7 +289,7 @@ export function exportBackup() {
     version: 3,
     exportedAt: new Date().toISOString(),
     days: store.days,
-    entries: records,
+    entries: live(),
     settings: store.settings,
     scrapbook: store.scrapbook,
     treasures: store.treasures,

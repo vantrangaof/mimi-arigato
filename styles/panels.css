@@ -420,3 +420,9 @@ mark {
 .intro { border-color: var(--accent); }
 .intro .muted { margin: 4px 0 0; }
 .intro-skip { margin-top: 10px; font-size: 0.875rem; color: var(--ink-soft); }
+
+/* ---- account ---- */
+
+.account-email { margin: 0 0 4px; font-weight: 700; overflow-wrap: anywhere; }
+.muted.error { color: var(--accent); }
+.sheet-section form.row .text-input { flex: 1 1 12rem; }

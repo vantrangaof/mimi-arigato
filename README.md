@@ -8,7 +8,7 @@ Every day, tell Mimi one small thing worth remembering. Mimi listens. Mimi remem
 
 Mimi is a pet that never asks anything of you: no hunger bars, no punishments, no broken streaks. Missing a day takes nothing away. "Arigato" means thank you in Japanese; you can rename the cat (for example, Xiao Mi).
 
-It's an installable web app (PWA). It works offline, needs no account, and keeps everything on your device.
+It's an installable web app (PWA). It works offline and without an account; sign in with your email to sync your good things to the cloud and across devices.
 
 ---
 
@@ -84,6 +84,7 @@ Everything unlocks by total good things and never goes away:
 
 ### Settings
 - Your name, the cat's name, fur color (Strawberry, Peach, Cloud, Midnight, Snow), wardrobe.
+- **Account & sync:** type your email, tap the link Mimi emails you, and you're signed in (no password). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
 - **Daily reminder:** adds a repeating event to your calendar app (web apps can't schedule notifications on their own).
 - **Backup / Restore:** download everything as a file; restoring merges and never deletes.
 - **Share a picture of today:** a 1080×1350 pixel card of the cat with today's good things.
@@ -107,6 +108,7 @@ python3 -m http.server 5173
 index.html              Page markup (the room, journal, tabs, dialogs)
 manifest.webmanifest    Install-to-home-screen metadata
 sw.js                   Offline support (network first, cached copy when offline)
+supabase/schema.sql     Cloud database tables and security rules (run once in Supabase)
 assets/
   icon.svg              App icon
   sounds/meow.m4a       0.9 s meow clip
@@ -119,6 +121,9 @@ styles/
   panels.css            Journal, tabs, memories, scrapbook, month, calendar, dialogs
 src/
   main.js               Startup: opens the database and wires the modules together
+  config.js             Supabase project URL + public anon key (empty = no cloud sync)
+  cloud/
+    sync.js             Sign-in with email link, push/pull sync with Supabase
   core/                 Infrastructure, no UI
     db.js               IndexedDB database (localStorage fallback)
     store.js            In-memory data + persistence, change events, backup/restore
@@ -148,6 +153,7 @@ src/
     calendar.js         Calendar and search
     play.js             Treats and laser play
     settings.js         Settings dialog, reminder file, backup
+    account.js          Account & sync section in Settings
     share.js            Share picture
 ```
 
@@ -160,18 +166,54 @@ Conventions:
 
 ## Data
 
-Everything is stored **on the device** in an IndexedDB database named `mimi-arigato`:
+Mimi is **local-first**: the on-device database is what the app reads and writes, so it's instant and works offline. When you're signed in, it's mirrored to a Supabase (Postgres) database.
+
+### On this device: IndexedDB (`mimi-arigato`)
 
 | Store | Contents |
 |---|---|
-| `entries` | One record per good thing: `{ id, day: "YYYY-MM-DD", text, createdAt }`, indexed by day |
-| `kv` | `settings` (your name, cat name, fur, accessory, sound, reminder), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` counters, `lastVisit` |
+| `entries` | One record per good thing: `{ id, day, text, createdAt, updatedAt, deleted, synced }` |
+| `kv` | `settings` (+ when each setting changed), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` counters, `lastVisit`, sync bookmarks |
 
-Data from earlier versions (plain localStorage) is moved into the database automatically on first load. If IndexedDB isn't available (some private-browsing modes), the app falls back to localStorage.
+Data from earlier versions (plain localStorage) moves into the database automatically. If IndexedDB isn't available (some private-browsing modes), the app falls back to localStorage.
 
-There's no server and no sync yet. Clearing site data or switching devices loses data unless you use **Backup**.
+### In the cloud: Supabase (Postgres)
 
----
+| Table | Contents |
+|---|---|
+| `entries` | `id, user_id, day, text, created_at, updated_at, deleted, synced_at` |
+| `user_state` | `user_id, data (jsonb: settings, scrapbook, treasures, milestones, firstMet), updated_at` |
+
+Row-level security means each person can only read and write their own rows.
+
+### How sync works
+
+- **When:** right after sign-in, on open, about 1.5 s after any change, when the device comes back online, and every 5 minutes.
+- **Entries:** changed entries are pushed; then everything other devices changed since the last pull is fetched, ordered by `synced_at` (stamped by the server, so wrong device clocks don't matter). If the same entry changed in two places, the newer edit wins.
+- **Deletions** are kept as tombstones (`deleted = true`) so every device learns about them.
+- **Settings** merge field by field (the most recent change to each setting wins); **scrapbook, treasures and milestones** are combined, so a new device never wipes your history.
+- Anything you wrote before signing in is uploaded to your account when you sign in.
+- Pet and treat counters stay on each device.
+
+## Cloud sync setup (about 5 minutes)
+
+1. Create a free project at [supabase.com](https://supabase.com) → **New project**.
+2. Open **SQL Editor → New query**, paste the contents of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**.
+3. Open **Authentication → URL Configuration**:
+   - **Site URL:** where Mimi runs, e.g. `http://localhost:5173` (later your real address).
+   - **Redirect URLs:** add the same address(es).
+4. Open **Project Settings → API** and copy the **Project URL** and the **anon public** key into [`src/config.js`](src/config.js):
+   ```js
+   export const SUPABASE_URL = "https://YOUR-PROJECT.supabase.co";
+   export const SUPABASE_ANON_KEY = "eyJ...";
+   ```
+   The anon key is meant to be public; row-level security protects the data. **Never** put the `service_role` key in the app.
+5. Reload Mimi → Settings → **Account & sync** → enter your email → open the link.
+
+Notes:
+- Supabase's built-in email sender is limited to a few sign-in emails per hour; for real use, set up your own SMTP under **Authentication → Emails**.
+- The sign-in link opens Mimi in whichever browser your email app uses; that browser gets signed in.
+- The Supabase client library is loaded from a CDN only when cloud sync is configured, so offline use is unaffected.
 
 ## Not doing (on purpose)
 
@@ -179,7 +221,6 @@ Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing access
 
 ## Ideas for later
 
-- **Cloud sync** across devices (needs accounts and a hosted database, e.g. Supabase or Firebase).
 - Put it online (GitHub Pages / Netlify) so it can be installed on a phone.
 - More idle animations and room items; seasonal decorations.
 - Optional AI reactions for entries the keyword rules don't recognize.
