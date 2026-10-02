@@ -79,6 +79,12 @@ Everything unlocks by total good things and never goes away:
 - **Surprises** (rare, at most about three a week): Mimi finds a treasure (a tiny button, a seashell, a blue feather…) that appears on the floor of the room, or tells you a dream ("dreamed about noodles last night").
 - Tap things in the room and Mimi comments on them.
 
+### Photos
+- **Photos tab:** add photos of you and your cat ("Add photos", several at once). Tap one to see it large, write a caption, or delete it.
+- **Attach a photo to a good thing:** tap the camera button next to the journal box; the photo shows beside that entry, in the calendar, on its scrapbook page, and as the monthly favorite.
+- Photos are shrunk on the device before saving (longest side 1600 px, plus a small thumbnail) and turned upright automatically.
+- When signed in, photos sync to a **private** Supabase Storage bucket; other devices download thumbnails right away and full images when opened.
+
 ### Mimi's things (tabs)
 - **Memories:** *What Mimi has learned* ("Mimi thinks you really like coffee." "You talked about Lin 3 times. Mimi knows Lin must be important." "Your mom came up 4 times. That sounds special.") plus a **Memory cabinet** of drawers Mimi sorts on their own: People, Food, Things you were proud of, Things that made you laugh, Beautiful moments, Kindness, Rest, Moving your body, Hard days you got through, Little things, and Treasures Mimi found.
 - **Scrapbook:** at 10, 25, 50, 75, 100 good things, then every 50, Mimi keeps one entry (preferring warm moments) as a taped-in page. Flip through them.
@@ -87,7 +93,7 @@ Everything unlocks by total good things and never goes away:
 
 ### Settings
 - Your name, the cat's name, fur color (Strawberry, Peach, Cloud, Midnight, Snow).
-- **Account & sync:** type your email, tap the link Mimi emails you, and you're signed in (no password). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
+- **Account & sync** (also the **Sign in** / cloud button at the top): type your email, tap the link Mimi emails you, and you're signed in (no password). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
 - **Daily reminder:** adds a repeating event to your calendar app (web apps can't schedule notifications on their own).
 - **Backup / Restore:** download everything as a file; restoring merges and never deletes.
 - **Share a picture of today:** a 1080×1350 pixel card of the cat with today's good things.
@@ -127,13 +133,14 @@ src/
   main.js               Startup: opens the database and wires the modules together
   config.js             Supabase project URL + public anon key (empty = no cloud sync)
   cloud/
-    sync.js             Sign-in with email link, push/pull sync with Supabase
+    sync.js             Sign-in with email link, push/pull sync with Supabase (entries, photos, state)
   core/                 Infrastructure, no UI
     db.js               IndexedDB database (localStorage fallback)
     store.js            In-memory data + persistence, change events, backup/restore
     dates.js            Local day keys and date formatting
     dom.js              Small DOM helpers
     pixel.js            Draws pixel art as SVG
+    images.js           Shrinks photos before saving
   cat/                  The cat itself
     sprite.js           Sprite data, fur palettes, accessories, SVG and canvas drawing
     mimi.js             Moods, reactions, idle habits, sleep schedule
@@ -152,6 +159,7 @@ src/
     intro.js            "What's your name?"
     note.js             Mimi's note under their name
     wardrobe.js         Dress up: wear items per slot
+    photos.js           Photo album, viewer, and thumbnails used elsewhere
     journal.js          Writing good things, prompts, unlock and scrapbook events
     tabs.js             Accessible tabs
     memories.js         Memory cabinet
@@ -181,6 +189,8 @@ Mimi is **local-first**: the on-device database is what the app reads and writes
 |---|---|
 | `entries` | One record per good thing: `{ id, day, text, createdAt, updatedAt, deleted, synced }` |
 | `kv` | `settings` (+ when each setting changed), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` counters, `lastVisit`, sync bookmarks |
+| `photos` | Photo details: `{ id, day, caption, entryId, createdAt, updatedAt, deleted, synced, uploaded, hasFull, hasThumb }` |
+| `photoFiles` | The image files, keyed `<photo id>:full` and `<photo id>:thumb` |
 
 Data from earlier versions (plain localStorage) moves into the database automatically. If IndexedDB isn't available (some private-browsing modes), the app falls back to localStorage.
 
@@ -190,6 +200,10 @@ Data from earlier versions (plain localStorage) moves into the database automati
 |---|---|
 | `entries` | `id, user_id, day, text, created_at, updated_at, deleted, synced_at` |
 | `user_state` | `user_id, data (jsonb: settings, scrapbook, treasures, milestones, firstMet), updated_at` |
+| `photos` | `id, user_id, day, caption, entry_id, created_at, updated_at, deleted, synced_at` |
+| Storage bucket `photos` | Private image files at `<user id>/<photo id>.jpg` and `…-thumb.jpg` |
+
+Entries also have a `photo_id` column linking a good thing to its photo.
 
 Row-level security means each person can only read and write their own rows.
 
@@ -216,6 +230,13 @@ Row-level security means each person can only read and write their own rows.
    ```
    The anon key is meant to be public; row-level security protects the data. **Never** put the `service_role` key in the app.
 5. Reload Mimi → Settings → **Account & sync** → enter your email → open the link.
+
+**Updating:** when a new version adds tables (like photos), run `supabase/schema.sql` again. It's safe to re-run.
+
+**Checking that sync works:**
+- In the app, the cloud button at the top shows **Synced** (green cloud), **Syncing…**, or **Sync problem** (hover or open it for the reason). Settings → Account & sync shows "Synced just now" and has **Sync now**.
+- In Supabase, open **Table Editor → entries / photos / user_state** to see the rows, and **Storage → photos** to see image files (one folder per person).
+- Try it across devices: write something on your phone, then tap Sync now on your laptop.
 
 Notes:
 - Supabase's built-in email sender is limited to a few sign-in emails per hour; for real use, set up your own SMTP under **Authentication → Emails**.

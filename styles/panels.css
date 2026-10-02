@@ -125,9 +125,8 @@
 
 .tabs {
   display: flex;
+  flex-wrap: wrap; /* five tabs: wrap to a second row on narrow phones rather than hide one */
   gap: 4px;
-  overflow-x: auto;
-  scrollbar-width: none;
   margin: -8px -8px 16px;
   padding: 4px;
   background: var(--grid);
