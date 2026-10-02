@@ -5,5 +5,5 @@
 // The anon key is designed to be public; row-level security keeps each person's data
 // private. Never put the service_role key here.
 
-export const SUPABASE_URL = "";
-export const SUPABASE_ANON_KEY = "";
+export const SUPABASE_URL = "https://gbcobrwtrbsfdhqvnmow.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_bzx2uSoGkBcj3q8UMwJxYg_7mFnfbyR";
