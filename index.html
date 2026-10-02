@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fcf2f6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1e1522" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Mimi">
+  <title>Mimi Arigato</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+Rounded+1c:wght@400;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page">
+    <main class="stage">
+      <div class="topbar">
+        <p class="streak" id="streak"></p>
+        <div class="topbar-actions">
+          <button class="icon-button" id="soundToggle" type="button" aria-label="Sound" aria-pressed="true"></button>
+          <button class="icon-button" id="settingsOpen" type="button" aria-label="Settings" title="Settings"></button>
+        </div>
+      </div>
+
+      <div class="mimi-panel" id="mimiPanel">
+      <div class="habitat" id="habitat">
+        <button class="cat-wrap" id="catWrap" type="button" aria-label="Pet Mimi">
+          <span class="bubble" id="bubble" aria-hidden="true">purr~</span>
+          <svg class="cat" id="catSprite" viewBox="0 0 32 29" shape-rendering="crispEdges" aria-hidden="true"></svg>
+        </button>
+      </div>
+
+      <div class="caption">
+        <h1 class="name" id="catTitle">Mimi Arigato</h1>
+        <p class="state" aria-live="polite"><span id="stateText">is sitting peacefully.</span></p>
+      </div>
+
+      <div class="actions">
+        <button class="pixel-button" id="treatBtn" type="button">Give a treat</button>
+        <button class="pixel-button" id="playBtn" type="button" aria-pressed="false">Play</button>
+      </div>
+      </div>
+
+      <div class="cards">
+
+      <section class="card thanks" aria-labelledby="thanksTitle">
+        <div class="card-head">
+          <h2 class="card-title" id="thanksTitle">Tell Mimi five good things</h2>
+          <div class="progress">
+            <span class="hearts" id="hearts"></span>
+            <span id="progress" aria-live="polite">0 of 5 today</span>
+          </div>
+        </div>
+
+        <ol class="thanks-list" id="thanksList"></ol>
+
+        <form class="thanks-form" id="thanksForm" autocomplete="off">
+          <label class="visually-hidden" for="thanksInput">Something good about today</label>
+          <input class="text-input" id="thanksInput" type="text" maxlength="140" placeholder="Something good about today…" required>
+          <button class="thanks-send" id="thanksSend" type="submit">Tell Mimi</button>
+        </form>
+        <p class="thanks-done" id="thanksDone" hidden></p>
+        <button class="link-button" id="shareOpen" type="button" hidden>Make a picture of today</button>
+      </section>
+
+      <section class="card calendar" aria-labelledby="calTitle">
+        <div class="card-head">
+          <h2 class="card-title" id="calTitle">This month</h2>
+          <div class="cal-nav">
+            <button class="icon-button small" id="calPrev" type="button" aria-label="Previous month">‹</button>
+            <button class="icon-button small" id="calNext" type="button" aria-label="Next month">›</button>
+          </div>
+        </div>
+        <div class="cal-weekdays" id="calWeekdays" aria-hidden="true"></div>
+        <div class="cal-grid" id="calGrid"></div>
+        <p class="muted cal-stats" id="calStats"></p>
+        <label class="visually-hidden" for="calSearch">Search your good things</label>
+        <input class="text-input" id="calSearch" type="search" placeholder="Search your good things">
+        <div class="cal-detail" id="calDetail" aria-live="polite"></div>
+      </section>
+      </div>
+    </main>
+    <footer class="footer" id="tally">Tap Mimi to say hello.</footer>
+  </div>
+
+  <dialog class="sheet" id="settings" aria-labelledby="settingsTitle">
+    <form method="dialog" class="sheet-head">
+      <h2 class="card-title" id="settingsTitle">Settings</h2>
+      <button class="icon-button small" value="close" aria-label="Close">×</button>
+    </form>
+
+    <div class="sheet-section">
+      <label class="sheet-label" for="catName">Name</label>
+      <input class="text-input" id="catName" type="text" maxlength="16" autocomplete="off">
+    </div>
+
+    <fieldset class="sheet-section">
+      <legend class="sheet-label">Fur</legend>
+      <div class="choices" id="furChoices"></div>
+    </fieldset>
+
+    <fieldset class="sheet-section">
+      <legend class="sheet-label">Wardrobe</legend>
+      <div class="choices" id="wardrobe"></div>
+      <p class="muted" id="wardrobeNote"></p>
+    </fieldset>
+
+    <div class="sheet-section">
+      <label class="sheet-label" for="reminderTime">Daily reminder</label>
+      <p class="muted">Adds a repeating event to your calendar app so it can remind you.</p>
+      <div class="row">
+        <input class="text-input time" id="reminderTime" type="time" value="20:00">
+        <button class="pixel-button" id="reminderAdd" type="button">Add to calendar</button>
+      </div>
+    </div>
+
+    <div class="sheet-section">
+      <span class="sheet-label">Backup</span>
+      <p class="muted">Your good things are saved only in this browser. Download a backup to keep them safe or move them to another device.</p>
+      <div class="row">
+        <button class="pixel-button" id="backupDownload" type="button">Download backup</button>
+        <label class="pixel-button">Restore backup<input class="visually-hidden" id="backupRestore" type="file" accept=".json,application/json"></label>
+      </div>
+      <p class="muted" id="backupNote" aria-live="polite"></p>
+    </div>
+  </dialog>
+
+  <dialog class="sheet" id="shareDialog" aria-labelledby="shareTitle">
+    <form method="dialog" class="sheet-head">
+      <h2 class="card-title" id="shareTitle">Picture of today</h2>
+      <button class="icon-button small" value="close" aria-label="Close">×</button>
+    </form>
+    <img class="share-img" id="shareImg" alt="Today's good things with Mimi">
+    <div class="row">
+      <button class="pixel-button primary" id="shareSave" type="button">Save picture</button>
+      <button class="pixel-button" id="shareSend" type="button" hidden>Share</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

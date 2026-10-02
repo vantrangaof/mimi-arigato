@@ -1,0 +1,19 @@
+{
+  "name": "Mimi Arigato",
+  "short_name": "Mimi",
+  "description": "A tiny pink pixel cat you tell five things to each day.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fcf2f6",
+  "theme_color": "#fcf2f6",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
