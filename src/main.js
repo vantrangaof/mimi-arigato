@@ -23,6 +23,7 @@ import { wireShare } from "./ui/share.js";
 import { wireAccount } from "./ui/account.js";
 import { wireNote } from "./ui/note.js";
 import { wireWardrobe } from "./ui/wardrobe.js";
+import { wirePhotos } from "./ui/photos.js";
 import { initCloud } from "./cloud/sync.js";
 
 await initStore();
@@ -41,7 +42,7 @@ const mimi = makeMimi({
 
 wireHabitat({ mimi, look, wrap, sprite, room: $("roomArt"), tally: $("tally") });
 wireNote({ button: $("mimiNote"), text: $("noteText"), signature: $("noteSign") });
-wireTopbar({ together: $("together"), soundToggle: $("soundToggle"), settingsOpen: $("settingsOpen") });
+wireTopbar({ together: $("together"), soundToggle: $("soundToggle"), settingsOpen: $("settingsOpen"), cloudButton: $("cloudButton") });
 wireIntro(mimi, { card: $("intro"), form: $("introForm"), input: $("introName"), skip: $("introSkip"), title: $("introTitle"), note: $("introNote") });
 
 wireJournal(mimi, {
@@ -58,9 +59,16 @@ wireJournal(mimi, {
   done: $("thanksDone"),
   share: $("shareOpen"),
   next: $("worldNext"),
+  attachInput: $("attachInput"),
+  attachPreview: $("attachPreview"),
 });
 
 wireTabs($("thingsTabs"));
+wirePhotos(mimi, {
+  panel: $("panel-photos"),
+  input: $("photoInput"),
+  viewer: { dialog: $("photoViewer"), image: $("photoFull"), caption: $("photoCaption"), meta: $("photoMeta"), actions: $("photoActions") },
+});
 wireMemories($("panel-memories"));
 wireScrapbook($("panel-scrapbook"));
 wireMonth($("panel-month"));

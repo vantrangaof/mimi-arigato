@@ -29,6 +29,7 @@
       <header class="topbar">
         <p class="together" id="together"></p>
         <div class="topbar-actions">
+          <button class="cloud-button" id="cloudButton" type="button" hidden></button>
           <button class="icon-button" id="soundToggle" type="button" aria-pressed="true" aria-label="Sound"></button>
           <button class="icon-button" id="settingsOpen" type="button" aria-label="Settings" title="Settings"></button>
         </div>
@@ -92,8 +93,14 @@
           <form class="thanks-form" id="thanksForm" autocomplete="off">
             <label class="visually-hidden" for="thanksInput">Something good about today</label>
             <input class="text-input" id="thanksInput" type="text" maxlength="140" required>
+            <label class="icon-button attach" for="attachInput" title="Attach a photo">
+              <span class="visually-hidden">Attach a photo</span>
+              <svg viewBox="0 0 9 7" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M3 0h3v1H3zM0 1h9v6H0z"/><path fill="var(--paper)" d="M3 2h3v1H3zM2 3h1v2H2zM6 3h1v2H6zM3 5h3v1H3z"/><path fill="currentColor" d="M4 3h1v2H4z"/></svg>
+            </label>
+            <input class="visually-hidden" id="attachInput" type="file" accept="image/*" tabindex="-1">
             <button class="thanks-send" id="thanksSend" type="submit">Tell Mimi</button>
           </form>
+          <div class="attach-preview" id="attachPreview" hidden></div>
 
           <div class="stuck" id="stuck">
             <button class="link-button" id="stuckButton" type="button" aria-expanded="false" aria-controls="promptChips">Stuck? Pick something to think about</button>
@@ -109,12 +116,15 @@
         <section class="card things" aria-label="Mimi's things">
           <div class="tabs" id="thingsTabs" role="tablist" aria-label="Mimi's things">
             <button class="tab" id="tab-memories" role="tab" type="button" aria-controls="panel-memories">Memories</button>
+            <button class="tab" id="tab-photos" role="tab" type="button" aria-controls="panel-photos">Photos</button>
             <button class="tab" id="tab-scrapbook" role="tab" type="button" aria-controls="panel-scrapbook">Scrapbook</button>
             <button class="tab" id="tab-month" role="tab" type="button" aria-controls="panel-month">Month</button>
             <button class="tab" id="tab-calendar" role="tab" type="button" aria-controls="panel-calendar">Calendar</button>
           </div>
 
           <div class="tab-panel" id="panel-memories" role="tabpanel" aria-labelledby="tab-memories" tabindex="0"></div>
+          <div class="tab-panel" id="panel-photos" role="tabpanel" aria-labelledby="tab-photos" tabindex="0" hidden></div>
+          <input class="visually-hidden" id="photoInput" type="file" accept="image/*" multiple tabindex="-1" aria-hidden="true">
           <div class="tab-panel" id="panel-scrapbook" role="tabpanel" aria-labelledby="tab-scrapbook" tabindex="0" hidden></div>
           <div class="tab-panel" id="panel-month" role="tabpanel" aria-labelledby="tab-month" tabindex="0" hidden></div>
           <div class="tab-panel" id="panel-calendar" role="tabpanel" aria-labelledby="tab-calendar" tabindex="0" hidden>
@@ -168,7 +178,7 @@
       </div>
     </div>
 
-    <div class="sheet-section">
+    <div class="sheet-section" id="accountSection">
       <span class="sheet-label">Account &amp; sync</span>
       <div id="accountBody"></div>
     </div>
@@ -194,6 +204,18 @@
     </div>
     <div id="wardrobeSlots"></div>
     <p class="muted small" id="wardrobeNext"></p>
+  </dialog>
+
+  <dialog class="sheet photo-sheet" id="photoViewer" aria-labelledby="photoTitle">
+    <form method="dialog" class="sheet-head">
+      <h2 class="card-title" id="photoTitle">Photo</h2>
+      <button class="icon-button small" value="close" aria-label="Close">×</button>
+    </form>
+    <img class="photo-full" id="photoFull" alt="">
+    <label class="sheet-label" for="photoCaption">Caption</label>
+    <input class="text-input" id="photoCaption" type="text" maxlength="140" placeholder="Add a caption" autocomplete="off">
+    <p class="muted small" id="photoMeta"></p>
+    <div class="row" id="photoActions"></div>
   </dialog>
 
   <dialog class="sheet" id="shareDialog" aria-labelledby="shareTitle">

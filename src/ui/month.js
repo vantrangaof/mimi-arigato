@@ -2,7 +2,8 @@
 
 import { el, plural } from "../core/dom.js";
 import { formatMonth, formatShort } from "../core/dates.js";
-import { store, catName } from "../core/store.js";
+import { store, catName, photoForEntry } from "../core/store.js";
+import { photoThumb } from "./photos.js";
 import { CATEGORIES, monthRecap } from "../memory/insights.js";
 
 // Months that have entries, newest first, as [year, monthIndex].
@@ -45,6 +46,7 @@ export function wireMonth(panel) {
       recap.topThing && el("p", { text: `You mentioned ${recap.topThing.label} ${recap.topThing.count} times.` }),
       el("figure", { class: "favorite" },
         el("figcaption", { text: `${name}'s favorite memory` }),
+        photoForEntry(recap.favorite.key, recap.favorite.text) && photoThumb(photoForEntry(recap.favorite.key, recap.favorite.text), "photo-thumb wide"),
         el("blockquote", { text: `“${recap.favorite.text}”` }),
         el("p", { class: "muted small", text: formatShort(recap.favorite.key) }),
       ),

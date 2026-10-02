@@ -1,6 +1,7 @@
 // Month view of good things, plus search across every day.
 
-import { store, entriesFor } from "../core/store.js";
+import { store, entriesFor, photoForEntry } from "../core/store.js";
+import { photoThumb } from "./photos.js";
 import { dayKey, parseDay, formatLong, formatMonth, formatMonthYear, formatShortYear, formatWeekdayNarrow } from "../core/dates.js";
 import { plural } from "../core/dom.js";
 
@@ -89,7 +90,9 @@ export function wireCalendar(els) {
     const ul = document.createElement("ul");
     ul.append(...list.map((t) => {
       const li = document.createElement("li");
-      li.textContent = t;
+      const photo = photoForEntry(selected, t);
+      if (photo) li.append(photoThumb(photo, "photo-thumb small"));
+      li.append(t);
       return li;
     }));
     els.detail.replaceChildren(heading, ul);

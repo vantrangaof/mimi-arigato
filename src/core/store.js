@@ -33,7 +33,9 @@ const DEFAULT_SETTINGS = {
 
 let db;
 let kv = {};
-let records = []; // { id, day, text, createdAt, updatedAt, deleted, synced }, oldest first
+let records = []; // { id, day, text, createdAt, updatedAt, deleted, synced, photoId }, oldest first
+let photos = []; // { id, day, caption, entryId, createdAt, updatedAt, deleted, synced, uploaded, hasFull, hasThumb }
+const photoURLs = new Map(); // "<id>:<size>" → object URL
 let settingsSnapshot = {};
 
 export const store = {
@@ -89,8 +91,8 @@ const persistRecords = (list) => db?.putEntries(list).catch((err) => console.war
 
 const newId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 
-export function addEntry(text, day = dayKey(), createdAt = Date.now()) {
-  const record = { id: newId(), day, text, createdAt, updatedAt: createdAt, deleted: false, synced: false };
+export function addEntry(text, day = dayKey(), createdAt = Date.now(), photoId = null) {
+  const record = { id: newId(), day, text, createdAt, updatedAt: createdAt, deleted: false, synced: false, photoId };
   records.push(record);
   (store.days[day] ??= []).push(text);
   persistRecords([record]);
@@ -105,6 +107,90 @@ export function removeEntry(day, index) {
   rebuildDays();
   persistRecords([record]);
 }
+
+export function linkEntryPhoto(entryId, photoId) {
+  const record = records.find((r) => r.id === entryId);
+  if (!record) return;
+  Object.assign(record, { photoId, updatedAt: Date.now(), synced: false });
+  persistRecords([record]);
+}
+
+// ---- photos ----
+
+const persistPhotos = (list) => db?.putPhotos(list).catch((err) => console.warn("Mimi couldn't save photos", err));
+
+function forgetURLs(id) {
+  for (const size of ["full", "thumb"]) {
+    const key = `${id}:${size}`;
+    if (photoURLs.has(key)) URL.revokeObjectURL(photoURLs.get(key));
+    photoURLs.delete(key);
+  }
+}
+
+export const photoList = () => photos.filter((p) => !p.deleted).sort((a, b) => b.createdAt - a.createdAt);
+export const photoById = (id) => photos.find((p) => p.id === id && !p.deleted) ?? null;
+
+export async function addPhoto({ full, thumb, caption = "", day = dayKey(), entryId = null }) {
+  const now = Date.now();
+  const meta = { id: newId(), day, caption, entryId, createdAt: now, updatedAt: now, deleted: false, synced: false, uploaded: false, hasFull: true, hasThumb: true };
+  await db.putFile(`${meta.id}:full`, full);
+  await db.putFile(`${meta.id}:thumb`, thumb);
+  photos.push(meta);
+  persistPhotos([meta]);
+  emit();
+  return meta;
+}
+
+export function updatePhoto(id, changes) {
+  const photo = photoById(id);
+  if (!photo) return;
+  Object.assign(photo, changes, { updatedAt: Date.now(), synced: false });
+  persistPhotos([photo]);
+  emit();
+}
+
+// Photos are tombstoned like entries; the image files are deleted right away.
+export function removePhoto(id) {
+  const photo = photoById(id);
+  if (!photo) return;
+  Object.assign(photo, { deleted: true, updatedAt: Date.now(), synced: false, hasFull: false, hasThumb: false });
+  persistPhotos([photo]);
+  db?.deleteFiles([`${id}:full`, `${id}:thumb`]);
+  forgetURLs(id);
+  for (const r of records.filter((x) => x.photoId === id)) linkEntryPhoto(r.id, null);
+  emit();
+}
+
+export const photoFile = (id, size) => db.getFile(`${id}:${size}`);
+
+// An object URL for a photo's image, or null if this device doesn't have the file yet.
+export async function photoURL(id, size = "thumb") {
+  const key = `${id}:${size}`;
+  if (photoURLs.has(key)) return photoURLs.get(key);
+  const blob = await photoFile(id, size);
+  if (!blob) return null;
+  const url = URL.createObjectURL(blob);
+  photoURLs.set(key, url);
+  return url;
+}
+
+export async function savePhotoFile(id, size, blob) {
+  await db.putFile(`${id}:${size}`, blob);
+  const photo = photos.find((p) => p.id === id);
+  if (photo) {
+    photo[size === "full" ? "hasFull" : "hasThumb"] = true;
+    persistPhotos([photo]);
+    if (size === "thumb") emit(); // lets the album show a newly downloaded thumbnail
+  }
+}
+
+// The photo attached to a good thing (matched by day and text), if any.
+export function photoForEntry(day, text) {
+  const record = live().find((r) => r.day === day && r.text === text && r.photoId);
+  return record ? photoById(record.photoId) : null;
+}
+
+export const entryRecordsFor = (day) => live().filter((r) => r.day === day);
 
 // Moves data saved by earlier versions (plain localStorage keys) into the database.
 async function migrateFromLocalStorage() {
@@ -147,7 +233,8 @@ export async function initStore() {
   db = await openDatabase();
   const loaded = await db.loadAll();
   kv = loaded.kv;
-  records = loaded.entries.map((r) => ({ deleted: false, synced: false, updatedAt: r.createdAt, ...r }));
+  records = loaded.entries.map((r) => ({ deleted: false, synced: false, updatedAt: r.createdAt, photoId: null, ...r }));
+  photos = loaded.photos ?? [];
   if (!kv.migrated) {
     if (!records.length) records = await migrateFromLocalStorage();
     write("migrated", true);
@@ -162,6 +249,8 @@ export async function clearDevice() {
   kv = { migrated: true };
   await db.setKV("migrated", true);
   records = [];
+  for (const p of photos) forgetURLs(p.id);
+  photos = [];
   loadMemory();
   emit();
 }
@@ -217,6 +306,7 @@ export function mergeRemoteEntries(rows) {
       updatedAt: Date.parse(row.updated_at),
       deleted: row.deleted,
       synced: true,
+      photoId: row.photo_id ?? null,
     };
     const local = byId.get(row.id);
     if (local && local.updatedAt >= remote.updatedAt) continue;
@@ -230,6 +320,49 @@ export function mergeRemoteEntries(rows) {
     emit();
   }
   return changed.length;
+}
+
+export const unsyncedPhotos = () => photos.filter((p) => !p.synced);
+
+export function markPhotosSynced(list) {
+  for (const p of list) Object.assign(p, { synced: true, uploaded: !p.deleted });
+  persistPhotos(list);
+}
+
+// Applies photo details from the cloud. Returns photos whose thumbnail should be downloaded.
+export function mergeRemotePhotos(rows) {
+  const byId = new Map(photos.map((p) => [p.id, p]));
+  const changed = [];
+  for (const row of rows) {
+    const local = byId.get(row.id);
+    const updatedAt = Date.parse(row.updated_at);
+    if (local && local.updatedAt >= updatedAt) continue;
+    const remote = {
+      id: row.id,
+      day: row.day,
+      caption: row.caption ?? "",
+      entryId: row.entry_id ?? null,
+      createdAt: Date.parse(row.created_at),
+      updatedAt,
+      deleted: row.deleted,
+      synced: true,
+      uploaded: true,
+      hasFull: !row.deleted && Boolean(local?.hasFull),
+      hasThumb: !row.deleted && Boolean(local?.hasThumb),
+    };
+    if (remote.deleted) {
+      db?.deleteFiles([`${row.id}:full`, `${row.id}:thumb`]);
+      forgetURLs(row.id);
+    }
+    if (local) Object.assign(local, remote);
+    else photos.push(remote);
+    changed.push(local ?? remote);
+  }
+  if (changed.length) {
+    persistPhotos(changed);
+    emit();
+  }
+  return photos.filter((p) => !p.deleted && !p.hasThumb);
 }
 
 // The parts of Mimi's memory that follow you across devices.

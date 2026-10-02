@@ -2,7 +2,11 @@
 
 import { el, capitalize } from "../core/dom.js";
 import { dayKey } from "../core/dates.js";
-import { store, entriesToday, catName, userName, totalThings, addEntry, removeEntry } from "../core/store.js";
+import {
+  store, entriesToday, entryRecordsFor, catName, userName, totalThings, addEntry, removeEntry, addPhoto, linkEntryPhoto, photoById,
+} from "../core/store.js";
+import { preparePhoto, photoErrorMessage } from "../core/images.js";
+import { photoThumb } from "./photos.js";
 import { heartSVG } from "../cat/mimi.js";
 import { purr } from "../cat/sound.js";
 import { WORLD, nextUnlock } from "../world/world.js";
@@ -42,6 +46,33 @@ function progressLine(n) {
 
 export function wireJournal(mimi, els) {
   let prompt = null;
+  let pending = null; // a photo chosen for the next good thing: { full, thumb, url }
+
+  function renderAttachment(message = "") {
+    els.attachPreview.replaceChildren(...(pending
+      ? [
+        el("img", { src: pending.url, alt: "Photo to attach" }),
+        el("span", { class: "muted small", text: "Photo ready to attach" }),
+        el("button", { type: "button", class: "remove", text: "×", "aria-label": "Remove photo", onclick: () => { URL.revokeObjectURL(pending.url); pending = null; renderAttachment(); } }),
+      ]
+      : message ? [el("span", { class: "muted small", text: message })] : []));
+    els.attachPreview.hidden = !pending && !message;
+  }
+
+  els.attachInput.addEventListener("change", async () => {
+    const file = els.attachInput.files[0];
+    els.attachInput.value = "";
+    if (!file) return;
+    try {
+      const prepared = await preparePhoto(file);
+      if (pending) URL.revokeObjectURL(pending.url);
+      pending = { ...prepared, url: URL.createObjectURL(prepared.thumb) };
+      renderAttachment();
+      els.input.focus();
+    } catch (err) {
+      renderAttachment(photoErrorMessage(err));
+    }
+  });
 
   function render() {
     const list = entriesToday();
@@ -53,8 +84,12 @@ export function wireJournal(mimi, els) {
     els.hearts.replaceChildren(...Array.from({ length: DAILY }, (_, i) => heartSVG("slot", i < n)));
     els.progress.textContent = progressLine(n);
 
+    const records = entryRecordsFor(dayKey());
     els.list.replaceChildren(...list.map((text, i) => el("li", {},
-      el("span", { text }),
+      el("span", { class: "entry-text" },
+        records[i]?.photoId && photoById(records[i].photoId) && photoThumb(photoById(records[i].photoId), "photo-thumb small"),
+        el("span", { text }),
+      ),
       el("button", {
         type: "button",
         class: "remove",
@@ -105,17 +140,26 @@ export function wireJournal(mimi, els) {
     },
   })));
 
-  els.form.addEventListener("submit", (e) => {
+  let saving = false;
+  els.form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const text = els.input.value.trim();
-    if (!text || entriesToday().length >= DAILY) return;
+    if (saving || !text || entriesToday().length >= DAILY) return;
+    saving = true;
 
     const today = dayKey();
     const before = totalThings();
     const echo = echoOf(text, today);
-    addEntry(text, today);
+    const record = addEntry(text, today);
     els.input.value = "";
     prompt = null;
+    if (pending) {
+      const photo = await addPhoto({ full: pending.full, thumb: pending.thumb, caption: text, day: today, entryId: record.id });
+      linkEntryPhoto(record.id, photo.id);
+      URL.revokeObjectURL(pending.url);
+      pending = null;
+      renderAttachment();
+    }
 
     const n = entriesToday().length;
     const events = [echo
@@ -137,6 +181,7 @@ export function wireJournal(mimi, els) {
     store.save("days", "settings", "scrapbook");
     if (store.settings.sound) purr({ volume: 0.6 });
     mimi.announce(events);
+    saving = false;
     if (n < DAILY) els.input.focus();
   });
 

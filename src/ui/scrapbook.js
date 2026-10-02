@@ -2,7 +2,8 @@
 
 import { el } from "../core/dom.js";
 import { formatLong } from "../core/dates.js";
-import { store, catName, totalThings } from "../core/store.js";
+import { store, catName, totalThings, photoForEntry } from "../core/store.js";
+import { photoThumb } from "./photos.js";
 import { CATEGORIES, categorize } from "../memory/insights.js";
 import { FIRST_PAGE, pageThresholds } from "../memory/scrapbook.js";
 
@@ -27,6 +28,7 @@ export function wireScrapbook(panel) {
     panel.replaceChildren(...[
       el("article", { class: "book-page", "aria-label": `Scrapbook page ${i + 1} of ${pages.length}` },
         el("span", { class: "tape", "aria-hidden": "true" }),
+        photoForEntry(page.key, page.text) && photoThumb(photoForEntry(page.key, page.text), "photo-thumb taped"),
         cat && el("span", { class: "sticker", text: CATEGORIES[cat].label }),
         el("blockquote", { text: `“${page.text}”` }),
         el("p", { class: "page-date", text: formatLong(page.key) }),

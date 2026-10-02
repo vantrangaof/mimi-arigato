@@ -124,9 +124,10 @@
 /* ---- tabs ---- */
 
 .tabs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
   gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
   margin: -8px -8px 16px;
   padding: 4px;
   background: var(--grid);
@@ -134,7 +135,9 @@
 }
 
 .tab {
-  padding: 8px 4px;
+  flex: 1 0 auto;
+  padding: 8px 10px;
+  white-space: nowrap;
   font-size: 0.875rem;
   color: var(--ink-soft);
   background: none;
@@ -477,3 +480,63 @@ mark {
 .wear-none { height: 28px; line-height: 28px; color: var(--ink-soft); }
 .wear-label { text-align: center; }
 #wardrobeNext { margin: 16px 0 0; }
+
+/* ---- photos ---- */
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.photo-tile { margin: 0; display: grid; gap: 4px; }
+.photo-tile figcaption { font-size: 0.75rem; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.photo-thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+  background: var(--grid);
+  border: 2px solid var(--sheet-edge);
+  border-radius: 3px;
+  cursor: zoom-in;
+}
+
+.photo-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.photo-thumb.small { width: 40px; height: 40px; flex: none; }
+.photo-thumb.wide { aspect-ratio: 4 / 3; margin: 8px 0 4px; }
+.photo-thumb.taped { width: 70%; aspect-ratio: 4 / 3; margin: 0 auto 12px; transform: rotate(1.2deg); box-shadow: 3px 3px 0 var(--cat-shadow); }
+
+.entry-text { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.cal-detail li .photo-thumb.small { display: inline-block; vertical-align: middle; margin-right: 8px; }
+
+.attach { flex: none; width: 44px; height: auto; border: 2px solid var(--sheet-edge); background: var(--paper); }
+.attach svg { width: 22px; height: 22px; }
+
+.attach-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.attach-preview img { width: 44px; height: 44px; object-fit: cover; border: 2px solid var(--sheet-edge); border-radius: 3px; }
+
+.photo-sheet { max-width: 34rem; }
+
+.photo-full {
+  display: block;
+  width: 100%;
+  max-height: 60dvh;
+  margin-bottom: 14px;
+  object-fit: contain;
+  background: var(--grid);
+  border-radius: 3px;
+}
+
+.photo-sheet .sheet-label { margin-top: 4px; }
+#photoActions { margin-top: 12px; }
+.link-button.danger { color: var(--ink-soft); }

@@ -3,17 +3,22 @@
 //   push  entries changed on this device (including deletions, as tombstones)
 //   pull  entries other devices changed since our last pull (by server time, synced_at)
 //   merge settings/scrapbook/treasures/milestones both ways (see store.mergeCloudState)
+//   photos: details sync like entries; image files live in a private Storage bucket
+//   ("photos/<user id>/<photo id>.jpg" and "-thumb.jpg"). Thumbnails download right away,
+//   full images only when opened.
 // Sync runs on sign-in, on open, shortly after changes, when back online, and every few minutes.
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config.js";
 import {
   store, read, write, unsyncedEntries, markEntriesSynced, mergeRemoteEntries, cloudState, mergeCloudState, clearDevice,
+  unsyncedPhotos, markPhotosSynced, mergeRemotePhotos, photoFile, savePhotoFile, photoById,
 } from "../core/store.js";
 
 const CLIENT_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const PAGE = 1000;
 const PUSH_DELAY_MS = 1500;
 const POLL_MS = 5 * 60_000;
+const BUCKET = "photos";
 
 let client = null;
 let session = null;
@@ -45,7 +50,7 @@ function friendly(err) {
   if (!navigator.onLine) return "You're offline. Mimi will sync when you're back.";
   const msg = String(err?.message ?? err ?? "");
   if (/fetch|network|load/i.test(msg)) return "Couldn't reach the cloud. Mimi will try again soon.";
-  if (/relation .* does not exist|schema cache/i.test(msg)) return "The database tables are missing. Run supabase/schema.sql in your Supabase project.";
+  if (/relation .* does not exist|schema cache|column .* does not exist|bucket not found/i.test(msg)) return "The cloud database needs an update. Run supabase/schema.sql again in your Supabase project.";
   return msg || "Something went wrong while syncing.";
 }
 
@@ -98,7 +103,8 @@ export async function signOut({ forgetDevice = false } = {}) {
   setStatus({ state: "signed-out" });
 }
 
-const lastPullKey = () => `lastPull:${session.user.id}`;
+const lastPullKey = (table = "entries") => `lastPull${table === "entries" ? "" : `:${table}`}:${session.user.id}`;
+const filePath = (id, size) => `${session.user.id}/${id}${size === "thumb" ? "-thumb" : ""}.jpg`;
 
 async function pushEntries(c) {
   const pending = unsyncedEntries();
@@ -112,6 +118,7 @@ async function pushEntries(c) {
       created_at: new Date(r.createdAt).toISOString(),
       updated_at: new Date(r.updatedAt).toISOString(),
       deleted: Boolean(r.deleted),
+      photo_id: r.photoId ?? null,
     })));
     if (error) throw error;
     markEntriesSynced(batch);
@@ -122,7 +129,7 @@ async function pullEntries(c) {
   let since = read(lastPullKey(), "1970-01-01T00:00:00Z");
   for (;;) {
     const { data, error } = await c.from("entries")
-      .select("id,day,text,created_at,updated_at,deleted,synced_at")
+      .select("id,day,text,created_at,updated_at,deleted,photo_id,synced_at")
       .gt("synced_at", since)
       .order("synced_at", { ascending: true })
       .range(0, PAGE - 1);
@@ -139,6 +146,73 @@ async function pullEntries(c) {
 const stable = (v) => JSON.stringify(v, (_, x) => (x && typeof x === "object" && !Array.isArray(x)
   ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => a.localeCompare(b)))
   : x));
+
+async function pushPhotos(c) {
+  const pending = unsyncedPhotos();
+  if (!pending.length) return;
+  const files = c.storage.from(BUCKET);
+  for (const p of pending) {
+    if (p.deleted) {
+      await files.remove([filePath(p.id, "full"), filePath(p.id, "thumb")]); // best effort
+      continue;
+    }
+    if (p.uploaded) continue;
+    for (const size of ["full", "thumb"]) {
+      const blob = await photoFile(p.id, size);
+      if (!blob) continue;
+      const { error } = await files.upload(filePath(p.id, size), blob, { upsert: true, contentType: "image/jpeg" });
+      if (error) throw error;
+    }
+  }
+  const { error } = await c.from("photos").upsert(pending.map((p) => ({
+    id: p.id,
+    user_id: session.user.id,
+    day: p.day,
+    caption: p.caption ?? "",
+    entry_id: p.entryId ?? null,
+    created_at: new Date(p.createdAt).toISOString(),
+    updated_at: new Date(p.updatedAt).toISOString(),
+    deleted: Boolean(p.deleted),
+  })));
+  if (error) throw error;
+  markPhotosSynced(pending);
+}
+
+async function pullPhotos(c) {
+  let since = read(lastPullKey("photos"), "1970-01-01T00:00:00Z");
+  let missing = [];
+  for (;;) {
+    const { data, error } = await c.from("photos")
+      .select("id,day,caption,entry_id,created_at,updated_at,deleted,synced_at")
+      .gt("synced_at", since)
+      .order("synced_at", { ascending: true })
+      .range(0, PAGE - 1);
+    if (error) throw error;
+    if (!data.length) break;
+    missing = mergeRemotePhotos(data);
+    since = data.at(-1).synced_at;
+    write(lastPullKey("photos"), since);
+    if (data.length < PAGE) break;
+  }
+  for (const p of missing) await downloadFile(c, p.id, "thumb");
+}
+
+async function downloadFile(c, id, size) {
+  const { data, error } = await c.storage.from(BUCKET).download(filePath(id, size));
+  if (error || !data) return null;
+  await savePhotoFile(id, size, data);
+  return data;
+}
+
+// Gets a photo's image from the cloud when this device doesn't have it yet.
+export async function fetchPhotoFile(id, size = "full") {
+  if (!session || !photoById(id)) return null;
+  try {
+    return await downloadFile(await getClient(), id, size);
+  } catch {
+    return null;
+  }
+}
 
 async function syncState(c) {
   const { data, error } = await c.from("user_state").select("data,updated_at").maybeSingle();
@@ -164,8 +238,10 @@ export async function syncNow() {
   setStatus({ ...status, state: "syncing" });
   try {
     const c = await getClient();
+    await pushPhotos(c);
     await pushEntries(c);
     await pullEntries(c);
+    await pullPhotos(c);
     await syncState(c);
     setStatus({ state: "synced", lastSync: Date.now() });
   } catch (err) {
