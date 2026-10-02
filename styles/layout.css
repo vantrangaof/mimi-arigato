@@ -1,0 +1,124 @@
+/* Page layout: one column on phones; on desktop Mimi's room stays on the left
+   while the journal and Mimi's things scroll on the right. */
+
+.page {
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding-inline: 16px;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+}
+
+.stage {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+}
+
+.topbar {
+  width: 100%;
+  max-width: 26rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.together {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+
+.together .paw { width: 15px; height: 15px; color: var(--accent); }
+
+.topbar-actions { display: flex; gap: 4px; }
+#soundToggle[aria-pressed="true"] { color: var(--accent); }
+
+.mimi-panel,
+.cards {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+}
+
+.caption { text-align: center; margin-top: calc(var(--px) * 1.5); }
+
+.name {
+  font-family: var(--font-pixel);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.state {
+  max-width: 22rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0.375rem auto 0;
+  min-height: 1.5em;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 18px 0 24px;
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  padding-top: 8px;
+}
+
+@media (min-width: 560px) {
+  .name { font-size: 48px; }
+}
+
+@media (min-width: 960px) {
+  .page { padding-inline: 40px; padding-top: 20px; }
+
+  body::before {
+    background: radial-gradient(ellipse 50% 80% at 30% 50%, transparent 40%, var(--paper) 100%);
+  }
+
+  .stage {
+    width: 100%;
+    max-width: 1240px;
+    margin-inline: auto;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 30rem);
+    grid-template-areas: "top top" "mimi cards";
+    column-gap: clamp(40px, 6vw, 96px);
+    align-items: start;
+    justify-items: stretch;
+  }
+
+  .topbar { grid-area: top; max-width: none; margin-bottom: 8px; }
+
+  .mimi-panel {
+    grid-area: mimi;
+    position: sticky;
+    top: 0;
+    min-height: calc(100dvh - 100px);
+    align-content: center;
+  }
+
+  .cards { grid-area: cards; padding-top: 8px; }
+
+  .name { font-size: 64px; }
+  .state { font-size: 1.125rem; max-width: 30rem; }
+  .actions { margin-bottom: 0; }
+  .pixel-button { min-height: 44px; padding: 10px 18px; }
+}

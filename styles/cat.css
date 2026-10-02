@@ -1,0 +1,252 @@
+/* Mimi and their room: the pixel scene, sprite states, idle behaviors, and effects.
+   Sprite layers are always in the SVG; classes on .cat-wrap decide which are visible. */
+
+/* ---- room ---- */
+
+.habitat {
+  position: relative;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding-top: var(--px);
+}
+
+.habitat.is-playing { touch-action: none; cursor: crosshair; }
+
+.room {
+  position: relative;
+  width: calc(var(--px) * 46);
+  height: calc(var(--px) * 34);
+}
+
+.room-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  --sky: #bfe6ff;
+  --sky-accent: #ffffff;
+}
+
+.room-art[data-sky="dusk"] { --sky: #ffb38a; --sky-accent: #ffd45e; }
+.room-art[data-sky="night"] { --sky: #2b2d5a; --sky-accent: #fff3a8; }
+
+.room-item { visibility: hidden; cursor: pointer; }
+.room-item.is-on { visibility: visible; }
+.treasure { cursor: pointer; }
+
+.twinkle { animation: twinkle 3.2s step-end infinite; }
+@keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+.room .cat-wrap {
+  position: absolute;
+  left: calc(var(--px) * 7);
+  top: calc(var(--px) * 2);
+}
+
+/* ---- Mimi ---- */
+
+.cat-wrap {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 4px;
+}
+
+.habitat.is-playing .cat-wrap { cursor: crosshair; }
+.cat-wrap:focus-visible { outline: 3px dashed var(--focus); outline-offset: var(--px); }
+
+.cat {
+  display: block;
+  width: calc(var(--px) * 32);
+  height: calc(var(--px) * 29);
+  overflow: visible;
+  transform-origin: 50% 96%;
+}
+
+.is-squish .cat { animation: squish 320ms steps(4, end); }
+.is-stretching .cat { animation: stretch 1.4s steps(7, end); }
+.cat-wrap.is-pounce { animation: pounce 480ms steps(6, end); }
+.cat-wrap.is-shake { animation: shake 420ms steps(6, end); }
+.cat-wrap.is-chasing { animation: shake 600ms steps(6, end) 3; }
+
+@keyframes squish {
+  0%   { transform: scale(1, 1); }
+  35%  { transform: scale(1.04, 0.94); }
+  70%  { transform: scale(0.98, 1.03); }
+  100% { transform: scale(1, 1); }
+}
+
+@keyframes stretch {
+  0%, 100% { transform: scale(1, 1); }
+  40%, 70% { transform: scale(1.07, 0.9); }
+}
+
+@keyframes pounce {
+  0%, 100% { transform: translateY(0); }
+  40%      { transform: translateY(calc(var(--px) * -3)); }
+  70%      { transform: translateY(calc(var(--px) * -1)); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%, 75% { transform: translateX(calc(var(--px) * -1)); }
+  50%      { transform: translateX(var(--px)); }
+}
+
+/* Eyes: open with a two-frame blink by default. */
+.eyes-closed,
+.eyes-happy { visibility: hidden; }
+
+.eyes-open   { animation: blink-open 5.2s step-end infinite; }
+.eyes-closed { animation: blink-closed 5.2s step-end infinite; }
+
+@keyframes blink-open   { 0% { visibility: visible; } 94% { visibility: hidden; } 97% { visibility: visible; } }
+@keyframes blink-closed { 0% { visibility: hidden; }  94% { visibility: visible; } 97% { visibility: hidden; } }
+
+/* Happy (^ ^): petting, reactions, grooming. */
+:is(.is-happy, .is-grooming) .eyes-open,
+:is(.is-happy, .is-grooming) .eyes-closed { animation: none; visibility: hidden; }
+:is(.is-happy, .is-grooming) .eyes-happy { visibility: visible; }
+:is(.is-happy, .is-staring) .blush { fill: var(--cat-blush-hot); }
+
+/* Closed: asleep, dozing, yawning. */
+:is(.is-asleep, .is-dozing, .is-yawning) .eyes-open { animation: none; visibility: hidden; }
+:is(.is-asleep, .is-dozing, .is-yawning) .eyes-closed { animation: none; visibility: visible; }
+
+/* Mouth */
+.mouth-open { visibility: hidden; }
+.is-yawning .mouth-open { visibility: visible; }
+.is-yawning .mouth-closed { visibility: hidden; }
+.is-chomping .mouth-open   { animation: chomp-open 300ms step-end 3; }
+.is-chomping .mouth-closed { animation: chomp-closed 300ms step-end 3; }
+.is-grooming .mouth-open   { animation: chomp-open 600ms step-end infinite; }
+.is-grooming .mouth-closed { animation: chomp-closed 600ms step-end infinite; }
+
+@keyframes chomp-open   { 0% { visibility: visible; } 50% { visibility: hidden; } }
+@keyframes chomp-closed { 0% { visibility: hidden; }  50% { visibility: visible; } }
+
+.paw-up { visibility: hidden; }
+.is-grooming .paw-up { visibility: visible; }
+
+/* Tail: an occasional flick, quick wags when happy or chasing, still while asleep. */
+.tail-flick { visibility: hidden; }
+.tail-up    { animation: tail-up 3.6s step-end infinite; }
+.tail-flick { animation: tail-flick 3.6s step-end infinite; }
+.is-happy :is(.tail-up, .tail-flick) { animation-duration: 0.36s; }
+.is-chasing :is(.tail-up, .tail-flick) { animation-duration: 0.24s; }
+.is-asleep .tail-up { animation: none; visibility: visible; }
+.is-asleep .tail-flick { animation: none; visibility: hidden; }
+
+@keyframes tail-up    { 0% { visibility: visible; } 80% { visibility: hidden; } 88% { visibility: visible; } }
+@keyframes tail-flick { 0% { visibility: hidden; }  80% { visibility: visible; } 88% { visibility: hidden; } }
+
+.acc { visibility: hidden; }
+[data-accessory="bow"] .acc-bow,
+[data-accessory="flower"] .acc-flower,
+[data-accessory="scarf"] .acc-scarf,
+[data-accessory="crown"] .acc-crown { visibility: visible; }
+
+/* ---- speech bubble ---- */
+
+.bubble {
+  position: absolute;
+  left: calc(var(--px) * 25);
+  top: calc(var(--px) * -2);
+  padding: calc(var(--px) * 0.5) calc(var(--px) * 1.25);
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  line-height: 1.25;
+  white-space: nowrap;
+  color: var(--cat-nose);
+  background: var(--bubble-bg);
+  border: 2px solid var(--cat-outline);
+  border-radius: 3px;
+  box-shadow: 3px 3px 0 var(--cat-shadow);
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 200ms, transform 200ms steps(2, end);
+  z-index: 1;
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  bottom: -8px;
+  width: 8px;
+  height: 8px;
+  background: var(--bubble-bg);
+  border-left: 2px solid var(--cat-outline);
+  border-bottom: 2px solid var(--cat-outline);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.is-talking .bubble { opacity: 1; transform: translateY(0); }
+.is-asleep .bubble { color: var(--ink-soft); border-style: dashed; letter-spacing: 0.1em; }
+
+/* ---- effects ---- */
+
+.heart {
+  position: absolute;
+  left: calc(var(--px) * 14);
+  top: calc(var(--px) * 4);
+  width: calc(var(--px) * 5);
+  height: calc(var(--px) * 5);
+  pointer-events: none;
+  opacity: 0;
+  animation: float-up 900ms steps(6, end) forwards;
+}
+
+@keyframes float-up {
+  0%   { transform: translate(0, 0); opacity: 1; }
+  70%  { opacity: 1; }
+  100% { transform: translate(calc(var(--drift) * var(--px)), calc(var(--px) * -7)); opacity: 0; }
+}
+
+.fish {
+  position: absolute;
+  left: calc(var(--px) * 12.5);
+  top: calc(var(--px) * 13);
+  width: calc(var(--px) * 7);
+  height: calc(var(--px) * 4);
+  pointer-events: none;
+  animation: fish-drop 700ms steps(7, end) forwards;
+}
+
+@keyframes fish-drop {
+  from { transform: translateY(calc(var(--px) * -16)); }
+  to   { transform: translateY(0); opacity: 0.9; }
+}
+
+.laser {
+  position: absolute;
+  left: -6px;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--laser);
+  box-shadow: 0 0 0 4px rgba(255, 45, 85, 0.2), 0 0 14px rgba(255, 45, 85, 0.7);
+  pointer-events: none;
+  z-index: 2;
+}
+
+@media (min-width: 960px) {
+  .bubble { font-size: 24px; border-width: 3px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eyes-open, .eyes-closed, .tail-up, .tail-flick, .twinkle { animation: none; }
+  .is-squish .cat, .is-stretching .cat,
+  .cat-wrap.is-pounce, .cat-wrap.is-shake, .cat-wrap.is-chasing { animation: none; }
+  .heart { animation-duration: 600ms; animation-timing-function: linear; --drift: 0; }
+  .fish { animation-duration: 200ms; }
+  .bubble { transition: opacity 150ms; transform: none; }
+}

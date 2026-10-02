@@ -1,30 +1,27 @@
 // Things to do with Mimi: treats and a laser dot to chase.
 
-import { store, KEYS } from "./store.js";
-import { pixelSVG } from "./sprite.js";
+import { KEYS, dailyCount, setDailyCount } from "../core/store.js";
+import { replay } from "../core/dom.js";
+import { pixelSVG } from "../core/pixel.js";
+import { store } from "../core/store.js";
+import { purr } from "../cat/sound.js";
 
 const MAX_TREATS = 3;
 const FISH = [".bbbb.b", "bFeFFbb", "bFFFFbb", ".bbbb.b"];
 const FISH_COLORS = { b: "#3f6797", F: "#a6d4f7", e: "#1b2a3a" };
 
-function replay(el, className) {
-  el.classList.remove(className);
-  void el.offsetWidth;
-  el.classList.add(className);
-}
-
 export function wireTreat(btn, mimi, wrap) {
   let busy = false;
 
   function label() {
-    const left = MAX_TREATS - store.daily(KEYS.treats);
+    const left = MAX_TREATS - dailyCount(KEYS.treats);
     btn.textContent = left > 0 ? `Give a treat (${left})` : "Full of treats";
     btn.setAttribute("aria-label", left > 0 ? `Give a treat, ${left} left today` : "No treats left today");
   }
 
   btn.addEventListener("click", () => {
     if (busy) return;
-    const used = store.daily(KEYS.treats);
+    const used = dailyCount(KEYS.treats);
     if (used >= MAX_TREATS) {
       replay(wrap, "is-shake");
       mimi.react(["mm-mm", "is too full for more treats today."], { hearts: 0 });
@@ -39,9 +36,10 @@ export function wireTreat(btn, mimi, wrap) {
       wrap.classList.add("is-chomping");
       setTimeout(() => {
         wrap.classList.remove("is-chomping");
-        store.setDaily(KEYS.treats, used + 1);
+        setDailyCount(KEYS.treats, used + 1);
         label();
         mimi.setActivity(null);
+        if (store.settings.sound) purr();
         mimi.react(["nom nom", "loved that treat."], { hearts: 2 });
         busy = false;
       }, 900);

@@ -1,10 +1,10 @@
-// Pixel cat: sprite data, fur palettes, accessories, SVG + canvas rendering.
+// The pixel cat: sprite data, fur palettes, accessory layers, and SVG/canvas rendering.
 // Legend:
 //   d outline  @ inner-ear  O body  L chest  s floor shadow  T tail
 //   E eye      W eye-shine  B blush  N nose   H mouth
 //   accessories: R/r ribbon  P/f/y flower  S/s/k scarf  G/g/J crown
 
-export const SVGNS = "http://www.w3.org/2000/svg";
+import { drawPixels, group } from "../core/pixel.js";
 
 const BODY = [
   "................................",
@@ -38,11 +38,12 @@ const BODY = [
   ".......ssssssssssssssssss.......",
 ];
 
-// Layers drawn over BODY. Each is [x0, y0, rows].
+// Layers drawn over BODY, each [x0, y0, rows]. CSS classes on the wrapper pick which are visible.
 const EYES_OPEN = [8, 11, ["WEE..........WEE", "EEE..........EEE", "EEE..........EEE"]];
 const EYES_CLOSED = [8, 12, ["EEE..........EEE"]];
 const EYES_HAPPY = [8, 11, [".E............E.", "E.E..........E.E"]];
 const MOUTH_OPEN = [13, 15, ["OHHHHO", "OHNNHO"]];
+const PAW_UP = [9, 16, [".dddd.", "dOOOOd", "dOdOdd", ".dddd."]];
 const TAIL_UP = [26, 19, [
   "...dd.", "..dTTd", "..dTTd", ".dTTd.", ".TTd..", ".TTd..", ".TTd..", ".TTd..", "ddd...",
 ]];
@@ -60,13 +61,6 @@ const ACCESSORY_LAYERS = {
   ]],
   crown: [12, 3, ["G..GG..G", "GG.GG.GG", "GGGGGGGG", "gJggggJg"]],
 };
-
-export const ACCESSORIES = [
-  { id: "bow", label: "Ribbon bow", need: 5 },
-  { id: "flower", label: "Little flower", need: 15 },
-  { id: "scarf", label: "Cozy scarf", need: 35 },
-  { id: "crown", label: "Tiny crown", need: 70 },
-];
 
 const ACCESSORY_COLORS = {
   R: "#ef5a8a", r: "#a8325c",
@@ -88,74 +82,49 @@ const FUR_VARS = {
   shine: "--cat-shine", blush: "--cat-blush", nose: "--cat-nose", mouth: "--cat-mouth",
 };
 
-const SPRITE_VARS = {
-  d: "--cat-outline", "@": "--cat-inner", O: "--cat-body", T: "--cat-body", L: "--cat-chest",
-  s: "--cat-shadow", E: "--cat-eye", W: "--cat-shine", B: "--cat-blush", N: "--cat-nose", H: "--cat-mouth",
-};
-
+// Sprite characters map to a fur key (canvas) or CSS variable (SVG).
 const FUR_KEY = { d: "outline", "@": "inner", O: "body", T: "body", L: "chest", E: "eye", W: "shine", B: "blush", N: "nose", H: "mouth" };
-
-function svgColor(ch) {
-  if (SPRITE_VARS[ch]) return `var(${SPRITE_VARS[ch]})`;
-  return ACCESSORY_COLORS[ch];
-}
-
-function group(parent, className) {
-  const g = document.createElementNS(SVGNS, "g");
-  if (className) g.setAttribute("class", className);
-  parent.appendChild(g);
-  return g;
-}
+const svgColor = (ch) => (FUR_KEY[ch] ? `var(${FUR_VARS[FUR_KEY[ch]]})` : ch === "s" ? "var(--cat-shadow)" : ACCESSORY_COLORS[ch]);
 
 function drawLayer(parent, className, [x0, y0, rows], { only, map = {} } = {}) {
   const g = group(parent, className);
-  rows.forEach((row, y) => {
-    [...row].forEach((raw, x) => {
-      if (only && !only.includes(raw)) return;
-      const ch = map[raw] ?? raw;
-      const fill = svgColor(ch);
-      if (!fill) return;
-      const rect = document.createElementNS(SVGNS, "rect");
-      rect.setAttribute("x", x0 + x);
-      rect.setAttribute("y", y0 + y);
-      rect.setAttribute("width", 1);
-      rect.setAttribute("height", 1);
-      rect.setAttribute("fill", fill);
-      if (ch === "B") rect.classList.add("blush");
-      g.appendChild(rect);
-    });
-  });
+  const visible = only ? rows.map((r) => [...r].map((ch) => (only.includes(ch) ? ch : ".")).join("")) : rows;
+  const mapped = visible.map((r) => [...r].map((ch) => map[ch] ?? ch).join(""));
+  drawPixels(g, x0, y0, mapped, svgColor, (ch) => (ch === "B" ? "blush" : null));
   return g;
 }
 
-// Returns a function that points Mimi's eyes at a viewport position (or recenters with null).
+// Draws Mimi into the SVG. Returns look(x, y): point the eyes at a viewport position,
+// look(null) to recenter, and look.dir(dx, dy) to glance in a direction (-1, 0, 1).
 export function renderCat(svg) {
   drawLayer(svg, "", [0, 0, BODY], { map: { H: "O" } });
   drawLayer(svg, "mouth mouth-closed", [0, 0, BODY], { only: "H" });
   drawLayer(svg, "mouth mouth-open", MOUTH_OPEN);
   drawLayer(svg, "tail tail-up", TAIL_UP);
   drawLayer(svg, "tail tail-flick", TAIL_FLICK);
-  const look = group(svg, "look");
-  drawLayer(look, "eyes eyes-open", EYES_OPEN);
-  drawLayer(look, "eyes eyes-closed", EYES_CLOSED);
-  drawLayer(look, "eyes eyes-happy", EYES_HAPPY);
+  const eyes = group(svg, "look");
+  drawLayer(eyes, "eyes eyes-open", EYES_OPEN);
+  drawLayer(eyes, "eyes eyes-closed", EYES_CLOSED);
+  drawLayer(eyes, "eyes eyes-happy", EYES_HAPPY);
+  drawLayer(svg, "paw-up", PAW_UP);
   for (const [id, layer] of Object.entries(ACCESSORY_LAYERS)) drawLayer(svg, `acc acc-${id}`, layer);
 
   let idle;
-  return (x, y) => {
+  const dir = (dx, dy) => {
     clearTimeout(idle);
-    if (x == null) {
-      look.removeAttribute("transform");
-      return;
-    }
+    if (!dx && !dy) eyes.removeAttribute("transform");
+    else eyes.setAttribute("transform", `translate(${dx} ${dy})`);
+  };
+  const look = (x, y) => {
+    if (x == null) return dir(0, 0);
     const r = svg.getBoundingClientRect();
     const cell = r.width / 32;
-    const dx = x - (r.left + 16 * cell);
-    const dy = y - (r.top + 12.5 * cell);
     const step = (d) => (Math.abs(d) < cell * 3 ? 0 : Math.sign(d));
-    look.setAttribute("transform", `translate(${step(dx)} ${step(dy)})`);
-    idle = setTimeout(() => look.removeAttribute("transform"), 2500);
+    dir(step(x - (r.left + 16 * cell)), step(y - (r.top + 12.5 * cell)));
+    idle = setTimeout(() => dir(0, 0), 2500);
   };
+  look.dir = dir;
+  return look;
 }
 
 export function applyLook(wrap, { fur, accessory }) {
@@ -182,23 +151,4 @@ export function drawSpriteCanvas(ctx, x0, y0, cell, { fur, accessory }) {
     ctx.fillStyle = color;
     ctx.fillRect(x0 + x * cell, y0 + y * cell, cell, cell);
   }));
-}
-
-export function pixelSVG(rows, colors, className) {
-  const svg = document.createElementNS(SVGNS, "svg");
-  svg.setAttribute("viewBox", `0 0 ${rows[0].length} ${rows.length}`);
-  svg.setAttribute("shape-rendering", "crispEdges");
-  svg.setAttribute("aria-hidden", "true");
-  if (className) svg.setAttribute("class", className);
-  rows.forEach((row, y) => [...row].forEach((ch, x) => {
-    if (!colors[ch]) return;
-    const rect = document.createElementNS(SVGNS, "rect");
-    rect.setAttribute("x", x);
-    rect.setAttribute("y", y);
-    rect.setAttribute("width", 1);
-    rect.setAttribute("height", 1);
-    rect.setAttribute("fill", colors[ch]);
-    svg.appendChild(rect);
-  }));
-  return svg;
 }

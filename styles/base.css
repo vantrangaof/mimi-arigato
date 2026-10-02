@@ -1,0 +1,141 @@
+/* Base: the graph-paper page, form controls, buttons, and utilities. */
+
+* { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-body);
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: var(--px) var(--px);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Grid fades toward the edges so the paper feels like it's under Mimi, not a pattern. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 60% at 50% 30%, transparent 30%, var(--paper) 100%);
+}
+
+button, input { font: inherit; color: inherit; }
+
+button:focus-visible,
+summary:focus-visible,
+[role="tabpanel"]:focus-visible {
+  outline: 3px dashed var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---- buttons ---- */
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 1.375rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.icon-button svg { width: 21px; height: 21px; }
+.icon-button:hover { color: var(--ink); background: var(--grid-strong); }
+.icon-button:disabled { opacity: 0.3; cursor: default; background: none; }
+.icon-button.small { width: 32px; height: 32px; }
+
+.pixel-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 14px;
+  font-family: var(--font-pixel);
+  font-size: 16px;
+  line-height: 1.25;
+  color: var(--ink);
+  background: var(--sheet-solid);
+  border: 2px solid var(--sheet-edge);
+  border-radius: 3px;
+  box-shadow: 3px 3px 0 var(--cat-shadow);
+  cursor: pointer;
+  user-select: none;
+}
+
+.pixel-button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--cat-shadow); }
+.pixel-button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.pixel-button.primary { color: #fff; background: var(--accent); border-color: var(--accent-edge); }
+.pixel-button:has(input:focus-visible) { outline: 3px dashed var(--focus); outline-offset: 2px; }
+
+.link-button {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 0.9375rem;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.chip {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--sheet-edge);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.chip:hover { border-color: var(--accent); }
+
+/* ---- inputs ---- */
+
+.text-input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--sheet-edge);
+  border-radius: 3px;
+}
+
+.text-input::placeholder { color: var(--ink-soft); opacity: 0.8; }
+.text-input:focus { outline: none; border-color: var(--focus); }
+.text-input.time { flex: none; width: auto; }
+
+/* ---- utilities ---- */
+
+.muted { color: var(--ink-soft); line-height: 1.5; }
+.small { font-size: 0.875rem; }
+.center { text-align: center; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

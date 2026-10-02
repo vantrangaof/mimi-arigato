@@ -1,143 +1,189 @@
 # Mimi Arigato
 
-A tiny pink pixel cat you tell five good things to each day.
+**A tiny cat who collects the good things in your life.**
 
-Mimi Arigato is a gratitude journal with a virtual pet. Each day you tell your cat up to five good things that happened. The cat reacts, remembers them, and grows a little wardrobe as you keep coming back. "Arigato" means thank you in Japanese. "Mimi" is the default name, and you can rename the cat (for example, Xiao Mi).
+Every day, tell Mimi one small thing worth remembering. Mimi listens. Mimi remembers. Mimi grows a little world around your memories.
 
-It's a small installable web app (PWA). It works offline, has no account and no server, and keeps everything on the device.
+> Notice → Tell Mimi → Mimi reacts → Mimi remembers → Your little world grows
+
+Mimi is a pet that never asks anything of you: no hunger bars, no punishments, no broken streaks. Missing a day takes nothing away. "Arigato" means thank you in Japanese; you can rename the cat (for example, Xiao Mi).
+
+It's an installable web app (PWA). It works offline, needs no account, and keeps everything on your device.
 
 ---
 
-## The core loop
+## The five pillars
 
-1. Open the app. The cat greets you based on the time of day.
-2. Write one to five good things about today. The cat reacts to each one.
-3. Fill all five hearts and the cat "glows with thanks" until tomorrow.
-4. Come back daily to keep your streak and unlock accessories.
+| Pillar | What it does |
+|---|---|
+| **Good things** | Tell Mimi up to five good things a day. One is a good day; five is Mimi's favorite. |
+| **Mimi** | A pixel cat with moods, reactions to what you write, idle habits, and a purr. |
+| **Memories** | Mimi notices patterns on their own: favorite things, people you mention, beautiful moments. |
+| **Little world** | Mimi's room fills up with things as your good things add up, plus treasures Mimi finds. |
+| **Scrapbook** | Every so often Mimi keeps one of your good things as a scrapbook page. |
 
 ---
 
 ## What you can do
 
-### Journal: five good things a day
-- Write up to **five entries per day** (140 characters each).
-- Five pixel hearts fill in as you go ("2 of 5 today").
+### Meet Mimi
+- On your first visit Mimi says hello and asks **"What's your name?"** Mimi then greets you by name ("Good morning, Trang!", "you're back, Trang!"). Choose "Maybe later" to skip; you can add or change it in Settings.
+
+### Tell Mimi good things
+- Write up to five entries a day. Hearts fill as you go: *"One is enough today"* → *"That's a good day"* → *"Mimi's favorite kind of day."*
+- **Mimi reacts to what you wrote**, entirely on-device using keywords:
+  - coffee → "Mimi approves." · rain → "likes rainy windows too." · a friend or family → "thinks that sounds special."
+  - finished something → "is so proud of you." · someone was kind → "loves a little kindness."
+  - a hard day → **"says that counts too."** (Mimi never forces positivity)
+  - taxes → "doesn't understand taxes, but is proud of you."
+- If you write something you've written before, Mimi remembers: *"remembers you wrote about this on Sep 28 too."*
+- **Stuck?** Tap "Stuck? Pick something to think about" for prompts: something tiny, someone who was kind, something that made you laugh, something delicious, something you're proud of, something cute, something beautiful, something worth remembering.
+- The first question of each day rotates ("Tell me something tiny…", "What made you smile?").
 - Remove an entry with × (for typos).
-- After the fifth entry the input closes until tomorrow: "Mimi will keep these safe. Come back tomorrow for five more."
-- The day resets at midnight on your device's clock.
 
-### Pet the cat
-- **Tap the cat** to pet them. They get happy eyes (^ ^), blush, wag their tail quickly, a pixel heart floats up, and a speech bubble appears ("purr~", "mrrp!", "nya~"...).
-- Each pet changes the status line under the name ("is purring softly.", "wiggles their ears."...).
-- A counter at the bottom tracks pets today.
-- **Memories:** about 1 in 4 pets, the cat recalls a random past entry: *remembers "Pho with my sister" from Sep 28.*
+### Days together (instead of streaks)
+- The top bar shows **"Day 37 together"**: how long you've known Mimi, which never resets.
+- Milestones are celebrated once: Day 1 "nice to meet you", Day 7 "recognizes you now", Day 30 "knows some of your favorite things", Day 100, one year; and 50 / 100 / 250 / 500 / 1,000 good things.
+- After a few days away: *"you're back! Mimi kept your room cozy while you were away."*
 
-### Activities
-- **Give a treat:** a pixel fish drops in and the cat chomps it ("nom nom"). Limit of 3 treats a day; after that the cat shakes their head ("is too full for more treats today").
-- **Play (laser dot):** a red dot appears for 20 seconds. It wanders on its own, or you can steer it with your finger or mouse. When it lands on the cat, they pounce ("got it!"). At the end: "caught the dot 4 times!"
+### Mimi, the cat
+- **Tap Mimi** to pet them: a **meow** or **purr** (real recordings), happy ^ ^ eyes, blush, tail wags, a floating heart, and a little line ("leans into your hand."). Sometimes Mimi recalls one of your past entries.
+- **Sound on/off:** speaker button at the top right (remembered).
+- **Idle habits:** every so often Mimi grooms a paw, yawns, dozes, stretches, chases their tail, stares at you, looks out the window, watches the aquarium fish, admires their accessory, or sits by the journal "waiting to hear about your day."
+- **Time of day:** asleep 10 pm to 6 am ("z z z"; tap to wake). Morning stretch, lunchtime thoughts, evening "ready to hear about your day."
+- **Treats:** a fish drops in and Mimi chomps it (3 a day).
+- **Play:** a laser dot for 20 seconds; Mimi pounces when it lands on them. Steer it with your finger or mouse, or let it wander.
 - **Eyes follow your mouse** on desktop.
 
-### Moods and time of day
-- **Night (10 pm to 6 am):** the cat is asleep (closed eyes, "z z z" bubble, still tail). Tapping wakes them for about 90 seconds, then they doze off again.
-- **Morning:** "is stretching. Good morning!" **Lunch:** "is thinking about lunch." **Evening:** "is ready to hear about your day."
-- **Coming back after 2+ days away:** "you're back! / missed you so much."
-- After all five entries: "is glowing with thanks."
+### Mimi's little world
+Everything unlocks by total good things and never goes away:
 
-### Streaks
-- A paw print and "4-day streak" at the top. The streak counts consecutive days with at least one entry.
-- The paw is filled in once you've written today, and outlined if today still needs an entry. The streak stays alive until the end of today.
-
-### Calendar and search
-- **Month view:** each day gets a deeper pink the more entries it has (0–5). Five entries shows a solid pink square.
-- Tap a day to read what you wrote. Use the arrows to see past months.
-- **Search** across every entry, with matches highlighted.
-
-### Rewards: the wardrobe
-Accessories unlock based on the total number of good things you've written:
-
-| Total good things | Unlocks |
+| Good things | Unlocks |
 |---|---|
-| 5 | Ribbon bow |
-| 15 | Little flower |
-| 35 | Cozy scarf |
-| 70 | Tiny crown |
+| 5 | Little flower (accessory) |
+| 15 | Ribbon bow (accessory) |
+| 30 | Tiny plant |
+| 40 | Cozy scarf (accessory) |
+| 50 | Cushion |
+| 75 | Wall picture |
+| 100 | Window (the sky outside follows the time of day) |
+| 150 | Bookshelf |
+| 200 | Tiny crown (accessory) |
+| 250 | Aquarium |
+| 500 | Starry window |
 
-When one unlocks, the cat puts it on automatically ("ooh! got a ribbon bow for hearing 5 good things!"). You can switch or remove it in Settings.
+- The journal shows what's next: *"Next for Mimi's world: a cushion at 50 good things."*
+- **Surprises** (rare, at most about three a week): Mimi finds a treasure (a tiny button, a seashell, a blue feather…) that appears on the floor of the room, or tells you a dream ("dreamed about noodles last night").
+- Tap things in the room and Mimi comments on them.
 
-### Customizing
-- **Name:** rename the cat. The new name appears everywhere (title, buttons, messages).
-- **Fur color:** Strawberry (pink), Peach, Cloud (gray), Midnight (black with amber eyes), Snow (white).
+### Mimi's things (tabs)
+- **Memories:** *What Mimi has learned* ("Mimi thinks you really like coffee." "You talked about Lin 3 times. Mimi knows Lin must be important." "Your mom came up 4 times. That sounds special.") plus a **Memory cabinet** of drawers Mimi sorts on their own: People, Food, Things you were proud of, Things that made you laugh, Beautiful moments, Kindness, Rest, Moving your body, Hard days you got through, Little things, and Treasures Mimi found.
+- **Scrapbook:** at 10, 25, 50, 75, 100 good things, then every 50, Mimi keeps one entry (preferring warm moments) as a taped-in page. Flip through them.
+- **Month:** "Your October": how many good things across how many days, what kinds, "You mentioned coffee 11 times," and **Mimi's favorite memory** of the month.
+- **Calendar:** days get pinker the more you wrote; tap a day to read it; search everything.
 
-### Share a picture of today
-- "Make a picture of today" creates a 1080×1350 image (Instagram story / portrait size): the pixel cat in their current fur and accessory, the name, the date, and today's entries.
-- Save it, or use the phone's share sheet where supported.
-
-### Daily reminder
-- Pick a time and tap "Add to calendar". This downloads a repeating daily calendar event ("Tell Mimi five good things") that your phone's calendar app uses to remind you.
-- This works around a limitation: web apps can't reliably schedule notifications on their own without a server.
-
-### Backup and restore
-- **Download backup** saves all entries and settings as a `.json` file.
-- **Restore backup** merges a backup into the current data. It never deletes anything and skips duplicates. Useful for moving to a new phone.
-
-### Works everywhere
-- **Phone:** single column with the cat on top, then the journal, then the calendar.
-- **Desktop:** two columns. The cat is large on the left and stays in view; the journal and calendar scroll on the right.
-- Light and dark mode follow the system setting.
-- Installable to the home screen and works offline after the first visit.
-- Keyboard accessible, with screen-reader labels, and respects "reduce motion".
+### Settings
+- Your name, the cat's name, fur color (Strawberry, Peach, Cloud, Midnight, Snow), wardrobe.
+- **Daily reminder:** adds a repeating event to your calendar app (web apps can't schedule notifications on their own).
+- **Backup / Restore:** download everything as a file; restoring merges and never deletes.
+- **Share a picture of today:** a 1080×1350 pixel card of the cat with today's good things.
 
 ---
 
-## Look and feel
+## Running it
 
-- **Visual concept:** the whole page is pink graph paper, and each grid square is exactly one pixel of the cat, so the cat looks drawn onto the sheet.
-- **Fonts:** DotGothic16 (a Japanese pixel font) for the name and buttons; M PLUS Rounded 1c for body text.
-- **Palette:** soft pink paper `#fcf2f6`, plum ink `#43263a`, strawberry accent `#d64f86`; dark mode uses deep plum `#1e1522`.
-- **Tone:** gentle and cozy. The cat speaks in small sounds (purr~, nya!, mrrp~, arigato!); status lines are short and kind.
+No build step and no dependencies. Serve the folder with any static server:
 
----
-
-## Current limitations
-
-- **Data lives in one browser on one device.** Clearing site data or switching phones loses it unless you use Backup.
-- No accounts, no sync, no cloud.
-- No real push notifications (the calendar-event reminder is the workaround).
-- English only.
-- Not deployed online yet. It runs locally (`python3 -m http.server 5173`, then open http://localhost:5173).
+```sh
+python3 -m http.server 5173
+# open http://localhost:5173
+```
 
 ---
 
-## Open questions for improving the concept
+## Project structure
 
-- Should the cat have needs that change over time (hunger, happiness), or stay low-pressure with no guilt mechanics?
-- What should happen on a missed day? Currently the streak just resets quietly.
-- Should rewards be more varied (backgrounds, furniture, new animations, other cats/friends) and tied to streaks as well as totals?
-- Should entries support prompts ("something someone did for you", "something small you noticed") for days you're stuck?
-- Weekly or monthly reflections ("Your October in good things")?
-- A social element (send a friend a good thing, shared cats) versus keeping it fully private?
-- What would make someone open it every day beyond streaks?
+```
+index.html              Page markup (the room, journal, tabs, dialogs)
+manifest.webmanifest    Install-to-home-screen metadata
+sw.js                   Offline support (network first, cached copy when offline)
+assets/
+  icon.svg              App icon
+  sounds/meow.m4a       0.9 s meow clip
+  sounds/purr.m4a       1.5 s purr clip
+styles/
+  tokens.css            Colors, fonts, light/dark themes, the pixel unit
+  base.css              Graph-paper page, buttons, inputs, utilities
+  layout.css            Page layout; desktop two-column layout
+  cat.css               The room, sprite states, idle animations, effects
+  panels.css            Journal, tabs, memories, scrapbook, month, calendar, dialogs
+src/
+  main.js               Startup: opens the database and wires the modules together
+  core/                 Infrastructure, no UI
+    db.js               IndexedDB database (localStorage fallback)
+    store.js            In-memory data + persistence, change events, backup/restore
+    dates.js            Local day keys and date formatting
+    dom.js              Small DOM helpers
+    pixel.js            Draws pixel art as SVG
+  cat/                  The cat itself
+    sprite.js           Sprite data, fur palettes, accessories, SVG and canvas drawing
+    mimi.js             Moods, reactions, idle habits, sleep schedule
+    sound.js            Meow and purr playback
+  world/
+    world.js            Unlock list, the pixel room, treasures
+    surprises.js        Rare finds and dreams
+  memory/               How Mimi understands you (pure logic)
+    insights.js         Keyword reactions, categories, learned facts, monthly recap
+    relationship.js     Days together and milestones
+    scrapbook.js        When pages are added and which entry is kept
+  ui/                   One module per part of the page
+    habitat.js          Room on screen, pixel sizing, petting
+    topbar.js           Days together, sound toggle, settings icon
+    intro.js            "What's your name?"
+    journal.js          Writing good things, prompts, unlock and scrapbook events
+    tabs.js             Accessible tabs
+    memories.js         Memory cabinet
+    scrapbook.js        Scrapbook pages
+    month.js            Monthly recap
+    calendar.js         Calendar and search
+    play.js             Treats and laser play
+    settings.js         Settings dialog, reminder file, backup
+    share.js            Share picture
+```
+
+Conventions:
+- **`core` and `memory` never touch the page**; `ui` modules each own one part of the page and re-render when the store changes (`store.on(render)`).
+- Data changes go through the store: `addEntry` / `removeEntry` for good things; for everything else change `store.<name>` then call `store.save("<name>")`.
+- New files must be added to `SHELL` in `sw.js` so they work offline.
 
 ---
 
-## Tech overview (for developers)
+## Data
 
-Plain HTML/CSS/JavaScript ES modules with no framework and no build step.
+Everything is stored **on the device** in an IndexedDB database named `mimi-arigato`:
 
-| File | Role |
+| Store | Contents |
 |---|---|
-| `index.html` | Page structure, settings and share dialogs |
-| `styles.css` | All styling, themes, animations, responsive layout |
-| `app.js` | Starts everything; petting, streak, name/fur, layout sizing |
-| `sprite.js` | Pixel cat data (32×29 grid), fur palettes, accessories, SVG and canvas drawing |
-| `store.js` | localStorage data: entries, settings, streaks, backup/restore |
-| `mimi.js` | Moods, sleep schedule, reactions, floating hearts |
-| `journal.js` | Five-good-things form and list, accessory unlocks |
-| `calendar.js` | Month view and search |
-| `play.js` | Treats and laser-dot play |
-| `settings.js` | Settings dialog, reminder `.ics`, backup download/restore |
-| `share.js` | Share-picture generation (canvas) |
-| `sw.js` | Offline support (network first, cached copy when offline) |
-| `manifest.webmanifest`, `icon.svg` | Install-to-home-screen metadata and icon |
+| `entries` | One record per good thing: `{ id, day: "YYYY-MM-DD", text, createdAt }`, indexed by day |
+| `kv` | `settings` (your name, cat name, fur, accessory, sound, reminder), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` counters, `lastVisit` |
 
-Data is stored in localStorage under `mimi.days` (entries by date), `mimi.settings`, `mimi.pets`, `mimi.treats` and `mimi.lastVisit`.
+Data from earlier versions (plain localStorage) is moved into the database automatically on first load. If IndexedDB isn't available (some private-browsing modes), the app falls back to localStorage.
+
+There's no server and no sync yet. Clearing site data or switching devices loses data unless you use **Backup**.
+
+---
+
+## Not doing (on purpose)
+
+Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing accessories, streak freezes, coins, energy, ads, quests. Mimi says one thing: *"Tell me one nice thing."*
+
+## Ideas for later
+
+- **Cloud sync** across devices (needs accounts and a hosted database, e.g. Supabase or Firebase).
+- Put it online (GitHub Pages / Netlify) so it can be installed on a phone.
+- More idle animations and room items; seasonal decorations.
+- Optional AI reactions for entries the keyword rules don't recognize.
+
+## Credits
+
+Sounds: "Loud cat purring" (Freesound community) trimmed to 1.5 s, and a meow (yomecerlm3), trimmed to 0.9 s, both via Pixabay.

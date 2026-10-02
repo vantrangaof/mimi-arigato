@@ -1,14 +1,8 @@
 // Month view of good things, plus search across every day.
 
-import { store, dayKey, entriesFor, parseDay } from "./store.js";
-
-const monthFmt = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
-const monthOnlyFmt = new Intl.DateTimeFormat(undefined, { month: "long" });
-const longFmt = new Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric" });
-const shortFmt = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" });
-const weekdayFmt = new Intl.DateTimeFormat(undefined, { weekday: "narrow" });
-
-const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+import { store, entriesFor } from "../core/store.js";
+import { dayKey, parseDay, formatLong, formatMonth, formatMonthYear, formatShortYear, formatWeekdayNarrow } from "../core/dates.js";
+import { plural } from "../core/dom.js";
 
 function highlighted(text, query) {
   const frag = document.createDocumentFragment();
@@ -33,7 +27,7 @@ export function wireCalendar(els) {
   // Monday-first week; 2024-01-01 was a Monday.
   els.weekdays.replaceChildren(...Array.from({ length: 7 }, (_, i) => {
     const span = document.createElement("span");
-    span.textContent = weekdayFmt.format(new Date(2024, 0, 1 + i));
+    span.textContent = formatWeekdayNarrow(new Date(2024, 0, 1 + i));
     return span;
   }));
 
@@ -45,7 +39,7 @@ export function wireCalendar(els) {
     const count = new Date(year, month + 1, 0).getDate();
     let monthTotal = 0;
 
-    els.title.textContent = monthFmt.format(view);
+    els.title.textContent = formatMonthYear(view);
     const thisMonth = new Date();
     els.next.disabled = year === thisMonth.getFullYear() && month === thisMonth.getMonth();
 
@@ -63,7 +57,7 @@ export function wireCalendar(els) {
       btn.disabled = key > today;
       btn.classList.toggle("is-today", key === today);
       btn.setAttribute("aria-pressed", String(key === selected));
-      btn.setAttribute("aria-label", `${longFmt.format(date)}: ${plural(n, "good thing")}`);
+      btn.setAttribute("aria-label", `${formatLong(date)}: ${plural(n, "good thing")}`);
       btn.addEventListener("click", () => {
         selected = key;
         els.search.value = "";
@@ -74,8 +68,8 @@ export function wireCalendar(els) {
     }
     els.grid.replaceChildren(...cells);
     els.stats.textContent = monthTotal
-      ? `${plural(monthTotal, "good thing")} in ${monthOnlyFmt.format(view)}`
-      : `Nothing yet in ${monthOnlyFmt.format(view)}.`;
+      ? `${plural(monthTotal, "good thing")} in ${formatMonth(view)}`
+      : `Nothing yet in ${formatMonth(view)}.`;
   }
 
   function renderDetail() {
@@ -83,7 +77,7 @@ export function wireCalendar(els) {
     if (query) return renderResults(query);
 
     const heading = document.createElement("h3");
-    heading.textContent = longFmt.format(parseDay(selected));
+    heading.textContent = formatLong(selected);
     const list = entriesFor(selected);
     if (!list.length) {
       const p = document.createElement("p");
@@ -115,7 +109,7 @@ export function wireCalendar(els) {
       const li = document.createElement("li");
       const date = document.createElement("span");
       date.className = "result-date";
-      date.textContent = shortFmt.format(parseDay(key));
+      date.textContent = formatShortYear(key);
       const body = document.createElement("span");
       body.append(highlighted(text, query));
       li.append(date, body);

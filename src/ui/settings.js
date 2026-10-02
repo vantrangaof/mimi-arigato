@@ -1,18 +1,10 @@
 // Settings sheet: name, fur, wardrobe, daily reminder, backup.
 
-import { store, catName, dayKey, exportBackup, importBackup, totalThings } from "./store.js";
-import { FURS, ACCESSORIES } from "./sprite.js";
-
-export function download(filename, blob) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
+import { download, capitalize } from "../core/dom.js";
+import { dayKey } from "../core/dates.js";
+import { store, catName, exportBackup, importBackup, totalThings } from "../core/store.js";
+import { FURS } from "../cat/sprite.js";
+import { ACCESSORIES } from "../world/world.js";
 
 function radio(name, value, checked, disabled, content) {
   const label = document.createElement("label");
@@ -77,10 +69,10 @@ export function wireSettings(els) {
 
   function renderWardrobe() {
     const total = totalThings();
-    const options = [{ id: "none", label: "Nothing", need: 0 }, ...ACCESSORIES];
+    const options = [{ id: "none", label: "nothing", need: 0 }, ...ACCESSORIES];
     els.wardrobe.replaceChildren(...options.map((a) => {
       const locked = total < a.need;
-      const text = [span("", a.label)];
+      const text = [span("", capitalize(a.label))];
       if (locked) text.push(span("lock", `at ${a.need}`));
       return radio("accessory", a.id, store.settings.accessory === a.id, locked, text);
     }));
@@ -93,6 +85,7 @@ export function wireSettings(els) {
 
   function render() {
     if (document.activeElement !== els.name) els.name.value = store.settings.name;
+    if (document.activeElement !== els.userName) els.userName.value = store.settings.userName;
     els.name.placeholder = "Mimi";
     els.reminder.value = store.settings.reminder;
     renderFur();
@@ -108,22 +101,27 @@ export function wireSettings(els) {
     if (e.target === els.dialog) els.dialog.close();
   });
 
+  els.userName.addEventListener("input", () => {
+    store.settings.userName = els.userName.value.slice(0, 24);
+    store.settings.nameAsked = true;
+    store.save("settings");
+  });
   els.name.addEventListener("input", () => {
     store.settings.name = els.name.value.slice(0, 16);
-    store.saveSettings();
+    store.save("settings");
   });
   els.fur.addEventListener("change", (e) => {
     store.settings.fur = e.target.value;
-    store.saveSettings();
+    store.save("settings");
   });
   els.wardrobe.addEventListener("change", (e) => {
     store.settings.accessory = e.target.value;
-    store.saveSettings();
+    store.save("settings");
   });
   els.reminder.addEventListener("change", () => {
     if (!els.reminder.value) return;
     store.settings.reminder = els.reminder.value;
-    store.saveSettings();
+    store.save("settings");
   });
   els.addReminder.addEventListener("click", () => {
     download("mimi-reminder.ics", new Blob([reminderICS(store.settings.reminder)], { type: "text/calendar" }));

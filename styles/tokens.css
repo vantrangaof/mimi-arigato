@@ -1,0 +1,86 @@
+/* Design tokens: colors, fonts, and the pixel unit. Dark mode overrides the same names. */
+
+:root {
+  --px: 9px; /* one sprite pixel = one graph-paper square; set from JS */
+
+  --paper: #fcf2f6;
+  --grid: rgba(214, 79, 134, 0.11);
+  --grid-strong: rgba(214, 79, 134, 0.16);
+  --ink: #43263a;
+  --ink-soft: #94687f;
+  --focus: #d64f86;
+  --accent: #d64f86;
+  --accent-edge: #b23f6f;
+  --bubble-bg: #ffffff;
+  --sheet: rgba(255, 255, 255, 0.82);
+  --sheet-solid: #ffffff;
+  --sheet-edge: #efc2d5;
+  --backdrop: rgba(67, 38, 58, 0.32);
+  --laser: #ff2d55;
+
+  --cat-body: #ffd4e4;
+  --cat-chest: #fff0f6;
+  --cat-outline: #c9588a;
+  --cat-inner: #ff8bb0;
+  --cat-eye: #2b1a2e;
+  --cat-shine: #ffffff;
+  --cat-blush: #ff9ebe;
+  --cat-blush-hot: #ff6f9f;
+  --cat-nose: #d64f86;
+  --cat-mouth: #8a3a56;
+  --cat-shadow: rgba(201, 88, 138, 0.16);
+
+  --room-line: #6b4a5c;
+  --room-frame: #ffffff;
+  --floor: rgba(201, 88, 138, 0.08);
+  --floor-edge: rgba(201, 88, 138, 0.22);
+
+  --font-pixel: "DotGothic16", ui-monospace, monospace;
+  --font-body: "M PLUS Rounded 1c", ui-rounded, -apple-system, "Segoe UI", sans-serif;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1e1522;
+    --grid: rgba(255, 160, 200, 0.07);
+    --grid-strong: rgba(255, 160, 200, 0.14);
+    --ink: #f7e7ef;
+    --ink-soft: #ab90a2;
+    --focus: #ff8bb0;
+    --bubble-bg: #2c2031;
+    --sheet: rgba(44, 32, 49, 0.88);
+    --sheet-solid: #2c2031;
+    --sheet-edge: #5a3b55;
+    --backdrop: rgba(8, 4, 10, 0.6);
+    --cat-outline: #a8487a;
+    --cat-eye: #1a0f1c;
+    --cat-shadow: rgba(0, 0, 0, 0.35);
+    --room-frame: #e9dfe6;
+    --floor: rgba(255, 160, 200, 0.06);
+    --floor-edge: rgba(255, 160, 200, 0.16);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #1e1522;
+  --grid: rgba(255, 160, 200, 0.07);
+  --grid-strong: rgba(255, 160, 200, 0.14);
+  --ink: #f7e7ef;
+  --ink-soft: #ab90a2;
+  --focus: #ff8bb0;
+  --bubble-bg: #2c2031;
+  --sheet: rgba(44, 32, 49, 0.88);
+  --sheet-solid: #2c2031;
+  --sheet-edge: #5a3b55;
+  --backdrop: rgba(8, 4, 10, 0.6);
+  --cat-outline: #a8487a;
+  --cat-eye: #1a0f1c;
+  --cat-shadow: rgba(0, 0, 0, 0.35);
+  --room-frame: #e9dfe6;
+  --floor: rgba(255, 160, 200, 0.06);
+  --floor-edge: rgba(255, 160, 200, 0.16);
+  color-scheme: dark;
+}

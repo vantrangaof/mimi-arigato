@@ -1,14 +1,14 @@
 // A picture of today's good things, sized for stories (1080×1350).
 
-import { store, dayKey, entriesFor, catTitle } from "./store.js";
-import { drawSpriteCanvas } from "./sprite.js";
-import { download } from "./settings.js";
+import { download } from "../core/dom.js";
+import { dayKey, formatLong } from "../core/dates.js";
+import { store, entriesToday, catTitle } from "../core/store.js";
+import { drawSpriteCanvas } from "../cat/sprite.js";
 
 const W = 1080;
 const H = 1350;
 const PIXEL = '"DotGothic16", monospace';
 const BODY = '"M PLUS Rounded 1c", sans-serif';
-const longFmt = new Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric" });
 
 function wrapLines(ctx, text, width) {
   const words = text.split(/\s+/);
@@ -55,7 +55,7 @@ async function makeCard() {
   for (let x = 0; x < W; x += 30) ctx.fillRect(x, 0, 2, H);
   for (let y = 0; y < H; y += 30) ctx.fillRect(0, y, W, 2);
 
-  const items = entriesFor(dayKey()).slice(0, 5);
+  const items = entriesToday().slice(0, 5);
   const top = 730;
   const bottom = H - 70;
   const textX = 200;
@@ -80,7 +80,7 @@ async function makeCard() {
   ctx.fillText(catTitle(), W / 2, 590 + shift);
   ctx.fillStyle = "#9a7088";
   ctx.font = `34px ${BODY}`;
-  ctx.fillText(`Good things on ${longFmt.format(new Date())}`, W / 2, 648 + shift);
+  ctx.fillText(`Good things on ${formatLong(new Date())}`, W / 2, 648 + shift);
 
   ctx.textAlign = "left";
   let y = top + shift;
