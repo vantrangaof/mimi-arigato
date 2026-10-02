@@ -5,7 +5,7 @@ import { store, KEYS, catName, catTitle, totalThings, dailyCount, setDailyCount,
 import { dayKey, formatShort } from "../core/dates.js";
 import { applyLook, FURS } from "../cat/sprite.js";
 import { meow, purr } from "../cat/sound.js";
-import { renderRoom, isUnlocked, ACCESSORIES, ROOM_W, ROOM_H } from "../world/world.js";
+import { renderRoom, isUnlocked, validWear, ACCESSORIES, ROOM_W, ROOM_H } from "../world/world.js";
 
 const wide = matchMedia("(min-width: 960px)");
 
@@ -21,10 +21,12 @@ function fitGrid(sprite) {
   document.body.style.backgroundPosition = `${mod(r.left + scrollX)}px ${mod(r.top + scrollY)}px`;
 }
 
-export function wearing() {
-  const id = store.settings.accessory;
-  return ACCESSORIES.find((a) => a.id === id && isUnlocked(id, totalThings())) ?? null;
-}
+export const currentWear = () => validWear(store.settings.wear, totalThings());
+
+// Accessories currently worn, as catalog items.
+export const wearing = () => Object.values(currentWear())
+  .map((id) => ACCESSORIES.find((a) => a.id === id))
+  .filter(Boolean);
 
 export function roomContext() {
   const total = totalThings();
@@ -32,7 +34,7 @@ export function roomContext() {
     window: isUnlocked("window", total),
     aquarium: isUnlocked("aquarium", total),
     cushion: isUnlocked("cushion", total),
-    accessory: wearing()?.label ?? null,
+    accessory: wearing()[0]?.label ?? null,
   };
 }
 
@@ -67,7 +69,7 @@ export function wireHabitat({ mimi, look, wrap, sprite, room, tally }) {
   const render = () => {
     updateRoom({ total: totalThings(), found: store.treasures });
     const fur = FURS[store.settings.fur] ? store.settings.fur : "pink";
-    applyLook(wrap, { fur, accessory: wearing()?.id ?? "none" });
+    applyLook(wrap, { fur, wear: currentWear() });
     $("catTitle").textContent = catTitle();
     document.title = catTitle();
     wrap.setAttribute("aria-label", `Pet ${catName()}`);

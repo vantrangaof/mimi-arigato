@@ -21,6 +21,8 @@ import { wireSettings } from "./ui/settings.js";
 import { wireIntro, needsIntro } from "./ui/intro.js";
 import { wireShare } from "./ui/share.js";
 import { wireAccount } from "./ui/account.js";
+import { wireNote } from "./ui/note.js";
+import { wireWardrobe } from "./ui/wardrobe.js";
 import { initCloud } from "./cloud/sync.js";
 
 await initStore();
@@ -38,6 +40,7 @@ const mimi = makeMimi({
 });
 
 wireHabitat({ mimi, look, wrap, sprite, room: $("roomArt"), tally: $("tally") });
+wireNote({ button: $("mimiNote"), text: $("noteText"), signature: $("noteSign") });
 wireTopbar({ together: $("together"), soundToggle: $("soundToggle"), settingsOpen: $("settingsOpen") });
 wireIntro(mimi, { card: $("intro"), form: $("introForm"), input: $("introName"), skip: $("introSkip"), title: $("introTitle"), note: $("introNote") });
 
@@ -73,6 +76,7 @@ wireCalendar({
 });
 
 wireTreat($("treatBtn"), mimi, wrap);
+wireWardrobe(mimi, { open: $("dressBtn"), dialog: $("wardrobeDialog"), preview: $("wardrobePreview"), previewCat: $("wardrobeCat"), slots: $("wardrobeSlots"), next: $("wardrobeNext") });
 const play = wirePlay($("playBtn"), mimi, wrap, $("habitat"), look);
 followPointer(look, () => play.isPlaying());
 
@@ -82,8 +86,6 @@ wireSettings({
   name: $("catName"),
   userName: $("userName"),
   fur: $("furChoices"),
-  wardrobe: $("wardrobe"),
-  wardrobeNote: $("wardrobeNote"),
   reminder: $("reminderTime"),
   addReminder: $("reminderAdd"),
   backup: $("backupDownload"),

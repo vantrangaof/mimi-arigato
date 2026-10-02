@@ -15,7 +15,7 @@ export function wireTreat(btn, mimi, wrap) {
 
   function label() {
     const left = MAX_TREATS - dailyCount(KEYS.treats);
-    btn.textContent = left > 0 ? `Give a treat (${left})` : "Full of treats";
+    btn.textContent = left > 0 ? `Treat (${left})` : "Full of treats";
     btn.setAttribute("aria-label", left > 0 ? `Give a treat, ${left} left today` : "No treats left today");
   }
 

@@ -2,9 +2,9 @@
 // Legend:
 //   d outline  @ inner-ear  O body  L chest  s floor shadow  T tail
 //   E eye      W eye-shine  B blush  N nose   H mouth
-//   accessories: R/r ribbon  P/f/y flower  S/s/k scarf  G/g/J crown
+//   accessories: R/r ribbon  P/f/y flower  S/v/k scarf  G/g/J crown  Q glasses  p/b party hat  m beret
 
-import { drawPixels, group } from "../core/pixel.js";
+import { drawPixels, group, pixelSVG } from "../core/pixel.js";
 
 const BODY = [
   "................................",
@@ -56,18 +56,40 @@ const ACCESSORY_LAYERS = {
   flower: [3, 3, [".fPf.", "fPPPf", "PPyPP", "fPPPf", ".fPf."]],
   scarf: [5, 19, [
     "kSSSSSSSSSSSSSSSSSSSSk",
-    "kssssssssssssssssssssk",
+    "kvvvvvvvvvvvvvvvvvvvvk",
     "...kSk", "...kSk", "...ksk", "...kkk",
   ]],
   crown: [12, 3, ["G..GG..G", "GG.GG.GG", "GGGGGGGG", "gJggggJg"]],
+  glasses: [6, 10, [
+    ".QQQQQ........QQQQQ.",
+    "Q.....QQQQQQQQ.....Q",
+    "Q.....Q......Q.....Q",
+    "Q.....Q......Q.....Q",
+    ".QQQQQ........QQQQQ.",
+  ]],
+  partyhat: [13, 0, ["..yy..", "..pp..", "..pb..", ".pppp.", ".bppp.", ".ppbp.", "pppppp"]],
+  bell: [6, 19, [
+    "RRRRRRRRRRRRRRRRRRRR",
+    ".........yy.........",
+    "........yyyy........",
+    ".........QQ.........",
+  ]],
+  beret: [8, 4, ["....m...", "..mmmmm.", ".mmmmmmm", "mmmmmmmm"]],
 };
 
 const ACCESSORY_COLORS = {
   R: "#ef5a8a", r: "#a8325c",
   P: "#fffdf2", f: "#e2a83a", y: "#ffc93c",
-  S: "#7fb3e6", s: "#5b8fc9", k: "#3f6797",
+  S: "#7fb3e6", v: "#5b8fc9", k: "#3f6797",
   G: "#ffd45e", g: "#d8a425", J: "#ff6f9f",
+  Q: "#3b2a36", p: "#ff6f9f", b: "#7fb3e6", m: "#b23a48",
 };
+
+// A standalone picture of one accessory (for the wardrobe tiles).
+export function accessoryPreview(id, className) {
+  const [, , rows] = ACCESSORY_LAYERS[id];
+  return pixelSVG(rows, ACCESSORY_COLORS, className);
+}
 
 export const FURS = {
   pink: { label: "Strawberry", body: "#ffd4e4", chest: "#fff0f6", outline: "#c9588a", inner: "#ff8bb0", eye: "#2b1a2e", shine: "#ffffff", blush: "#ff9ebe", nose: "#d64f86", mouth: "#8a3a56" },
@@ -127,24 +149,25 @@ export function renderCat(svg) {
   return look;
 }
 
-export function applyLook(wrap, { fur, accessory }) {
+// wear: { head, neck, face } item ids ("none" for an empty slot).
+export function applyLook(wrap, { fur, wear }) {
   const palette = FURS[fur];
   for (const [key, cssVar] of Object.entries(FUR_VARS)) {
     // Strawberry keeps the stylesheet colors so its dark-mode tweaks still apply.
     if (palette && fur !== "pink") wrap.style.setProperty(cssVar, palette[key]);
     else wrap.style.removeProperty(cssVar);
   }
-  wrap.dataset.accessory = accessory;
+  wrap.dataset.wear = Object.values(wear).filter((id) => ACCESSORY_LAYERS[id]).join(" ");
 }
 
-export function drawSpriteCanvas(ctx, x0, y0, cell, { fur, accessory }) {
+export function drawSpriteCanvas(ctx, x0, y0, cell, { fur, wear = {} }) {
   const palette = FURS[fur] ?? FURS.pink;
   const grid = BODY.map((r) => [...r]);
   const overlay = ([lx, ly, rows]) =>
     rows.forEach((row, y) => [...row].forEach((ch, x) => { if (ch !== ".") grid[ly + y][lx + x] = ch; }));
   overlay(EYES_OPEN);
   overlay(TAIL_UP);
-  if (ACCESSORY_LAYERS[accessory]) overlay(ACCESSORY_LAYERS[accessory]);
+  for (const id of Object.values(wear)) if (ACCESSORY_LAYERS[id]) overlay(ACCESSORY_LAYERS[id]);
   grid.forEach((row, y) => row.forEach((ch, x) => {
     const color = ch === "s" ? "rgba(201, 88, 138, 0.16)" : FUR_KEY[ch] ? palette[FUR_KEY[ch]] : ACCESSORY_COLORS[ch];
     if (!color) return;

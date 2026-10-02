@@ -123,7 +123,7 @@ export function wireJournal(mimi, els) {
       : [...reactionFor(text, n), { hearts: n === DAILY ? 5 : 1, hold: 2200 }]];
 
     for (const item of WORLD.filter((w) => before < w.need && before + 1 >= w.need)) {
-      if (item.kind === "acc") store.settings.accessory = item.id;
+      if (item.kind === "acc") store.settings.wear = { ...store.settings.wear, [item.slot]: item.id };
       events.push(["ooh!", item.kind === "acc"
         ? `got a ${item.label} for hearing ${item.need} good things!`
         : `got a ${item.label} for their room!`, { hearts: 3, hold: 3200 }]);

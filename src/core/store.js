@@ -26,7 +26,7 @@ const DEFAULT_SETTINGS = {
   userName: "", // what the cat calls you
   nameAsked: false,
   fur: "pink",
-  accessory: "none",
+  wear: { head: "none", neck: "none", face: "none" },
   reminder: "20:00",
   sound: true,
 };
@@ -325,7 +325,7 @@ export function importBackup(text) {
   if (s && typeof s === "object") {
     for (const key of ["name", "userName"]) if (typeof s[key] === "string") store.settings[key] = s[key].slice(0, 24);
     if (typeof s.fur === "string") store.settings.fur = s.fur;
-    if (typeof s.accessory === "string") store.settings.accessory = s.accessory;
+    if (s.wear && typeof s.wear === "object") store.settings.wear = { ...store.settings.wear, ...s.wear };
     if (typeof s.reminder === "string" && /^\d{2}:\d{2}$/.test(s.reminder)) store.settings.reminder = s.reminder;
     if (typeof s.sound === "boolean") store.settings.sound = s.sound;
     if (store.settings.userName) store.settings.nameAsked = true;

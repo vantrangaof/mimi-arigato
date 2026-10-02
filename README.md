@@ -27,6 +27,7 @@ It's an installable web app (PWA). It works offline and without an account; sign
 ## What you can do
 
 ### Meet Mimi
+- **A new note every visit:** under Mimi's name there's a little note in their voice ("Small things count. Especially snacks."). About 60 notes are dealt in shuffled order with no repeats; some fit the time of day, and some are personal (your name, your favorite things, a past good thing, days together). Tap the note for another.
 - On your first visit Mimi says hello and asks **"What's your name?"** Mimi then greets you by name ("Good morning, Trang!", "you're back, Trang!"). Choose "Maybe later" to skip; you can add or change it in Settings.
 
 ### Tell Mimi good things
@@ -48,10 +49,11 @@ It's an installable web app (PWA). It works offline and without an account; sign
 
 ### Mimi, the cat
 - **Tap Mimi** to pet them: a **meow** or **purr** (real recordings), happy ^ ^ eyes, blush, tail wags, a floating heart, and a little line ("leans into your hand."). Sometimes Mimi recalls one of your past entries.
-- **Sound on/off:** speaker button at the top right (remembered).
+- **Sound on/off:** speaker button at the top right (remembered). On iPhone, the ring/silent switch also mutes web sounds.
 - **Idle habits:** every so often Mimi grooms a paw, yawns, dozes, stretches, chases their tail, stares at you, looks out the window, watches the aquarium fish, admires their accessory, or sits by the journal "waiting to hear about your day."
 - **Time of day:** asleep 10 pm to 6 am ("z z z"; tap to wake). Morning stretch, lunchtime thoughts, evening "ready to hear about your day."
 - **Treats:** a fish drops in and Mimi chomps it (3 a day).
+- **Dress up:** a wardrobe with one item per slot (head, neck, face) and a live preview. Free from the start: party hat, bell collar, round glasses. Unlocked by good things: little flower (5), ribbon bow (15), cozy scarf (40), beret (120), tiny crown (200).
 - **Play:** a laser dot for 20 seconds; Mimi pounces when it lands on them. Steer it with your finger or mouse, or let it wander.
 - **Eyes follow your mouse** on desktop.
 
@@ -60,15 +62,16 @@ Everything unlocks by total good things and never goes away:
 
 | Good things | Unlocks |
 |---|---|
-| 5 | Little flower (accessory) |
-| 15 | Ribbon bow (accessory) |
+| 5 | Little flower (to wear) |
+| 15 | Ribbon bow (to wear) |
 | 30 | Tiny plant |
-| 40 | Cozy scarf (accessory) |
+| 40 | Cozy scarf (to wear) |
 | 50 | Cushion |
 | 75 | Wall picture |
 | 100 | Window (the sky outside follows the time of day) |
+| 120 | Beret (to wear) |
 | 150 | Bookshelf |
-| 200 | Tiny crown (accessory) |
+| 200 | Tiny crown (to wear) |
 | 250 | Aquarium |
 | 500 | Starry window |
 
@@ -83,7 +86,7 @@ Everything unlocks by total good things and never goes away:
 - **Calendar:** days get pinker the more you wrote; tap a day to read it; search everything.
 
 ### Settings
-- Your name, the cat's name, fur color (Strawberry, Peach, Cloud, Midnight, Snow), wardrobe.
+- Your name, the cat's name, fur color (Strawberry, Peach, Cloud, Midnight, Snow).
 - **Account & sync:** type your email, tap the link Mimi emails you, and you're signed in (no password). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
 - **Daily reminder:** adds a repeating event to your calendar app (web apps can't schedule notifications on their own).
 - **Backup / Restore:** download everything as a file; restoring merges and never deletes.
@@ -110,7 +113,8 @@ manifest.webmanifest    Install-to-home-screen metadata
 sw.js                   Offline support (network first, cached copy when offline)
 supabase/schema.sql     Cloud database tables and security rules (run once in Supabase)
 assets/
-  icon.svg              App icon
+  icon.svg              App icon (vector)
+  icons/                PNG app icons (home screen, maskable, Apple touch, favicon)
   sounds/meow.m4a       0.9 s meow clip
   sounds/purr.m4a       1.5 s purr clip
 styles/
@@ -139,12 +143,15 @@ src/
     surprises.js        Rare finds and dreams
   memory/               How Mimi understands you (pure logic)
     insights.js         Keyword reactions, categories, learned facts, monthly recap
+    quotes.js           Mimi's notes and how a new one is picked each visit
     relationship.js     Days together and milestones
     scrapbook.js        When pages are added and which entry is kept
   ui/                   One module per part of the page
     habitat.js          Room on screen, pixel sizing, petting
     topbar.js           Days together, sound toggle, settings icon
     intro.js            "What's your name?"
+    note.js             Mimi's note under their name
+    wardrobe.js         Dress up: wear items per slot
     journal.js          Writing good things, prompts, unlock and scrapbook events
     tabs.js             Accessible tabs
     memories.js         Memory cabinet

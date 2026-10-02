@@ -2,23 +2,54 @@
 
 import { drawPixels, svgEl } from "../core/pixel.js";
 
-export const WORLD = [
-  { id: "flower", kind: "acc", label: "little flower", need: 5 },
-  { id: "bow", kind: "acc", label: "ribbon bow", need: 15 },
-  { id: "plant", kind: "room", label: "tiny plant", need: 30 },
-  { id: "scarf", kind: "acc", label: "cozy scarf", need: 40 },
-  { id: "cushion", kind: "room", label: "cushion", need: 50 },
-  { id: "picture", kind: "room", label: "wall picture", need: 75 },
-  { id: "window", kind: "room", label: "window", need: 100 },
-  { id: "bookshelf", kind: "room", label: "bookshelf", need: 150 },
-  { id: "crown", kind: "acc", label: "tiny crown", need: 200 },
-  { id: "aquarium", kind: "room", label: "aquarium", need: 250 },
-  { id: "starry", kind: "room", label: "starry window", need: 500 },
+// Things Mimi can wear: one per slot. need = good things required (0 = free from the start).
+export const SLOTS = [
+  { id: "head", label: "Head" },
+  { id: "neck", label: "Neck" },
+  { id: "face", label: "Face" },
 ];
 
-export const ACCESSORIES = WORLD.filter((w) => w.kind === "acc");
-export const isUnlocked = (id, total) => WORLD.some((w) => w.id === id && total >= w.need);
+export const ACCESSORIES = [
+  { id: "partyhat", slot: "head", label: "party hat", need: 0 },
+  { id: "bell", slot: "neck", label: "bell collar", need: 0 },
+  { id: "glasses", slot: "face", label: "round glasses", need: 0 },
+  { id: "flower", slot: "head", label: "little flower", need: 5 },
+  { id: "bow", slot: "head", label: "ribbon bow", need: 15 },
+  { id: "scarf", slot: "neck", label: "cozy scarf", need: 40 },
+  { id: "beret", slot: "head", label: "beret", need: 120 },
+  { id: "crown", slot: "head", label: "tiny crown", need: 200 },
+];
+
+const ROOM_ITEMS = [
+  { id: "plant", label: "tiny plant", need: 30 },
+  { id: "cushion", label: "cushion", need: 50 },
+  { id: "picture", label: "wall picture", need: 75 },
+  { id: "window", label: "window", need: 100 },
+  { id: "bookshelf", label: "bookshelf", need: 150 },
+  { id: "aquarium", label: "aquarium", need: 250 },
+  { id: "starry", label: "starry window", need: 500 },
+];
+
+// Everything that unlocks over time, in order: what "next for Mimi's world" points at.
+export const WORLD = [
+  ...ROOM_ITEMS.map((r) => ({ ...r, kind: "room" })),
+  ...ACCESSORIES.filter((a) => a.need > 0).map((a) => ({ ...a, kind: "acc" })),
+].sort((x, y) => x.need - y.need);
+
+const findItem = (id) => ROOM_ITEMS.find((r) => r.id === id) ?? ACCESSORIES.find((a) => a.id === id);
+export const isUnlocked = (id, total) => {
+  const item = findItem(id);
+  return Boolean(item) && total >= item.need;
+};
 export const nextUnlock = (total) => WORLD.find((w) => total < w.need) ?? null;
+
+// What's actually worn: drops anything unknown, locked, or in the wrong slot.
+export function validWear(wear = {}, total) {
+  return Object.fromEntries(SLOTS.map(({ id: slot }) => {
+    const item = ACCESSORIES.find((a) => a.id === wear[slot] && a.slot === slot && total >= a.need);
+    return [slot, item?.id ?? "none"];
+  }));
+}
 
 // Room is 46×34 sprite pixels; Mimi's 32×29 sprite sits at (7, 2).
 export const ROOM_W = 46;

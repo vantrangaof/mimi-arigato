@@ -147,10 +147,14 @@
 @keyframes tail-flick { 0% { visibility: hidden; }  80% { visibility: visible; } 88% { visibility: hidden; } }
 
 .acc { visibility: hidden; }
-[data-accessory="bow"] .acc-bow,
-[data-accessory="flower"] .acc-flower,
-[data-accessory="scarf"] .acc-scarf,
-[data-accessory="crown"] .acc-crown { visibility: visible; }
+[data-wear~="bow"] .acc-bow,
+[data-wear~="flower"] .acc-flower,
+[data-wear~="scarf"] .acc-scarf,
+[data-wear~="crown"] .acc-crown,
+[data-wear~="glasses"] .acc-glasses,
+[data-wear~="partyhat"] .acc-partyhat,
+[data-wear~="bell"] .acc-bell,
+[data-wear~="beret"] .acc-beret { visibility: visible; }
 
 /* ---- speech bubble ---- */
 

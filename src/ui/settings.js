@@ -1,10 +1,9 @@
-// Settings sheet: name, fur, wardrobe, daily reminder, backup.
+// Settings sheet: names, fur, daily reminder, account, backup.
 
-import { download, capitalize } from "../core/dom.js";
+import { download } from "../core/dom.js";
 import { dayKey } from "../core/dates.js";
 import { store, catName, exportBackup, importBackup, totalThings } from "../core/store.js";
 import { FURS } from "../cat/sprite.js";
-import { ACCESSORIES } from "../world/world.js";
 
 function radio(name, value, checked, disabled, content) {
   const label = document.createElement("label");
@@ -67,29 +66,12 @@ export function wireSettings(els) {
     }));
   }
 
-  function renderWardrobe() {
-    const total = totalThings();
-    const options = [{ id: "none", label: "nothing", need: 0 }, ...ACCESSORIES];
-    els.wardrobe.replaceChildren(...options.map((a) => {
-      const locked = total < a.need;
-      const text = [span("", capitalize(a.label))];
-      if (locked) text.push(span("lock", `at ${a.need}`));
-      return radio("accessory", a.id, store.settings.accessory === a.id, locked, text);
-    }));
-    const next = ACCESSORIES.find((a) => total < a.need);
-    const told = `You've told ${catName()} ${total} good thing${total === 1 ? "" : "s"}.`;
-    els.wardrobeNote.textContent = next
-      ? `${told} The ${next.label.toLowerCase()} unlocks at ${next.need}.`
-      : `${told} Everything is unlocked.`;
-  }
-
   function render() {
     if (document.activeElement !== els.name) els.name.value = store.settings.name;
     if (document.activeElement !== els.userName) els.userName.value = store.settings.userName;
     els.name.placeholder = "Mimi";
     els.reminder.value = store.settings.reminder;
     renderFur();
-    renderWardrobe();
   }
 
   els.open.addEventListener("click", () => {
@@ -112,10 +94,6 @@ export function wireSettings(els) {
   });
   els.fur.addEventListener("change", (e) => {
     store.settings.fur = e.target.value;
-    store.save("settings");
-  });
-  els.wardrobe.addEventListener("change", (e) => {
-    store.settings.accessory = e.target.value;
     store.save("settings");
   });
   els.reminder.addEventListener("change", () => {

@@ -4,6 +4,8 @@ import { download } from "../core/dom.js";
 import { dayKey, formatLong } from "../core/dates.js";
 import { store, entriesToday, catTitle } from "../core/store.js";
 import { drawSpriteCanvas } from "../cat/sprite.js";
+import { validWear } from "../world/world.js";
+import { totalThings } from "../core/store.js";
 
 const W = 1080;
 const H = 1350;
@@ -72,7 +74,7 @@ async function makeCard() {
   const shift = Math.max(0, (bottom - top - listHeight) / 2);
 
   const cell = 15;
-  drawSpriteCanvas(ctx, (W - 32 * cell) / 2, 60 + shift, cell, store.settings);
+  drawSpriteCanvas(ctx, (W - 32 * cell) / 2, 60 + shift, cell, { fur: store.settings.fur, wear: validWear(store.settings.wear, totalThings()) });
 
   ctx.textAlign = "center";
   ctx.fillStyle = "#43263a";

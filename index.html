@@ -12,7 +12,8 @@
   <title>Mimi Arigato</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
-  <link rel="apple-touch-icon" href="assets/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+Rounded+1c:wght@400;700&display=swap">
@@ -50,9 +51,16 @@
           <p class="state" aria-live="polite"><span id="stateText">is sitting peacefully.</span></p>
         </div>
 
+        <button class="note" id="mimiNote" type="button" title="Tap for another note">
+          <span class="visually-hidden">A note from your cat. Tap for another.</span>
+          <span class="note-text" id="noteText"></span>
+          <span class="note-sign" id="noteSign"></span>
+        </button>
+
         <div class="actions">
           <button class="pixel-button" id="treatBtn" type="button">Give a treat</button>
           <button class="pixel-button" id="playBtn" type="button" aria-pressed="false">Play</button>
+          <button class="pixel-button" id="dressBtn" type="button">Dress up</button>
         </div>
       </section>
 
@@ -151,12 +159,6 @@
       <div class="choices" id="furChoices"></div>
     </fieldset>
 
-    <fieldset class="sheet-section">
-      <legend class="sheet-label">Wardrobe</legend>
-      <div class="choices" id="wardrobe"></div>
-      <p class="muted" id="wardrobeNote"></p>
-    </fieldset>
-
     <div class="sheet-section">
       <label class="sheet-label" for="reminderTime">Daily reminder</label>
       <p class="muted">Adds a repeating event to your calendar app so it can remind you.</p>
@@ -180,6 +182,18 @@
       </div>
       <p class="muted" id="backupNote" aria-live="polite"></p>
     </div>
+  </dialog>
+
+  <dialog class="sheet" id="wardrobeDialog" aria-labelledby="wardrobeTitle">
+    <form method="dialog" class="sheet-head">
+      <h2 class="card-title" id="wardrobeTitle">Wardrobe</h2>
+      <button class="icon-button small" value="close" aria-label="Close">×</button>
+    </form>
+    <div class="cat-preview" id="wardrobePreview">
+      <svg class="cat" id="wardrobeCat" viewBox="0 0 32 29" shape-rendering="crispEdges" aria-hidden="true"></svg>
+    </div>
+    <div id="wardrobeSlots"></div>
+    <p class="muted small" id="wardrobeNext"></p>
   </dialog>
 
   <dialog class="sheet" id="shareDialog" aria-labelledby="shareTitle">
