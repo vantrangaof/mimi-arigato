@@ -248,8 +248,21 @@ Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing access
 
 ## Ideas for later
 
-- Put it online (GitHub Pages / Netlify) so it can be installed on a phone.
-- More idle animations and room items; seasonal decorations.
+**Next up: Diary** (planned, not built yet). A private page per day for whatever happened or whatever's on your mind, not only good things.
+- One page per day that saves as you type; past days in a list of dates.
+- Mood weather: a tiny pixel sunny / cloudy / rainy / stormy icon per page, shown through Mimi's window and as a "year in weather" in the Calendar.
+- Mimi keeps you company while you write (curled up, ears twitching) but never reacts to what you write.
+
+**Diary extras, maybe later**
+- "Let it go": write a worry, give it to Mimi, she bats it away. Never saved.
+- Gentle prompts on a blank page ("What happened today?"), never required.
+- "A year ago today…" card on today's page.
+- Diary lock (passcode) for shared phones. Hides it on the device only; real end-to-end encryption is a bigger job.
+
+**Other ideas**
+- Letters to future you, sealed until a date you pick.
+- Mimi's room follows the real season and time of day (snow in winter, a lamp at night); more idle animations and room items.
+- Monthly share card: a pixel image of the month's good things and weather.
 - Optional AI reactions for entries the keyword rules don't recognize.
 
 ## Credits
