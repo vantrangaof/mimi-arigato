@@ -291,6 +291,12 @@ Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing access
 - Mood weather shown through Mimi's window (once the window is unlocked).
 - Mimi's room follows the real season and time of day (snow in winter, a lamp at night); more idle animations and room items.
 - Thank-you cards from past days (calendar and Memories), not only today's list.
+
+**To decide (from the 2026-10-04 build)**
+- Should rainy/stormy diary weather affect the jar at all? Right now it makes the stars glimmer and Mimi sit by the jar more (she never reads the words). Alternative: the diary has no effect anywhere.
+- Your photo on the wall waits for the wall picture (75 good things). Alternative: hang it as soon as you add your first photo.
+- The ghost costume reads more like a white bib; redraw it before Halloween (Oct 18).
+- Fur from a photo uses the main color near the middle of the photo, so a busy background can pull the color off. Alternative: let you tap the cat in the photo to choose the color.
 - Monthly share card: a pixel image of the month's good things and weather.
 - Optional AI reactions for entries the keyword rules don't recognize.
 

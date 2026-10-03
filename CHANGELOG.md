@@ -65,6 +65,9 @@ Progress log for Mimi Arigato. Newest first.
 
 ## Open items
 
+- Decide: should diary weather affect the jar? Hang your photo before 75 good things? (See README "To decide".)
+- Redraw the ghost costume before Halloween starts on Oct 18.
+
 - Run the latest `supabase/schema.sql` in the Supabase project (photos table, `entries.photo_id`, storage bucket are missing as of 2026-10-03).
 - Try a real sign-in and sync on the live site (sync has only been tested against a mock Supabase so far).
 - In Supabase Auth → URL Configuration: Site URL `https://mimi-arigato.vercel.app`, redirect URLs `https://mimi-arigato.vercel.app/**` and `http://localhost:5173/**`.
