@@ -81,16 +81,42 @@ function schedulePush() {
   pushTimer = setTimeout(syncNow, PUSH_DELAY_MS);
 }
 
-export async function sendSignInLink(email) {
+function authError(err) {
+  const msg = String(err?.message ?? err ?? "");
+  if (/invalid login credentials/i.test(msg)) return "That email and password don't match.";
+  if (/already registered|already exists/i.test(msg)) return "There's already an account with that email. Sign in instead.";
+  if (/email not confirmed/i.test(msg)) return "Confirm your email first (check your inbox), then sign in.";
+  if (/password should be|weak password/i.test(msg)) return "Pick a longer password (at least 6 characters).";
+  if (/rate limit|too many/i.test(msg)) return "Too many tries. Wait a minute and try again.";
+  return friendly(err);
+}
+
+// Returns { error, existing? } or { notice } (sign-up needs an email confirmation) or {} when signed in.
+export async function signIn(email, password) {
   try {
-    const c = await getClient();
-    const { error } = await c.auth.signInWithOtp({
+    const { error } = await (await getClient()).auth.signInWithPassword({ email, password });
+    return error ? { error: authError(error) } : {};
+  } catch (err) {
+    return { error: authError(err) };
+  }
+}
+
+export async function signUp(email, password) {
+  try {
+    const { data, error } = await (await getClient()).auth.signUp({
       email,
+      password,
       options: { emailRedirectTo: location.origin + location.pathname },
     });
-    return error ? friendly(error) : null;
+    // With email confirmation on, Supabase hides existing accounts behind a user with no identities.
+    if (/already registered|already exists/i.test(error?.message ?? "") || (data?.user && !data.user.identities?.length)) {
+      return { error: authError("already registered"), existing: true };
+    }
+    if (error) return { error: authError(error) };
+    if (!data.session) return { notice: `Almost there: confirm your email (check ${email}), then sign in here.` };
+    return {};
   } catch (err) {
-    return friendly(err);
+    return { error: authError(err) };
   }
 }
 

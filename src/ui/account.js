@@ -1,7 +1,7 @@
-// Settings → Account & sync: sign in with an emailed link, see sync status, sign out.
+// Settings → Account & sync: sign in or create an account with email + password, see sync status, sign out.
 
 import { el } from "../core/dom.js";
-import { cloudConfigured, cloudStatus, onCloudChange, sendSignInLink, signOut, syncNow } from "../cloud/sync.js";
+import { cloudConfigured, cloudStatus, onCloudChange, signIn, signOut, signUp, syncNow } from "../cloud/sync.js";
 
 const relative = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
 
@@ -14,39 +14,47 @@ function ago(ms) {
 }
 
 export function wireAccount(body) {
-  let sentTo = null;
-  let sendError = null;
+  let mode = "sign-in"; // sign-in | sign-up
+  let typedEmail = "";
+  let message = null; // { text, error? }
   let confirmSignOut = false;
 
   function signedOutView() {
-    if (sentTo) {
-      return [
-        el("p", { class: "muted", text: `Check your inbox at ${sentTo}. Open the link from Mimi to finish signing in.` }),
-        el("button", { type: "button", class: "link-button", text: "Use a different email", onclick: () => { sentTo = null; render(); } }),
-      ];
-    }
-    const input = el("input", { class: "text-input", id: "accountEmail", type: "email", autocomplete: "email", placeholder: "you@example.com", required: true });
+    const creating = mode === "sign-up";
+    const email = el("input", { class: "text-input", id: "accountEmail", type: "email", autocomplete: "email", placeholder: "you@example.com", required: true, value: typedEmail });
+    const password = el("input", {
+      class: "text-input", id: "accountPassword", type: "password", required: true, minlength: 6,
+      autocomplete: creating ? "new-password" : "current-password",
+      placeholder: creating ? "Choose a password (6+ characters)" : "Password",
+    });
+    const button = el("button", { class: "pixel-button", type: "submit", text: creating ? "Create account" : "Sign in" });
     const form = el("form", {
-      class: "row",
+      class: "account-form",
       onsubmit: async (e) => {
         e.preventDefault();
-        const email = input.value.trim();
-        if (!email) return;
+        typedEmail = email.value.trim();
+        if (!typedEmail || !password.value) return;
         button.disabled = true;
-        button.textContent = "Sending…";
-        sendError = await sendSignInLink(email);
-        sentTo = sendError ? null : email;
+        button.textContent = creating ? "Creating…" : "Signing in…";
+        const result = await (creating ? signUp : signIn)(typedEmail, password.value);
+        message = result.error ? { error: true, text: result.error } : result.notice ? { text: result.notice } : null;
+        if (result.notice || result.existing) mode = "sign-in";
         render();
       },
     },
     el("label", { class: "visually-hidden", for: "accountEmail", text: "Email" }),
-    input);
-    const button = el("button", { class: "pixel-button", type: "submit", text: "Email me a sign-in link" });
-    form.append(button);
+    email,
+    el("label", { class: "visually-hidden", for: "accountPassword", text: "Password" }),
+    password,
+    button);
+    const switchMode = () => { typedEmail = email.value.trim(); mode = creating ? "sign-in" : "sign-up"; message = null; render(); };
     return [
-      el("p", { class: "muted", text: "Sign in to keep your good things safe in the cloud and see them on all your devices. No password needed." }),
+      el("p", { class: "muted", text: "Sign in to keep your good things safe in the cloud and see them on all your devices." }),
       form,
-      sendError && el("p", { class: "muted error", text: sendError }),
+      message && el("p", { class: `muted${message.error ? " error" : ""}`, "aria-live": "polite", text: message.text }),
+      el("p", { class: "muted" },
+        creating ? "Already have an account? " : "New here? ",
+        el("button", { type: "button", class: "link-button", text: creating ? "Sign in" : "Create an account", onclick: switchMode })),
     ];
   }
 
@@ -82,7 +90,7 @@ export function wireAccount(body) {
       return;
     }
     const status = cloudStatus();
-    if (status.email) sentTo = null; // the emailed link has done its job
+    if (status.email) { message = null; mode = "sign-in"; }
     const parts = status.email ? signedInView(status) : signedOutView();
     body.replaceChildren(...parts.filter(Boolean));
   }

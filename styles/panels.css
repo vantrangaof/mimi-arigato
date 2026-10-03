@@ -539,3 +539,5 @@ mark {
 .photo-sheet .sheet-label { margin-top: 4px; }
 #photoActions { margin-top: 12px; }
 .link-button.danger { color: var(--ink-soft); }
+.account-form { display: grid; gap: 10px; }
+.account-form .pixel-button { justify-self: start; }

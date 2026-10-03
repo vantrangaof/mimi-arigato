@@ -93,7 +93,7 @@ Everything unlocks by total good things and never goes away:
 
 ### Settings
 - Your name, the cat's name, fur color (Strawberry, Peach, Cloud, Midnight, Snow).
-- **Account & sync** (also the **Sign in** / cloud button at the top): type your email, tap the link Mimi emails you, and you're signed in (no password). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
+- **Account & sync** (also the **Sign in** / cloud button at the top): create an account with your email and a password (or sign in to an existing one). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
 - **Daily reminder:** adds a repeating event to your calendar app (web apps can't schedule notifications on their own).
 - **Backup / Restore:** download everything as a file; restoring merges and never deletes.
 - **Share a picture of today:** a 1080×1350 pixel card of the cat with today's good things.
@@ -133,7 +133,7 @@ src/
   main.js               Startup: opens the database and wires the modules together
   config.js             Supabase project URL + public anon key (empty = no cloud sync)
   cloud/
-    sync.js             Sign-in with email link, push/pull sync with Supabase (entries, photos, state)
+    sync.js             Sign-in with email + password, push/pull sync with Supabase (entries, photos, state)
   core/                 Infrastructure, no UI
     db.js               IndexedDB database (localStorage fallback)
     store.js            In-memory data + persistence, change events, backup/restore
@@ -220,16 +220,14 @@ Row-level security means each person can only read and write their own rows.
 
 1. Create a free project at [supabase.com](https://supabase.com) → **New project**.
 2. Open **SQL Editor → New query**, paste the contents of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**.
-3. Open **Authentication → URL Configuration**:
-   - **Site URL:** where Mimi runs, e.g. `http://localhost:5173` (later your real address).
-   - **Redirect URLs:** add the same address(es).
+3. Open **Authentication → Sign In / Providers → Email**: keep **Email** enabled, and turn **Confirm email** off if you want people signed in right after creating an account (no email needed). If you leave it on, also set **Authentication → URL Configuration → Site URL** to where Mimi runs (e.g. `https://mimi-arigato.vercel.app`) so the confirmation link comes back to Mimi.
 4. Open **Project Settings → API** and copy the **Project URL** and the **anon public** key into [`src/config.js`](src/config.js):
    ```js
    export const SUPABASE_URL = "https://YOUR-PROJECT.supabase.co";
    export const SUPABASE_ANON_KEY = "eyJ...";
    ```
    The anon key is meant to be public; row-level security protects the data. **Never** put the `service_role` key in the app.
-5. Reload Mimi → Settings → **Account & sync** → enter your email → open the link.
+5. Reload Mimi → Settings → **Account & sync** → **Create an account** with your email and a password.
 
 **Updating:** when a new version adds tables (like photos), run `supabase/schema.sql` again. It's safe to re-run.
 
@@ -239,8 +237,9 @@ Row-level security means each person can only read and write their own rows.
 - Try it across devices: write something on your phone, then tap Sync now on your laptop.
 
 Notes:
-- Supabase's built-in email sender is limited to a few sign-in emails per hour; for real use, set up your own SMTP under **Authentication → Emails**.
-- The sign-in link opens Mimi in whichever browser your email app uses; that browser gets signed in.
+- Passwords need at least 6 characters (Supabase's default).
+- There's no "forgot password" in Mimi yet; you can reset someone's password from **Authentication → Users** in Supabase.
+- If **Confirm email** is on, Supabase's built-in email sender only sends a few emails per hour; set up your own SMTP under **Authentication → Emails** for real use.
 - The Supabase client library is loaded from a CDN only when cloud sync is configured, so offline use is unaffected.
 
 ## Not doing (on purpose)

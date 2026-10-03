@@ -4,6 +4,11 @@ Progress log for Mimi Arigato. Newest first.
 
 ## 2026-10-03
 
+### Email + password accounts
+- Replaced the emailed sign-in link with email + password: "Create an account" or "Sign in" under Settings → Account & sync. Sign-in now happens inside the installed app (the link used to open in the phone's browser instead).
+- Friendly messages for wrong password, existing account, short password, too many tries. If Supabase's "Confirm email" is on, sign-up asks you to confirm first.
+- No "forgot password" yet; reset from Supabase → Authentication → Users.
+
 ### Photos
 - Photos tab: add several photos at once, view large, caption, delete.
 - Camera button on the journal attaches a photo to a good thing; attached photos also show in the calendar, scrapbook pages, and the monthly favorite.
