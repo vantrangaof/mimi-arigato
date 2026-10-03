@@ -27,6 +27,7 @@
   overflow: visible;
   --sky: #bfe6ff;
   --sky-accent: #ffffff;
+  --jar-glass: rgba(205, 234, 255, 0.55);
 }
 
 .room-art[data-sky="dusk"] { --sky: #ffb38a; --sky-accent: #ffd45e; }
@@ -35,6 +36,17 @@
 .room-item { visibility: hidden; cursor: pointer; }
 .room-item.is-on { visibility: visible; }
 .treasure { cursor: pointer; }
+
+/* Your photo in the wall frame, drawn at half-pixels so it still reads as pixel art. */
+.frame-photo { image-rendering: pixelated; }
+
+.item-jar:focus-visible { outline: none; }
+.item-jar.is-glowing .jar-stars { animation: twinkle 2.4s step-end infinite; }
+.item-postcard:not(.is-new) .postcard-new { display: none; }
+
+/* Tucked in for the night: the lights go down. */
+.habitat.is-tucked .room-art { filter: brightness(0.62) saturate(0.85); }
+.habitat.is-tucked .cat { filter: brightness(0.9); }
 
 .twinkle { animation: twinkle 3.2s step-end infinite; }
 @keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
@@ -154,7 +166,14 @@
 [data-wear~="glasses"] .acc-glasses,
 [data-wear~="partyhat"] .acc-partyhat,
 [data-wear~="bell"] .acc-bell,
-[data-wear~="beret"] .acc-beret { visibility: visible; }
+[data-wear~="beret"] .acc-beret,
+[data-wear~="witchhat"] .acc-witchhat,
+[data-wear~="ghost"] .acc-ghost,
+[data-wear~="santahat"] .acc-santahat,
+[data-wear~="luckyknot"] .acc-luckyknot { visibility: visible; }
+
+.blanket { visibility: hidden; }
+.is-tucked .blanket { visibility: visible; }
 
 /* ---- speech bubble ---- */
 

@@ -4,8 +4,9 @@
 import { el, pick, plural } from "../core/dom.js";
 import { formatLong } from "../core/dates.js";
 import {
-  store, catName, photoList, photoById, photoURL, addPhoto, updatePhoto, removePhoto,
+  store, catName, totalThings, photoList, photoById, photoURL, addPhoto, updatePhoto, removePhoto,
 } from "../core/store.js";
+import { isUnlocked, WORLD } from "../world/world.js";
 import { preparePhoto, photoErrorMessage } from "../core/images.js";
 import { meow } from "../cat/sound.js";
 import { cloudConfigured, cloudStatus, fetchPhotoFile } from "../cloud/sync.js";
@@ -18,6 +19,7 @@ const REACTIONS = [
 ];
 
 let viewer; // set by wirePhotos
+let hung = () => {}; // set by wirePhotos: Mimi reacts to a photo hung in the room
 
 // An image's URL: from this device, or downloaded from the cloud when missing.
 async function imageURL(id, size) {
@@ -50,7 +52,27 @@ function wireViewer({ dialog, image, caption, meta, actions }) {
         el("button", { type: "button", class: "pixel-button primary", text: "Delete", onclick: () => { removePhoto(currentId); dialog.close(); } }),
         el("button", { type: "button", class: "link-button", text: "Keep it", onclick: () => { confirming = false; renderActions(); } }),
       ]
-      : [el("button", { type: "button", class: "link-button danger", text: "Delete photo", onclick: () => { confirming = true; renderActions(); } })]));
+      : [
+        hangButton(),
+        el("button", { type: "button", class: "link-button danger", text: "Delete photo", onclick: () => { confirming = true; renderActions(); } }),
+      ]));
+  }
+
+  // The wall picture shows one of your photos once it's unlocked.
+  function hangButton() {
+    const framed = (photoById(store.settings.framePhoto) ?? photoList()[0])?.id === currentId;
+    if (framed && isUnlocked("picture", totalThings())) return el("span", { class: "muted small", text: `Hanging in ${catName()}'s room` });
+    return el("button", {
+      type: "button",
+      class: "pixel-button",
+      text: `Hang in ${catName()}'s room`,
+      onclick: () => {
+        store.settings.framePhoto = currentId;
+        store.save("settings");
+        renderActions();
+        hung();
+      },
+    });
   }
 
   async function open(id) {
@@ -81,6 +103,12 @@ function wireViewer({ dialog, image, caption, meta, actions }) {
 
 export function wirePhotos(mimi, { panel, input, viewer: viewerEls }) {
   viewer = wireViewer(viewerEls);
+  hung = () => {
+    const picture = WORLD.find((w) => w.id === "picture");
+    mimi.react(isUnlocked("picture", totalThings())
+      ? ["ooh!", "hung your photo on the wall."]
+      : ["!", `will hang it on the wall once the picture frame arrives (${picture.need} good things).`], { hearts: 2, hold: 3200 });
+  };
   let status = "";
 
   async function addFiles(files) {

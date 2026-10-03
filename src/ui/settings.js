@@ -3,7 +3,8 @@
 import { download } from "../core/dom.js";
 import { dayKey } from "../core/dates.js";
 import { store, catName, exportBackup, importBackup, totalThings } from "../core/store.js";
-import { FURS } from "../cat/sprite.js";
+import { FURS, setCustomFur } from "../cat/sprite.js";
+import { furFromPhoto } from "../cat/fur-photo.js";
 
 function radio(name, value, checked, disabled, content) {
   const label = document.createElement("label");
@@ -57,13 +58,40 @@ function reminderICS(time) {
 }
 
 export function wireSettings(els) {
+  let furNote = "";
+
   function renderFur() {
-    els.fur.replaceChildren(...Object.entries(FURS).map(([id, f]) => {
-      const swatch = span("swatch");
-      swatch.style.background = f.body;
-      swatch.style.borderColor = f.outline;
-      return radio("fur", id, store.settings.fur === id, false, [swatch, span("", f.label)]);
-    }));
+    const fromPhoto = document.createElement("label");
+    fromPhoto.className = "pixel-button fur-photo";
+    const input = Object.assign(document.createElement("input"), { type: "file", accept: "image/*", className: "visually-hidden" });
+    input.addEventListener("change", () => pickFurPhoto(input));
+    fromPhoto.append(FURS.custom ? "Use another photo" : "Colors from a photo of your cat…", input);
+    els.fur.replaceChildren(
+      ...Object.entries(FURS).map(([id, f]) => {
+        const swatch = span("swatch");
+        swatch.style.background = f.body;
+        swatch.style.borderColor = f.outline;
+        return radio("fur", id, store.settings.fur === id, false, [swatch, span("", f.label)]);
+      }),
+      fromPhoto,
+      furNote && span("muted small fur-note", furNote),
+    );
+  }
+
+  async function pickFurPhoto(input) {
+    const file = input.files[0];
+    input.value = "";
+    if (!file) return;
+    try {
+      store.settings.customFur = await furFromPhoto(file);
+      store.settings.fur = "custom";
+      setCustomFur(store.settings.customFur);
+      furNote = `${catName()} is trying on your cat's colors.`;
+      store.save("settings");
+    } catch {
+      furNote = "That photo couldn't be opened. Try a JPEG or PNG.";
+      renderFur();
+    }
   }
 
   function render() {
@@ -76,6 +104,7 @@ export function wireSettings(els) {
 
   els.open.addEventListener("click", () => {
     els.backupNote.textContent = "";
+    furNote = "";
     render();
     els.dialog.showModal();
   });

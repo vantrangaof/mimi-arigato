@@ -1,11 +1,15 @@
 // Mimi's room on screen: sizing the pixel grid, the room itself, petting, and her look.
 
 import { $ } from "../core/dom.js";
-import { store, KEYS, catName, catTitle, totalThings, dailyCount, setDailyCount, allEntries } from "../core/store.js";
+import {
+  store, KEYS, catName, catTitle, totalThings, dailyCount, setDailyCount, allEntries, photoById, photoList, photoURL, diaryPage,
+} from "../core/store.js";
 import { dayKey, formatShort } from "../core/dates.js";
-import { applyLook, FURS } from "../cat/sprite.js";
+import { applyLook, setCustomFur, FURS } from "../cat/sprite.js";
 import { meow, purr } from "../cat/sound.js";
-import { renderRoom, isUnlocked, validWear, ACCESSORIES, ROOM_W, ROOM_H } from "../world/world.js";
+import { renderRoom, isUnlocked, validWear, ACCESSORIES, ROOM_W, ROOM_H, PHOTO_SIZE } from "../world/world.js";
+import { seasonOn } from "../world/seasons.js";
+import { weekPostcard, postcardSeen } from "../memory/postcard.js";
 
 const wide = matchMedia("(min-width: 960px)");
 
@@ -28,9 +32,14 @@ export const wearing = () => Object.values(currentWear())
   .map((id) => ACCESSORIES.find((a) => a.id === id))
   .filter(Boolean);
 
+// On a rainy or stormy diary day Mimi keeps closer to the jar (she never reads the page itself).
+const greyDay = () => ["rainy", "stormy"].includes(diaryPage(dayKey()).mood);
+
 export function roomContext() {
   const total = totalThings();
   return {
+    jar: total > 0,
+    greyDay: total > 0 && greyDay(),
     window: isUnlocked("window", total),
     aquarium: isUnlocked("aquarium", total),
     cushion: isUnlocked("cushion", total),
@@ -53,7 +62,35 @@ function randomMemory() {
   return past.length ? past[Math.floor(Math.random() * past.length)] : null;
 }
 
-export function wireHabitat({ mimi, look, wrap, sprite, room, tally }) {
+// The photo hanging in the room: the one you picked, or the newest.
+export const framedPhoto = () => photoById(store.settings.framePhoto) ?? photoList()[0] ?? null;
+
+// A photo shrunk to the frame at half-pixels (16×10), as a data URL. Cached per photo.
+const pixelated = new Map();
+async function pixelatedPhoto(id) {
+  if (pixelated.has(id)) return pixelated.get(id);
+  const url = await photoURL(id, "thumb");
+  if (!url) return null;
+  const img = new Image();
+  img.src = url;
+  try {
+    await img.decode();
+  } catch {
+    return null;
+  }
+  const w = PHOTO_SIZE.w * 2;
+  const h = PHOTO_SIZE.h * 2;
+  const canvas = Object.assign(document.createElement("canvas"), { width: w, height: h });
+  const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+  const sw = w / scale;
+  const sh = h / scale;
+  canvas.getContext("2d").drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, 0, 0, w, h);
+  const data = canvas.toDataURL("image/png");
+  pixelated.set(id, data);
+  return data;
+}
+
+export function wireHabitat({ mimi, look, wrap, sprite, room, tally, onJar, onPostcard }) {
   // Sizing
   fitGrid(sprite);
   addEventListener("resize", () => fitGrid(sprite));
@@ -65,9 +102,33 @@ export function wireHabitat({ mimi, look, wrap, sprite, room, tally }) {
   }, { passive: true });
 
   // Room
-  const updateRoom = renderRoom(room, (line) => mimi.react(["♡", line], { hearts: 1 }));
+  const updateRoom = renderRoom(room, {
+    onItem: (line) => mimi.react(["♡", line], { hearts: 1 }),
+    onJar,
+    onPostcard,
+  });
+  let photo = null; // data URL of the framed photo
   const render = () => {
-    updateRoom({ total: totalThings(), found: store.treasures });
+    const card = weekPostcard();
+    updateRoom({
+      total: totalThings(),
+      found: store.treasures,
+      season: seasonOn()?.id ?? null,
+      photo,
+      postcard: card ? (postcardSeen(card) ? "read" : "new") : null,
+      glow: greyDay(),
+    });
+    const framed = framedPhoto();
+    if (framed && isUnlocked("picture", totalThings())) {
+      pixelatedPhoto(framed.id).then((url) => {
+        if (url && url !== photo && framedPhoto()?.id === framed.id) {
+          photo = url;
+          render();
+        }
+      });
+    }
+    else photo = null;
+    setCustomFur(store.settings.customFur);
     const fur = FURS[store.settings.fur] ? store.settings.fur : "pink";
     applyLook(wrap, { fur, wear: currentWear() });
     $("catTitle").textContent = catTitle();

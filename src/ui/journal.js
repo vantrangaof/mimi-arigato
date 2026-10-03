@@ -10,7 +10,9 @@ import { photoThumb } from "./photos.js";
 import { heartSVG } from "../cat/mimi.js";
 import { purr } from "../cat/sound.js";
 import { WORLD, nextUnlock } from "../world/world.js";
-import { reactionFor, echoOf, echoLine } from "../memory/insights.js";
+import { reactionFor, echoOf, echoLine, thankee } from "../memory/insights.js";
+import { mimiGoodThing, goodThingLine } from "../memory/mimi-good.js";
+import { pixelSVG } from "../core/pixel.js";
 import { fillScrapbook } from "../memory/scrapbook.js";
 import { newMilestones } from "../memory/relationship.js";
 
@@ -36,6 +38,8 @@ const OPENERS = [
   "Something delicious you had…",
   "Someone who was kind to you…",
 ];
+
+const ENVELOPE = ["ooooooooo", "oo.....oo", "o.o...o.o", "o..ooo..o", "o.......o", "ooooooooo"];
 
 function progressLine(n) {
   if (n === 0) return "One is enough today";
@@ -90,17 +94,26 @@ export function wireJournal(mimi, els) {
         records[i]?.photoId && photoById(records[i].photoId) && photoThumb(photoById(records[i].photoId), "photo-thumb small"),
         el("span", { text }),
       ),
-      el("button", {
-        type: "button",
-        class: "remove",
-        text: "×",
-        "aria-label": `Remove “${text}”`,
-        onclick: () => {
-          removeEntry(dayKey(), i);
-          store.save("days");
-          els.input.focus();
-        },
-      }),
+      el("span", { class: "entry-actions" },
+        thankee(text) && el("button", {
+          type: "button",
+          class: "remove thank",
+          title: `Send a thank-you card to ${thankee(text)}`,
+          "aria-label": `Make a thank-you card for “${text}”`,
+          onclick: () => els.onThank(text),
+        }, pixelSVG(ENVELOPE, { o: "currentColor" })),
+        el("button", {
+          type: "button",
+          class: "remove",
+          text: "×",
+          "aria-label": `Remove “${text}”`,
+          onclick: () => {
+            removeEntry(dayKey(), i);
+            store.save("days");
+            els.input.focus();
+          },
+        }),
+      ),
     )));
 
     els.form.hidden = full;
@@ -112,6 +125,9 @@ export function wireJournal(mimi, els) {
       : n === 0 ? OPENERS[Math.floor(Date.now() / 86_400_000) % OPENERS.length]
       : "And another…";
     els.share.hidden = list.length === 0;
+
+    els.mimiGood.textContent = list.length ? `${name}'s good thing today: ${mimiGoodThing()}` : "";
+    els.mimiGood.hidden = !list.length;
 
     const next = nextUnlock(totalThings());
     els.next.textContent = next
@@ -177,6 +193,8 @@ export function wireJournal(mimi, els) {
       events.push(["snip snip", `put “${short}” in the scrapbook.`, { hearts: 2, hold: 3600 }]);
     }
     events.push(...newMilestones());
+    // After your first good thing of the day, Mimi shares theirs.
+    if (n === 1) events.push(["my turn!", goodThingLine(mimiGoodThing()), { hearts: 1, hold: 3400 }]);
 
     store.save("days", "settings", "scrapbook");
     if (store.settings.sound) purr({ volume: 0.6 });

@@ -38,6 +38,8 @@ It's an installable web app (PWA). It works offline and without an account; sign
   - a hard day → **"says that counts too."** (Mimi never forces positivity)
   - taxes → "doesn't understand taxes, but is proud of you."
 - If you write something you've written before, Mimi remembers: *"remembers you wrote about this on Sep 28 too."*
+- **Mimi's good thing:** after your first good thing of the day, Mimi shares one of their own ("my turn!": *"A sunbeam moved onto the cushion."*). It shows under the journal for the rest of the day. Lines only mention things Mimi actually has (room items, treasures, seasonal decorations).
+- **Thank-you cards:** when a good thing mentions someone (a name, or Mom, Dad, Grandma…), an envelope button appears next to it. It makes a 1080×1350 pixel card ("Thank you, Lin!") with your words, Mimi, and "with love from Trang & Mimi" to save or send. You can change who it's for.
 - **Stuck?** Tap "Stuck? Pick something to think about" for prompts: something tiny, someone who was kind, something that made you laugh, something delicious, something you're proud of, something cute, something beautiful, something worth remembering.
 - The first question of each day rotates ("Tell me something tiny…", "What made you smile?").
 - Remove an entry with × (for typos).
@@ -53,9 +55,11 @@ It's an installable web app (PWA). It works offline and without an account; sign
 - **Idle habits:** every so often Mimi grooms a paw, yawns, dozes, stretches, chases their tail, stares at you, looks out the window, watches the aquarium fish, admires their accessory, or sits by the journal "waiting to hear about your day."
 - **Time of day:** asleep 10 pm to 6 am ("z z z"; tap to wake). Morning stretch, lunchtime thoughts, evening "ready to hear about your day."
 - **Treats:** a fish drops in and Mimi chomps it (3 a day).
+- **Bedtime:** from 9 pm to 6 am a **Tuck in** button appears. Mimi climbs under a blanket, whispers today's good things back to you one by one, says goodnight, and the room's lights dim. Mimi stays asleep until morning (petting still wakes them for a moment).
 - **Dress up:** a wardrobe with one item per slot (head, neck, face) and a live preview. Free from the start: party hat, bell collar, round glasses. Unlocked by good things: little flower (5), ribbon bow (15), cozy scarf (40), beret (120), tiny crown (200).
 - **Play:** a laser dot for 20 seconds; Mimi pounces when it lands on them. Steer it with your finger or mouse, or let it wander.
 - **Eyes follow your mouse** on desktop.
+- **Fur from a photo of your cat:** Settings → Fur → "Colors from a photo of your cat…" picks the main color near the middle of the photo and mixes a matching palette (darker outline, lighter chest, yellow eyes for dark cats). It shows up as a "From your photo" fur choice.
 
 ### Mimi's little world
 Everything unlocks by total good things and never goes away:
@@ -76,6 +80,19 @@ Everything unlocks by total good things and never goes away:
 | 500 | Starry window |
 
 - The journal shows what's next: *"Next for Mimi's world: a cushion at 50 good things."*
+- **Jar of good things:** a jar on a shelf under the window fills with paper stars (one per 5 good things, up to 16). Tap it, or shake your phone, and Mimi pulls out a random past good thing and reads it to you. On iPhone, shaking asks for motion permission the first time you tap the jar. On days your diary weather is rainy or stormy, the stars glimmer and Mimi likes to sit by the jar. That's the only thing Mimi takes from the diary: the weather, never the words.
+- **Your photo on the wall:** once the wall picture is unlocked (75), it shows one of your photos, pixelated to match the room. It's your newest photo unless you choose one with **Hang in Mimi's room** in the photo viewer.
+- **Weekly postcard:** on Sundays Mimi leaves a postcard on the floor about the week (Monday to Sunday): how many good things, how often you laughed, who came up, what kept showing up, and Mimi's favorite of the week. It stays until the next one (Monday to Saturday you see last week's), sparkles until read, and Mimi says "mail!" once when it arrives.
+- **Seasons:** for a few days a year the room gets a decoration and the wardrobe gets costumes, then they go away until next year:
+
+  | When | Room | Wardrobe |
+  |---|---|---|
+  | Halloween (Oct 18 to Nov 1) | pumpkin and a bat | witch hat, ghost costume |
+  | Christmas (Dec 18 to 26) | wreath | Santa hat |
+  | Lunar New Year (3 days before to 7 days after) | red lantern | lucky knot |
+  | The day you met Mimi, every year after the first | cake with a candle | |
+
+  Mimi mentions it once per event each year. Costumes come off automatically when the event ends.
 - **Surprises** (rare, at most about three a week): Mimi finds a treasure (a tiny button, a seashell, a blue feather…) that appears on the floor of the room, or tells you a dream ("dreamed about noodles last night").
 - Tap things in the room and Mimi comments on them.
 
@@ -146,14 +163,18 @@ src/
     sprite.js           Sprite data, fur palettes, accessories, SVG and canvas drawing
     mimi.js             Moods, reactions, idle habits, sleep schedule
     sound.js            Meow and purr playback
+    fur-photo.js        Fur palette from a photo of your cat
   world/
     world.js            Unlock list, the pixel room, treasures
     surprises.js        Rare finds and dreams
+    seasons.js          Halloween, Christmas, Lunar New Year, your anniversary
   memory/               How Mimi understands you (pure logic)
     insights.js         Keyword reactions, categories, learned facts, monthly recap
     quotes.js           Mimi's notes and how a new one is picked each visit
     relationship.js     Days together and milestones
     scrapbook.js        When pages are added and which entry is kept
+    mimi-good.js        Mimi's own good thing of the day
+    postcard.js         The weekly postcard's lines
   ui/                   One module per part of the page
     habitat.js          Room on screen, pixel sizing, petting
     topbar.js           Days together, sound toggle, settings icon
@@ -162,6 +183,10 @@ src/
     wardrobe.js         Dress up: wear items per slot
     photos.js           Photo album, viewer, and thumbnails used elsewhere
     diary.js            Private diary pages, mood weather, little Mimi on the page
+    jar.js              Jar of good things: tap or shake to pull one out
+    bedtime.js          Tuck Mimi in at night
+    postcard.js         The postcard on the floor and its dialog
+    thanks.js           Thank-you cards
     journal.js          Writing good things, prompts, unlock and scrapbook events
     tabs.js             Accessible tabs
     memories.js         Memory cabinet
@@ -190,7 +215,7 @@ Mimi is **local-first**: the on-device database is what the app reads and writes
 | Store | Contents |
 |---|---|
 | `entries` | One record per good thing: `{ id, day, text, createdAt, updatedAt, deleted, synced }` |
-| `kv` | `settings` (+ when each setting changed), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` counters, `lastVisit`, sync bookmarks |
+| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` counters, `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked` |
 | `photos` | Photo details: `{ id, day, caption, entryId, createdAt, updatedAt, deleted, synced, uploaded, hasFull, hasThumb }` |
 | `photoFiles` | The image files, keyed `<photo id>:full` and `<photo id>:thumb` |
 
@@ -248,6 +273,11 @@ Notes:
 
 Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing accessories, streak freezes, coins, energy, ads, quests. Mimi says one thing: *"Tell me one nice thing."*
 
+## Next up
+
+- **Visiting cats:** share a read-only link to your room; your cat shows up as a visitor in a friend's room for a day. Needs new Supabase tables and sharing rules (a public "room snapshot" per user, an invite/visit table, row-level security that allows reading a friend's snapshot only).
+- **"Mimi Wrapped" in December:** a year-in-review story you tap through (total good things, top people, favorite things, mood weather across the year, scrapbook highlights), built from Month, Memories and Scrapbook, with a share card at the end.
+
 ## Ideas for later
 
 **Diary extras**
@@ -260,6 +290,7 @@ Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing access
 - Letters to future you, sealed until a date you pick.
 - Mood weather shown through Mimi's window (once the window is unlocked).
 - Mimi's room follows the real season and time of day (snow in winter, a lamp at night); more idle animations and room items.
+- Thank-you cards from past days (calendar and Memories), not only today's list.
 - Monthly share card: a pixel image of the month's good things and weather.
 - Optional AI reactions for entries the keyword rules don't recognize.
 

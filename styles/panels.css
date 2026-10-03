@@ -642,3 +642,35 @@ mark {
 @media (prefers-reduced-motion: reduce) {
   .diary-cat.is-twitch .cat { animation: none; }
 }
+
+/* ---- thank-you cards, Mimi's good thing ---- */
+
+.entry-actions { display: inline-flex; align-items: start; gap: 2px; }
+.remove.thank { display: grid; place-items: center; }
+.remove.thank svg { width: 18px; height: 12px; }
+.mimi-good { margin: 14px 0 0; line-height: 1.5; font-size: 0.9375rem; color: var(--ink-soft); }
+.thanks-img { margin: 12px 0 16px; }
+.fur-photo { font-size: 0.875rem; }
+.fur-note { flex-basis: 100%; }
+
+/* ---- postcard ---- */
+
+.postcard {
+  padding: 18px 18px 14px;
+  background-color: var(--paper);
+  background-image: repeating-linear-gradient(-45deg, var(--accent) 0 8px, transparent 8px 16px, var(--cat-blush) 16px 24px, transparent 24px 32px);
+  background-size: 100% 6px;
+  background-repeat: no-repeat;
+  border: 2px solid var(--sheet-edge);
+  border-radius: 3px;
+  box-shadow: 3px 3px 0 var(--cat-shadow);
+  line-height: 1.6;
+}
+
+.postcard-week { margin: 0 0 8px; font-family: var(--font-pixel); color: var(--accent); }
+.postcard-hello { margin: 0 0 6px; font-weight: 700; }
+.postcard-lines { margin: 0 0 12px; padding-left: 1.25rem; }
+.postcard-favorite { margin: 0 0 12px; padding: 10px 12px; border: 1px dashed var(--grid-strong); border-radius: 3px; }
+.postcard-favorite figcaption { font-size: 0.8125rem; font-weight: 700; color: var(--ink-soft); }
+.postcard-favorite blockquote { margin: 4px 0 0; overflow-wrap: anywhere; }
+.postcard-sign { margin: 0; text-align: right; font-family: var(--font-pixel); color: var(--accent); }

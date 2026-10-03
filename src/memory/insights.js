@@ -93,11 +93,25 @@ export function reactionFor(text, n) {
 }
 
 // Capitalized words that aren't sentence starts are probably names (works best in English).
-function namesIn(text) {
+export function namesIn(text) {
   const words = text.match(/\p{L}[\p{L}'’-]*/gu) ?? [];
   return words.slice(1)
     .map((w) => w.replace(/['’]s$/u, ""))
     .filter((w) => /^\p{Lu}\p{Ll}+$/u.test(w) && !NOT_NAMES.has(w) && w !== catName());
+}
+
+const FAMILY_TITLES = { mom: "Mom", dad: "Dad", sister: "Sis", brother: "Bro", grandma: "Grandma", grandpa: "Grandpa" };
+
+// Who a good thing could be a thank-you to: a name in it, or a family member. "" if no one.
+// A first word counts as a name only if it shows up as a name in other entries ("Lin called").
+export function thankee(text) {
+  const name = namesIn(text)[0];
+  if (name) return name;
+  const first = text.match(/^\p{Lu}\p{Ll}+/u)?.[0];
+  if (first && !NOT_NAMES.has(first) && allEntries().some((e) => namesIn(e.text).includes(first))) return first;
+  const t = lower(text);
+  const family = Object.keys(FAMILY_TITLES).find((who) => FAMILY[who].test(t));
+  return family ? FAMILY_TITLES[family] : "";
 }
 
 const countEntries = (entries, test) => entries.filter((e) => test(e.text)).length;
@@ -144,13 +158,13 @@ export function shelves(entries = allEntries()) {
   return out;
 }
 
-function hash(s) {
+export function hash(s) {
   let h = 0;
   for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) | 0;
   return Math.abs(h);
 }
 
-const FAVORITE_CATS = ["beauty", "kindness", "proud", "laugh", "people"];
+export const FAVORITE_CATS = ["beauty", "kindness", "proud", "laugh", "people"];
 
 export function monthRecap(year, month) {
   const prefix = `${year}-${String(month + 1).padStart(2, "0")}`;

@@ -2,6 +2,20 @@
 
 Progress log for Mimi Arigato. Newest first.
 
+## 2026-10-04
+
+### Eight small things
+- **Mimi's good thing:** after your first good thing each day Mimi shares one of their own; shown under the journal for the rest of the day.
+- **Your photo on the wall:** the wall picture (75) shows a pixelated photo; "Hang in Mimi's room" in the photo viewer picks which one (`settings.framePhoto`).
+- **Fur from a photo:** Settings → Fur builds a palette from a photo of your cat (`settings.customFur`, synced with settings).
+- **Seasons:** Halloween (pumpkin + bat; witch hat, ghost costume), Christmas (wreath; Santa hat), Lunar New Year (lantern; lucky knot), and a cake on your yearly anniversary with Mimi. Costumes are only wearable during the event.
+- **Jar of good things:** stars fill a jar on a shelf; tap or shake to pull out a past good thing. Rainy/stormy diary weather makes the stars glimmer and Mimi sit by the jar more often.
+- **Thank-you cards:** envelope button on today's good things that mention someone; makes a shareable card.
+- **Bedtime:** "Tuck in" from 9 pm; Mimi reads back today's good things, the room dims, a blanket comes out, and Mimi sleeps until 6 am.
+- **Weekly postcard:** on Sundays a postcard about the week appears on the floor.
+- README: "Next up" lists visiting cats and Mimi Wrapped.
+- No schema change; no `schema.sql` re-run needed for this release.
+
 ## 2026-10-03
 
 ### Diary

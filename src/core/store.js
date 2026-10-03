@@ -29,6 +29,8 @@ const DEFAULT_SETTINGS = {
   wear: { head: "none", neck: "none", face: "none" },
   reminder: "20:00",
   sound: true,
+  customFur: null, // fur colors picked from a photo of your cat (see cat/fur-photo.js)
+  framePhoto: null, // id of the photo hanging in Mimi's room (null = the newest photo)
 };
 
 let db;

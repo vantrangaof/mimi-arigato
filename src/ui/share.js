@@ -7,12 +7,12 @@ import { drawSpriteCanvas } from "../cat/sprite.js";
 import { validWear } from "../world/world.js";
 import { totalThings } from "../core/store.js";
 
-const W = 1080;
-const H = 1350;
-const PIXEL = '"DotGothic16", monospace';
-const BODY = '"M PLUS Rounded 1c", sans-serif';
+export const W = 1080;
+export const H = 1350;
+export const PIXEL = '"DotGothic16", monospace';
+export const BODY = '"M PLUS Rounded 1c", sans-serif';
 
-function wrapLines(ctx, text, width) {
+export function wrapLines(ctx, text, width) {
   const words = text.split(/\s+/);
   const lines = [];
   let line = "";
@@ -40,7 +40,8 @@ function layout(ctx, items, size, width, maxLines) {
   });
 }
 
-async function makeCard() {
+// A blank card on pink graph paper, with the fonts loaded.
+export async function graphPaper() {
   await Promise.all([
     document.fonts.load(`72px ${PIXEL}`),
     document.fonts.load(`40px ${BODY}`),
@@ -56,6 +57,13 @@ async function makeCard() {
   ctx.fillStyle = "rgba(214, 79, 134, 0.10)";
   for (let x = 0; x < W; x += 30) ctx.fillRect(x, 0, 2, H);
   for (let y = 0; y < H; y += 30) ctx.fillRect(0, y, W, 2);
+  return { canvas, ctx };
+}
+
+export const toPNG = (canvas) => new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+
+async function makeCard() {
+  const { canvas, ctx } = await graphPaper();
 
   const items = entriesToday().slice(0, 5);
   const top = 730;
@@ -99,7 +107,7 @@ async function makeCard() {
     y += size * 0.6;
   });
 
-  return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  return toPNG(canvas);
 }
 
 export function wireShare(els) {

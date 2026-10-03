@@ -1,8 +1,10 @@
 // Mimi's little world: what unlocks as good things add up, the pixel room, and found treasures.
 
 import { drawPixels, svgEl } from "../core/pixel.js";
+import { SEASONS, seasonOn } from "./seasons.js";
 
 // Things Mimi can wear: one per slot. need = good things required (0 = free from the start).
+// Seasonal items are only in the wardrobe while their event is on (see seasons.js).
 export const SLOTS = [
   { id: "head", label: "Head" },
   { id: "neck", label: "Neck" },
@@ -18,6 +20,10 @@ export const ACCESSORIES = [
   { id: "scarf", slot: "neck", label: "cozy scarf", need: 40 },
   { id: "beret", slot: "head", label: "beret", need: 120 },
   { id: "crown", slot: "head", label: "tiny crown", need: 200 },
+  { id: "witchhat", slot: "head", label: "witch hat", need: 0, season: "halloween" },
+  { id: "ghost", slot: "neck", label: "ghost costume", need: 0, season: "halloween" },
+  { id: "santahat", slot: "head", label: "Santa hat", need: 0, season: "christmas" },
+  { id: "luckyknot", slot: "neck", label: "lucky knot", need: 0, season: "lunar" },
 ];
 
 const ROOM_ITEMS = [
@@ -33,7 +39,7 @@ const ROOM_ITEMS = [
 // Everything that unlocks over time, in order: what "next for Mimi's world" points at.
 export const WORLD = [
   ...ROOM_ITEMS.map((r) => ({ ...r, kind: "room" })),
-  ...ACCESSORIES.filter((a) => a.need > 0).map((a) => ({ ...a, kind: "acc" })),
+  ...ACCESSORIES.filter((a) => a.need > 0 && !a.season).map((a) => ({ ...a, kind: "acc" })),
 ].sort((x, y) => x.need - y.need);
 
 const findItem = (id) => ROOM_ITEMS.find((r) => r.id === id) ?? ACCESSORIES.find((a) => a.id === id);
@@ -43,10 +49,13 @@ export const isUnlocked = (id, total) => {
 };
 export const nextUnlock = (total) => WORLD.find((w) => total < w.need) ?? null;
 
-// What's actually worn: drops anything unknown, locked, or in the wrong slot.
-export function validWear(wear = {}, total) {
+// Accessories in the wardrobe right now: everything year-round plus this event's costumes.
+export const wardrobeItems = (season = seasonOn()?.id) => ACCESSORIES.filter((a) => !a.season || a.season === season);
+
+// What's actually worn: drops anything unknown, locked, out of season, or in the wrong slot.
+export function validWear(wear = {}, total, season = seasonOn()?.id) {
   return Object.fromEntries(SLOTS.map(({ id: slot }) => {
-    const item = ACCESSORIES.find((a) => a.id === wear[slot] && a.slot === slot && total >= a.need);
+    const item = wardrobeItems(season).find((a) => a.id === wear[slot] && a.slot === slot && total >= a.need);
     return [slot, item?.id ?? "none"];
   }));
 }
@@ -127,8 +136,57 @@ const ROOM_LINES = {
   aquarium: "stares very hard at the fish.",
 };
 
-const drawArt = (parent, [x0, y0, rows]) =>
-  drawPixels(parent, x0, y0, rows, (ch) => COLORS[ch], (ch) => (ch === "z" ? "twinkle" : null));
+const drawArt = (parent, [x0, y0, rows], colors = COLORS) =>
+  drawPixels(parent, x0, y0, rows, (ch) => colors[ch], (ch) => (ch === "z" ? "twinkle" : null));
+
+// The jar of good things on a little shelf under the window: one star per few good things.
+const JAR = [0, 12, [
+  ".WWWW...",
+  "kkkkkk..",
+  "k....k..",
+  "k....k..",
+  "k....k..",
+  "k....k..",
+  ".kkkk...",
+  "WWWWWWWW",
+]];
+const JAR_INSIDE = [2, 14, 4, 4]; // x, y, width, height of the glass
+const STAR_COLORS = ["#ffd166", "#ff8fb1", "#7fb3e6", "#8fd9b6", "#c8b4ef"];
+export const jarStars = (total) => Math.min(JAR_INSIDE[2] * JAR_INSIDE[3], Math.ceil(total / 5));
+
+// Mimi's weekly postcard, lying on the floor in front of the cushion.
+const POSTCARD = [16, 31, ["kkkkkk", "kSrrSk", "kkkkkk"]];
+
+// The wall picture as a frame for one of your photos (the photo is drawn inside it).
+const PHOTO_FRAME = [17, 0, [
+  "kkkkkkkkkkkk",
+  "kFFFFFFFFFFk",
+  "kF........Fk",
+  "kF........Fk",
+  "kF........Fk",
+  "kF........Fk",
+  "kF........Fk",
+  "kFFFFFFFFFFk",
+  "kkkkkkkkkkkk",
+]];
+export const PHOTO_SIZE = { x: 19, y: 2, w: 8, h: 5 }; // in room pixels; photos are drawn at half-pixels
+
+// Seasonal decorations hang in the top-right corner (above the aquarium).
+const DECOR = {
+  halloween: [[39, 0, [
+    "b.....b", "bbb.bbb", ".bbbbb.", "..b.b..",
+    "...g...", ".oOgOo.", "oOkOkOo", "oOOOOOo", ".oOkOo.", "WWWWWWW",
+  ]], { b: "#3b2a36", g: "#4f9a5c", o: "#e0702a", O: "#ff9f43", k: "#3b2a36", W: "#a8714f" }],
+  christmas: [[39, 0, [
+    "..ggg..", ".gGrGg.", "gG...Gg", "gr...rg", "gG...Gg", ".gGrGg.", "..gRg..", ".RR.RR.", "..R.R..",
+  ]], { g: "#4f9a5c", G: "#7cc47f", r: "#ef3f4a", R: "#d7263d" }],
+  lunar: [[39, 0, [
+    "...y...", "...y...", ".yyyyy.", "rRRRRRr", "rRRyRRr", "rRyyyRr", "rRRyRRr", "rRRRRRr", ".yyyyy.", "..y.y..",
+  ]], { y: "#ffc93c", r: "#b5172b", R: "#e5383b" }],
+  anniversary: [[39, 4, [
+    "...y...", "...z...", ".ppppp.", "pPPPPPp", "pzzzzzp", "WWWWWWW",
+  ]], { y: "#ffc93c", z: "#ffffff", p: "#e86a92", P: "#ffb3c8", W: "#a8714f" }],
+};
 
 export function skyFor(hour = new Date().getHours()) {
   if (hour >= 6 && hour < 17) return "day";
@@ -136,9 +194,11 @@ export function skyFor(hour = new Date().getHours()) {
   return "night";
 }
 
-// Draws the room once; returns update({ total, found }) to show what's unlocked.
-// onItem(line) is called when an item is clicked so Mimi can comment on it.
-export function renderRoom(svg, onItem) {
+// Draws the room once; returns update(state) to show what's unlocked and what's around:
+// { total, found, season, photo (a data URL or null), postcard ("new", "read" or null), glow }.
+// onItem(line) is called when an item is clicked so Mimi can comment on it; onJar and
+// onPostcard when the jar or the postcard is tapped.
+export function renderRoom(svg, { onItem, onJar, onPostcard }) {
   svg.append(
     svgEl("rect", { x: 0, y: 29, width: ROOM_W, height: 1, fill: "var(--floor-edge)" }),
     svgEl("rect", { x: 0, y: 30, width: ROOM_W, height: ROOM_H - 30, fill: "var(--floor)" }),
@@ -152,15 +212,69 @@ export function renderRoom(svg, onItem) {
     svg.appendChild(g);
     items[id] = g;
   }
-  const treasures = svgEl("g", { class: "treasures" });
-  svg.appendChild(treasures);
+  const frame = svgEl("g", { class: "room-item item-frame" });
+  drawArt(frame, PHOTO_FRAME);
+  const photo = svgEl("image", { class: "frame-photo", x: PHOTO_SIZE.x, y: PHOTO_SIZE.y, width: PHOTO_SIZE.w, height: PHOTO_SIZE.h, preserveAspectRatio: "none" });
+  frame.appendChild(photo);
+  frame.addEventListener("click", () => onItem("admires your photo on the wall."));
+  svg.appendChild(frame);
 
-  return function update({ total, found }) {
+  const jar = svgEl("g", { class: "room-item item-jar", role: "button", "aria-label": "Jar of good things" });
+  drawArt(jar, JAR);
+  const glass = svgEl("rect", { x: JAR_INSIDE[0], y: JAR_INSIDE[1], width: JAR_INSIDE[2], height: JAR_INSIDE[3], fill: "var(--jar-glass)" });
+  const stars = svgEl("g", { class: "jar-stars" });
+  jar.insertBefore(glass, jar.firstChild);
+  jar.appendChild(stars);
+  jar.addEventListener("click", () => onJar());
+  svg.appendChild(jar);
+
+  const decor = svgEl("g", { class: "room-item item-decor" });
+  svg.appendChild(decor);
+  let decorFor = null;
+  decor.addEventListener("click", () => onItem(SEASONS.find((x) => x.id === decorFor)?.line ?? "likes the decoration."));
+
+  const postcard = svgEl("g", { class: "room-item item-postcard" });
+  drawArt(postcard, POSTCARD);
+  postcard.appendChild(svgEl("rect", { class: "postcard-new twinkle", x: 22, y: 30, width: 1, height: 1, fill: "var(--accent)" }));
+  postcard.addEventListener("click", () => onPostcard());
+
+  const treasures = svgEl("g", { class: "treasures" });
+  svg.append(treasures, postcard);
+
+  return function update({ total, found, season = null, photo: photoURL = null, postcard: card = null, glow = false }) {
     svg.dataset.sky = skyFor();
+    const framed = Boolean(photoURL) && isUnlocked("picture", total);
     for (const [id, g] of Object.entries(items)) {
-      const on = isUnlocked(id, total) && !(id === "window" && isUnlocked("starry", total));
+      const on = isUnlocked(id, total) && !(id === "window" && isUnlocked("starry", total)) && !(id === "picture" && framed);
       g.classList.toggle("is-on", on);
     }
+
+    frame.classList.toggle("is-on", framed);
+    if (framed && photo.getAttribute("href") !== photoURL) photo.setAttribute("href", photoURL);
+
+    jar.classList.toggle("is-on", total > 0);
+    jar.classList.toggle("is-glowing", glow);
+    const [jx, jy, jw, jh] = JAR_INSIDE;
+    const count = jarStars(total);
+    if (stars.childElementCount !== count) {
+      stars.replaceChildren();
+      for (let i = 0; i < count; i++) {
+        const x = jx + (i % jw);
+        const y = jy + jh - 1 - Math.floor(i / jw);
+        stars.appendChild(svgEl("rect", { x, y, width: 1, height: 1, fill: STAR_COLORS[(i * 3) % STAR_COLORS.length] }));
+      }
+    }
+
+    if (decorFor !== season) {
+      decorFor = season;
+      decor.replaceChildren();
+      if (DECOR[season]) drawArt(decor, ...DECOR[season]);
+    }
+    decor.classList.toggle("is-on", Boolean(DECOR[season]));
+
+    postcard.classList.toggle("is-on", Boolean(card));
+    postcard.classList.toggle("is-new", card === "new");
+
     treasures.replaceChildren();
     found.slice(-TREASURE_SLOTS.length).forEach((t, i) => {
       const def = TREASURES[t.id];

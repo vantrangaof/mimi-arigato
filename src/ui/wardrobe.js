@@ -4,7 +4,7 @@ import { el, capitalize } from "../core/dom.js";
 import { store, catName, totalThings } from "../core/store.js";
 import { renderCat, applyLook, accessoryPreview, FURS } from "../cat/sprite.js";
 import { meow } from "../cat/sound.js";
-import { ACCESSORIES, SLOTS, validWear } from "../world/world.js";
+import { ACCESSORIES, SLOTS, validWear, wardrobeItems } from "../world/world.js";
 
 // Earlier versions stored a single `accessory`; move it into its slot.
 function migrateSingleAccessory() {
@@ -39,7 +39,8 @@ export function wireWardrobe(mimi, { open, dialog, preview, previewCat, slots, n
     },
     item ? accessoryPreview(item.id, "wear-art") : el("span", { class: "wear-none", text: "—" }),
     el("span", { class: "wear-label", text: item ? capitalize(item.label) : "Nothing" }),
-    locked && el("span", { class: "lock", text: `at ${item.need}` }));
+    locked && el("span", { class: "lock", text: `at ${item.need}` }),
+    item?.season && el("span", { class: "lock", text: "for a few days" }));
   }
 
   function render() {
@@ -51,7 +52,7 @@ export function wireWardrobe(mimi, { open, dialog, preview, previewCat, slots, n
       el("h3", { class: "panel-heading", text: label }),
       el("div", { class: "wear-grid" },
         tile(slot, null, current[slot], total),
-        ...ACCESSORIES.filter((a) => a.slot === slot).map((a) => tile(slot, a, current[slot], total)),
+        ...wardrobeItems().filter((a) => a.slot === slot).map((a) => tile(slot, a, current[slot], total)),
       ),
     )));
 

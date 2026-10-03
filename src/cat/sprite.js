@@ -3,6 +3,7 @@
 //   d outline  @ inner-ear  O body  L chest  s floor shadow  T tail
 //   E eye      W eye-shine  B blush  N nose   H mouth
 //   accessories: R/r ribbon  P/f/y flower  S/v/k scarf  G/g/J crown  Q glasses  p/b party hat  m beret
+//                h/o witch hat  w/x ghost  c/z Santa hat  q/u lucky knot  i/j/z/k bedtime blanket
 
 import { drawPixels, group, pixelSVG } from "../core/pixel.js";
 
@@ -75,7 +76,52 @@ const ACCESSORY_LAYERS = {
     ".........QQ.........",
   ]],
   beret: [8, 4, ["....m...", "..mmmmm.", ".mmmmmmm", "mmmmmmmm"]],
+  witchhat: [9, 1, [
+    ".......hh.....",
+    "......hhh.....",
+    ".....hhhh.....",
+    ".....hhhhh....",
+    "....hoooooh...",
+    "....hhhhhhh...",
+    "hhhhhhhhhhhhhh",
+  ]],
+  ghost: [5, 19, [
+    "xwwwwwwwwwwwwwwwwwwwwx",
+    "xwwwwwwwwwwwwwwwwwwwwx",
+    ".xwwwwwwwwwwwwwwwwwwx.",
+    ".xwwwwwwwwwwwwwwwwwwx.",
+    ".xwwwwwwwwwwwwwwwwwwx.",
+    ".xwwwwwwwwwwwwwwwwwwx.",
+    ".xwwxwwwxwwwwxwwwxwwx.",
+    "..x..x...x..x...x..x..",
+  ]],
+  santahat: [11, 1, [
+    "........zz",
+    "......cczz",
+    "....cccc..",
+    "...ccccc..",
+    "..cccccc..",
+    "zzzzzzzzzz",
+  ]],
+  luckyknot: [6, 19, [
+    "qqqqqqqqqqqqqqqqqqqq",
+    ".........uu.........",
+    "........quuq........",
+    ".........qq.........",
+    "........q..q........",
+  ]],
 };
+
+// Bedtime: a blanket tucked up to Mimi's chin (shown with .is-tucked).
+const BLANKET = [4, 21, [
+  "zzzzzzzzzzzzzzzzzzzzzzzz",
+  "ijjijjijjijjijjijjijjijj",
+  "iiiiiiiiiiiiiiiiiiiiiiii",
+  "jijjijjijjijjijjijjijjij",
+  "iiiiiiiiiiiiiiiiiiiiiiii",
+  "ijjijjijjijjijjijjijjijj",
+  "kkkkkkkkkkkkkkkkkkkkkkkk",
+]];
 
 const ACCESSORY_COLORS = {
   R: "#ef5a8a", r: "#a8325c",
@@ -83,6 +129,11 @@ const ACCESSORY_COLORS = {
   S: "#7fb3e6", v: "#5b8fc9", k: "#3f6797",
   G: "#ffd45e", g: "#d8a425", J: "#ff6f9f",
   Q: "#3b2a36", p: "#ff6f9f", b: "#7fb3e6", m: "#b23a48",
+  h: "#4a3566", o: "#ff9f43",
+  w: "#ffffff", x: "#b9b3c9",
+  c: "#e23a3a", z: "#ffffff",
+  q: "#d7263d", u: "#ffd166",
+  i: "#bcd7f5", j: "#9ab9e8",
 };
 
 // A standalone picture of one accessory (for the wardrobe tiles).
@@ -98,6 +149,12 @@ export const FURS = {
   midnight: { label: "Midnight", body: "#3e3549", chest: "#5d526c", outline: "#1c1723", inner: "#e48aae", eye: "#ffd76a", shine: "#ffffff", blush: "#b9658a", nose: "#ff8bb0", mouth: "#c7b3d4" },
   snow: { label: "Snow", body: "#ffffff", chest: "#f7eef3", outline: "#b49aaa", inner: "#ffc0d3", eye: "#2b1a2e", shine: "#ffffff", blush: "#ffc4d6", nose: "#f08aae", mouth: "#8c6f80" },
 };
+
+// A palette made from a photo of your own cat (see furphoto.js), shown as one more fur choice.
+export function setCustomFur(palette) {
+  if (palette && typeof palette.body === "string") FURS.custom = { ...palette, label: "From your photo" };
+  else delete FURS.custom;
+}
 
 const FUR_VARS = {
   body: "--cat-body", chest: "--cat-chest", outline: "--cat-outline", inner: "--cat-inner", eye: "--cat-eye",
@@ -130,6 +187,7 @@ export function renderCat(svg) {
   drawLayer(eyes, "eyes eyes-happy", EYES_HAPPY);
   drawLayer(svg, "paw-up", PAW_UP);
   for (const [id, layer] of Object.entries(ACCESSORY_LAYERS)) drawLayer(svg, `acc acc-${id}`, layer);
+  drawLayer(svg, "blanket", BLANKET);
 
   let idle;
   const dir = (dx, dy) => {
@@ -154,7 +212,7 @@ export function applyLook(wrap, { fur, wear }) {
   const palette = FURS[fur];
   for (const [key, cssVar] of Object.entries(FUR_VARS)) {
     // Strawberry keeps the stylesheet colors so its dark-mode tweaks still apply.
-    if (palette && fur !== "pink") wrap.style.setProperty(cssVar, palette[key]);
+    if (palette?.[key] && fur !== "pink") wrap.style.setProperty(cssVar, palette[key]);
     else wrap.style.removeProperty(cssVar);
   }
   wrap.dataset.wear = Object.values(wear).filter((id) => ACCESSORY_LAYERS[id]).join(" ");

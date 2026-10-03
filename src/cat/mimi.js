@@ -42,6 +42,7 @@ const IDLES = [
   { when: (c) => c.accessory, look: [1, -1], line: (c) => `is admiring their ${c.accessory}.`, ms: 2200 },
   { when: (c) => c.entriesToday === 0 && !isNight(), look: [0, 1], line: "is waiting to hear about your day.", ms: 3600, weight: 3 },
   { when: (c) => c.entriesToday > 0, look: [1, 1], line: "is looking at today's hearts.", ms: 2600 },
+  { when: (c) => c.jar, look: [-1, 0], line: "is sitting by the jar of good things.", ms: 3200, weight: (c) => (c.greyDay ? 4 : 1) },
 ];
 
 const AWAKE_MS = 90_000;
@@ -55,8 +56,9 @@ export function makeMimi({ wrap, bubble, state, look, context }) {
   let awakeUntil = 0;
   let full = false;
   let activity = null;
+  let tucked = false; // tucked in for the night: asleep even before 10 pm
 
-  const asleep = () => !activity && isNight() && Date.now() > awakeUntil;
+  const asleep = () => !activity && (isNight() || tucked) && Date.now() > awakeUntil;
   const busy = () => reacting || queued || activity || asleep() || document.hidden;
 
   function speak(text, { announce = true } = {}) {
@@ -71,7 +73,7 @@ export function makeMimi({ wrap, bubble, state, look, context }) {
     wrap.classList.toggle("is-asleep", sleeping);
     wrap.classList.toggle("is-talking", sleeping);
     if (sleeping) bubble.textContent = "z z z";
-    speak(activity ?? (sleeping ? "is asleep. Tap gently to wake them."
+    speak(activity ?? (sleeping ? (tucked ? "is tucked in, fast asleep." : "is asleep. Tap gently to wake them.")
       : full ? "is glowing with thanks."
       : restingLine(new Date().getHours())), { announce: false });
   }
@@ -86,7 +88,7 @@ export function makeMimi({ wrap, bubble, state, look, context }) {
   function startIdle() {
     const ctx = context();
     const options = IDLES.filter((i) => !i.when || i.when(ctx));
-    const weighted = options.flatMap((i) => Array(i.weight ?? 1).fill(i));
+    const weighted = options.flatMap((i) => Array((typeof i.weight === "function" ? i.weight(ctx) : i.weight) ?? 1).fill(i));
     const idle = pick(weighted);
     idling = idle;
     if (idle.cls) wrap.classList.add(idle.cls);
@@ -126,12 +128,12 @@ export function makeMimi({ wrap, bubble, state, look, context }) {
     }, hold + hearts * 140);
   }
 
-  // Plays reactions one after another: [[sound, text, options], ...]
-  function announce(items) {
+  // Plays reactions one after another: [[sound, text, options], ...], then calls onDone.
+  function announce(items, onDone) {
     clearTimeout(queueTimer);
     const run = (i) => {
       queued = i < items.length - 1;
-      if (i >= items.length) return;
+      if (i >= items.length) return onDone?.();
       const [sound, text, options = {}] = items[i];
       react([sound, text], options);
       const wait = (options.hold ?? 1800) + (options.hearts ?? 1) * 140 + 300;
@@ -152,6 +154,14 @@ export function makeMimi({ wrap, bubble, state, look, context }) {
       full = value;
       settle();
     },
+    // Tucked in: falls asleep right away and stays asleep (between pets) until morning.
+    tuck(on) {
+      tucked = on;
+      wrap.classList.toggle("is-tucked", on);
+      if (on) awakeUntil = 0;
+      settle();
+    },
+    isTucked: () => tucked,
     setActivity(text) {
       activity = text;
       if (text) awakeUntil = Date.now() + AWAKE_MS;
