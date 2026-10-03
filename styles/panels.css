@@ -125,7 +125,7 @@
 
 .tabs {
   display: flex;
-  flex-wrap: wrap; /* five tabs: wrap to a second row on narrow phones rather than hide one */
+  flex-wrap: wrap; /* six tabs: wrap to a second row on narrow phones rather than hide one */
   gap: 4px;
   margin: -8px -8px 16px;
   padding: 4px;
@@ -541,3 +541,104 @@ mark {
 .link-button.danger { color: var(--ink-soft); }
 .account-form { display: grid; gap: 10px; }
 .account-form .pixel-button { justify-self: start; }
+
+/* ---- diary ---- */
+
+.diary-date { margin: 4px 0 12px; }
+
+.moods { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+
+.mood {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 8px 4px 6px;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  background: none;
+  border: 2px solid var(--grid-strong);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.mood[aria-pressed="true"] {
+  color: var(--ink);
+  font-weight: 700;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--cat-blush) 22%, transparent);
+}
+
+.mood:focus-visible { outline: 3px dashed var(--focus); outline-offset: 2px; }
+
+.mood-icon { display: inline-block; width: 21px; height: 21px; flex: none; }
+
+.diary-sheet { position: relative; }
+
+.diary-text {
+  display: block;
+  width: 100%;
+  min-height: 12rem;
+  padding: 6px 12px 64px;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 28px;
+  color: var(--ink);
+  resize: vertical;
+  background-color: var(--paper);
+  background-image: linear-gradient(to bottom, transparent 27px, var(--grid-strong) 27px);
+  background-size: 100% 28px;
+  background-position: 0 6px;
+  background-attachment: local;
+  border: 2px solid var(--sheet-edge);
+  border-radius: 3px;
+}
+
+.diary-text:focus { outline: none; border-color: var(--focus); }
+
+/* Little Mimi asleep in the page's corner; she doesn't block typing. */
+.diary-cat {
+  --px: 2px;
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.diary-cat.is-twitch .cat { animation: diary-twitch 340ms steps(2, end); }
+.diary-cat.is-twitch .tail-up { visibility: hidden; }
+.diary-cat.is-twitch .tail-flick { visibility: visible; }
+
+@keyframes diary-twitch { 50% { transform: translateY(-1px); } }
+
+.diary-status { min-height: 1.25em; margin: 6px 0 0; }
+
+.diary-list { list-style: none; margin: 0; padding: 0; }
+
+.diary-entry {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 0;
+  text-align: left;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  border-bottom: 1px dashed var(--grid-strong);
+  cursor: pointer;
+}
+
+.diary-entry-date { font-size: 0.8125rem; color: var(--ink-soft); white-space: nowrap; }
+.diary-entry-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Calendar: a day's mood weather (or a dot for a page without one). */
+.day { position: relative; }
+.day-mood { position: absolute; top: 1px; right: 1px; width: 10px; height: 10px; }
+.day-diary { position: absolute; top: 3px; right: 3px; width: 4px; height: 4px; background: var(--ink-soft); }
+.cal-diary { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .diary-cat.is-twitch .cat { animation: none; }
+}

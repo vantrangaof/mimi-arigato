@@ -35,6 +35,7 @@ let db;
 let kv = {};
 let records = []; // { id, day, text, createdAt, updatedAt, deleted, synced, photoId }, oldest first
 let photos = []; // { id, day, caption, entryId, createdAt, updatedAt, deleted, synced, uploaded, hasFull, hasThumb }
+let diary = new Map(); // day → { day, text, mood, updatedAt, synced }
 const photoURLs = new Map(); // "<id>:<size>" → object URL
 let settingsSnapshot = {};
 
@@ -192,6 +193,30 @@ export function photoForEntry(day, text) {
 
 export const entryRecordsFor = (day) => live().filter((r) => r.day === day);
 
+// ---- diary (private: never shown in memories, scrapbook, month, share, or Mimi's lines) ----
+
+export const MOODS = ["sunny", "cloudy", "rainy", "stormy"];
+export const DIARY_MAX = 20_000;
+
+const persistDiary = (list) => db?.putDiary(list).catch((err) => console.warn("Mimi couldn't save the diary", err));
+const blankPage = (day) => ({ day, text: "", mood: null, updatedAt: 0, synced: true });
+
+export const diaryPage = (day) => diary.get(day) ?? blankPage(day);
+export const hasDiaryPage = (page) => Boolean(page && (page.text.trim() || page.mood));
+
+// Pages with something written or a mood, newest day first.
+export const diaryPages = () => [...diary.values()].filter(hasDiaryPage).sort((a, b) => b.day.localeCompare(a.day));
+
+export function saveDiaryPage(day, changes) {
+  const page = { ...diaryPage(day), ...changes, updatedAt: Date.now(), synced: false };
+  page.text = String(page.text ?? "").slice(0, DIARY_MAX);
+  if (!MOODS.includes(page.mood)) page.mood = null;
+  diary.set(day, page);
+  persistDiary([page]);
+  emit();
+  return page;
+}
+
 // Moves data saved by earlier versions (plain localStorage keys) into the database.
 async function migrateFromLocalStorage() {
   const legacy = (key) => {
@@ -235,6 +260,7 @@ export async function initStore() {
   kv = loaded.kv;
   records = loaded.entries.map((r) => ({ deleted: false, synced: false, updatedAt: r.createdAt, photoId: null, ...r }));
   photos = loaded.photos ?? [];
+  diary = new Map((loaded.diary ?? []).map((d) => [d.day, d]));
   if (!kv.migrated) {
     if (!records.length) records = await migrateFromLocalStorage();
     write("migrated", true);
@@ -251,6 +277,7 @@ export async function clearDevice() {
   records = [];
   for (const p of photos) forgetURLs(p.id);
   photos = [];
+  diary = new Map();
   loadMemory();
   emit();
 }
@@ -365,6 +392,40 @@ export function mergeRemotePhotos(rows) {
   return photos.filter((p) => !p.deleted && !p.hasThumb);
 }
 
+export const unsyncedDiary = () => [...diary.values()].filter((d) => !d.synced);
+
+// Skips pages edited again while uploading; they stay unsynced for the next round.
+export function markDiarySynced(list) {
+  const current = list.filter((d) => diary.get(d.day) === d);
+  for (const d of current) d.synced = true;
+  persistDiary(current);
+}
+
+// Applies diary pages from the cloud (or a backup); the newer edit of each page wins.
+export function mergeRemoteDiary(rows, { synced = true } = {}) {
+  const changed = [];
+  for (const row of rows) {
+    const updatedAt = typeof row.updated_at === "string" ? Date.parse(row.updated_at) : row.updatedAt;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(row.day) || !Number.isFinite(updatedAt)) continue;
+    const local = diary.get(row.day);
+    if (local && local.updatedAt >= updatedAt) continue;
+    const page = {
+      day: row.day,
+      text: String(row.text ?? "").slice(0, DIARY_MAX),
+      mood: MOODS.includes(row.mood) ? row.mood : null,
+      updatedAt,
+      synced,
+    };
+    diary.set(row.day, page);
+    changed.push(page);
+  }
+  if (changed.length) {
+    persistDiary(changed);
+    emit();
+  }
+  return changed.length;
+}
+
 // The parts of Mimi's memory that follow you across devices.
 export function cloudState() {
   return {
@@ -419,7 +480,7 @@ export function mergeCloudState(remote = {}) {
 export function exportBackup() {
   return JSON.stringify({
     app: "mimi-arigato",
-    version: 3,
+    version: 4,
     exportedAt: new Date().toISOString(),
     days: store.days,
     entries: live(),
@@ -427,6 +488,7 @@ export function exportBackup() {
     scrapbook: store.scrapbook,
     treasures: store.treasures,
     firstMet: read(KEYS.firstMet, null),
+    diary: diaryPages().map(({ day, text, mood, updatedAt }) => ({ day, text, mood, updatedAt })),
   }, null, 2);
 }
 
@@ -484,6 +546,8 @@ export function importBackup(text) {
     const current = read(KEYS.firstMet, null);
     if (!current || data.firstMet < current) write(KEYS.firstMet, data.firstMet);
   }
+
+  if (Array.isArray(data.diary)) mergeRemoteDiary(data.diary.filter((d) => d && typeof d === "object"), { synced: false });
 
   store.save("days", "settings", "scrapbook", "treasures");
   return added;

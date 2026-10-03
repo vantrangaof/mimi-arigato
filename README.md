@@ -87,9 +87,10 @@ Everything unlocks by total good things and never goes away:
 
 ### Mimi's things (tabs)
 - **Memories:** *What Mimi has learned* ("Mimi thinks you really like coffee." "You talked about Lin 3 times. Mimi knows Lin must be important." "Your mom came up 4 times. That sounds special.") plus a **Memory cabinet** of drawers Mimi sorts on their own: People, Food, Things you were proud of, Things that made you laugh, Beautiful moments, Kindness, Rest, Moving your body, Hard days you got through, Little things, and Treasures Mimi found.
+- **Diary:** a private page per day for whatever happened or whatever's on your mind, not only good things. It saves as you type. Pick the day's **mood weather** (sunny, cloudy, rainy, stormy) if you like. A little sleeping Mimi keeps you company on the page and flicks her tail while you type, but she never reads or reacts to what you write: diary pages never show up in Memories, Scrapbook, Month, the picture of today, or search. Past pages are listed underneath; tap one to read or edit it.
 - **Scrapbook:** at 10, 25, 50, 75, 100 good things, then every 50, Mimi keeps one entry (preferring warm moments) as a taped-in page. Flip through them.
 - **Month:** "Your October": how many good things across how many days, what kinds, "You mentioned coffee 11 times," and **Mimi's favorite memory** of the month.
-- **Calendar:** days get pinker the more you wrote; tap a day to read it; search everything.
+- **Calendar:** days get pinker the more you wrote, and days with a diary page show their mood weather in the corner. Tap a day to read it or open its diary page; search your good things.
 
 ### Settings
 - Your name, the cat's name, fur color (Strawberry, Peach, Cloud, Midnight, Snow).
@@ -160,6 +161,7 @@ src/
     note.js             Mimi's note under their name
     wardrobe.js         Dress up: wear items per slot
     photos.js           Photo album, viewer, and thumbnails used elsewhere
+    diary.js            Private diary pages, mood weather, little Mimi on the page
     journal.js          Writing good things, prompts, unlock and scrapbook events
     tabs.js             Accessible tabs
     memories.js         Memory cabinet
@@ -248,12 +250,7 @@ Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing access
 
 ## Ideas for later
 
-**Next up: Diary** (planned, not built yet). A private page per day for whatever happened or whatever's on your mind, not only good things.
-- One page per day that saves as you type; past days in a list of dates.
-- Mood weather: a tiny pixel sunny / cloudy / rainy / stormy icon per page, shown through Mimi's window and as a "year in weather" in the Calendar.
-- Mimi keeps you company while you write (curled up, ears twitching) but never reacts to what you write.
-
-**Diary extras, maybe later**
+**Diary extras**
 - "Let it go": write a worry, give it to Mimi, she bats it away. Never saved.
 - Gentle prompts on a blank page ("What happened today?"), never required.
 - "A year ago today…" card on today's page.
@@ -261,6 +258,7 @@ Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing access
 
 **Other ideas**
 - Letters to future you, sealed until a date you pick.
+- Mood weather shown through Mimi's window (once the window is unlocked).
 - Mimi's room follows the real season and time of day (snow in winter, a lamp at night); more idle animations and room items.
 - Monthly share card: a pixel image of the month's good things and weather.
 - Optional AI reactions for entries the keyword rules don't recognize.

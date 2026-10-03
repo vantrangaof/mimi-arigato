@@ -3,6 +3,7 @@
 //   push  entries changed on this device (including deletions, as tombstones)
 //   pull  entries other devices changed since our last pull (by server time, synced_at)
 //   merge settings/scrapbook/treasures/milestones both ways (see store.mergeCloudState)
+//   diary   one private page per day, upserted by (user, day); the newer edit wins
 //   photos: details sync like entries; image files live in a private Storage bucket
 //   ("photos/<user id>/<photo id>.jpg" and "-thumb.jpg"). Thumbnails download right away,
 //   full images only when opened.
@@ -12,6 +13,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config.js";
 import {
   store, read, write, unsyncedEntries, markEntriesSynced, mergeRemoteEntries, cloudState, mergeCloudState, clearDevice,
   unsyncedPhotos, markPhotosSynced, mergeRemotePhotos, photoFile, savePhotoFile, photoById,
+  unsyncedDiary, markDiarySynced, mergeRemoteDiary,
 } from "../core/store.js";
 
 const CLIENT_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -240,6 +242,39 @@ export async function fetchPhotoFile(id, size = "full") {
   }
 }
 
+async function pushDiary(c) {
+  const pending = unsyncedDiary();
+  for (let i = 0; i < pending.length; i += PAGE) {
+    const batch = pending.slice(i, i + PAGE);
+    const { error } = await c.from("diary_pages").upsert(batch.map((d) => ({
+      user_id: session.user.id,
+      day: d.day,
+      text: d.text,
+      mood: d.mood,
+      updated_at: new Date(d.updatedAt).toISOString(),
+    })), { onConflict: "user_id,day" });
+    if (error) throw error;
+    markDiarySynced(batch);
+  }
+}
+
+async function pullDiary(c) {
+  let since = read(lastPullKey("diary"), "1970-01-01T00:00:00Z");
+  for (;;) {
+    const { data, error } = await c.from("diary_pages")
+      .select("day,text,mood,updated_at,synced_at")
+      .gt("synced_at", since)
+      .order("synced_at", { ascending: true })
+      .range(0, PAGE - 1);
+    if (error) throw error;
+    if (!data.length) break;
+    mergeRemoteDiary(data);
+    since = data.at(-1).synced_at;
+    write(lastPullKey("diary"), since);
+    if (data.length < PAGE) break;
+  }
+}
+
 async function syncState(c) {
   const { data, error } = await c.from("user_state").select("data,updated_at").maybeSingle();
   if (error) throw error;
@@ -269,6 +304,8 @@ export async function syncNow() {
     await pullEntries(c);
     await pullPhotos(c);
     await syncState(c);
+    await pushDiary(c);
+    await pullDiary(c);
     setStatus({ state: "synced", lastSync: Date.now() });
   } catch (err) {
     setStatus({ state: "error", error: friendly(err), lastSync: status.lastSync });

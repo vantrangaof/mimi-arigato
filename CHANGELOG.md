@@ -4,6 +4,13 @@ Progress log for Mimi Arigato. Newest first.
 
 ## 2026-10-03
 
+### Diary
+- New **Diary** tab: one private page per day, saves as you type, past pages listed underneath (tap to read or edit).
+- Mood weather per page (sunny, cloudy, rainy, stormy) as pixel icons; shown in the Calendar's day corners, and a day's detail links to its diary page.
+- A small sleeping Mimi sits on the page and flicks her tail while you type; big Mimi "is curled up next to your diary." She never reads or quotes it, and diary text stays out of Memories, Scrapbook, Month, share pictures and search.
+- Syncs to a new `diary_pages` table (one row per day; an older offline edit can't overwrite a newer page). Included in backups (version 4). Local database upgraded to v3.
+- **Needs** `supabase/schema.sql` re-run for the new table.
+
 ### Email + password accounts
 - Replaced the emailed sign-in link with email + password: "Create an account" or "Sign in" under Settings → Account & sync. Sign-in now happens inside the installed app (the link used to open in the phone's browser instead).
 - Friendly messages for wrong password, existing account, short password, too many tries. If Supabase's "Confirm email" is on, sign-up asks you to confirm first.

@@ -24,6 +24,7 @@ import { wireAccount } from "./ui/account.js";
 import { wireNote } from "./ui/note.js";
 import { wireWardrobe } from "./ui/wardrobe.js";
 import { wirePhotos } from "./ui/photos.js";
+import { wireDiary } from "./ui/diary.js";
 import { initCloud } from "./cloud/sync.js";
 
 await initStore();
@@ -69,6 +70,7 @@ wirePhotos(mimi, {
   input: $("photoInput"),
   viewer: { dialog: $("photoViewer"), image: $("photoFull"), caption: $("photoCaption"), meta: $("photoMeta"), actions: $("photoActions") },
 });
+wireDiary(mimi, { panel: $("panel-diary"), tab: $("tab-diary") });
 wireMemories($("panel-memories"));
 wireScrapbook($("panel-scrapbook"));
 wireMonth($("panel-month"));

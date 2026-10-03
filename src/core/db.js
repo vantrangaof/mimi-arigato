@@ -1,13 +1,14 @@
-// Persistence: an IndexedDB database with four object stores.
+// Persistence: an IndexedDB database with five object stores.
 //   entries     { id, day: "YYYY-MM-DD", text, createdAt, updatedAt, deleted, synced, photoId }
 //   kv          small named records: settings, scrapbook, treasures, counters…
 //   photos      photo details { id, day, caption, entryId, createdAt, updatedAt, deleted, synced, … }
 //   photoFiles  image blobs keyed "<photoId>:full" and "<photoId>:thumb"
+//   diary       one private page per day { day, text, mood, updatedAt, synced }
 // Falls back to localStorage if IndexedDB is unavailable (some private-browsing modes);
 // there, photos are stored as data URLs and may not fit.
 
 const DB_NAME = "mimi-arigato";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 function request(req) {
   return new Promise((resolve, reject) => {
@@ -29,6 +30,7 @@ function openIndexedDB() {
         db.createObjectStore("photos", { keyPath: "id" });
         db.createObjectStore("photoFiles");
       }
+      if (event.oldVersion < 3) db.createObjectStore("diary", { keyPath: "day" });
     };
     req.onsuccess = () => {
       // If another tab needs to upgrade or delete the database, step aside instead of blocking it.
@@ -51,24 +53,26 @@ function indexedDBAdapter(db) {
   return {
     kind: "indexeddb",
     async loadAll() {
-      const tx = db.transaction(["entries", "kv", "photos"]);
+      const tx = db.transaction(["entries", "kv", "photos", "diary"]);
       const kvStore = tx.objectStore("kv");
-      const [entries, keys, values, photos] = await Promise.all([
+      const [entries, keys, values, photos, diary] = await Promise.all([
         request(tx.objectStore("entries").getAll()),
         request(kvStore.getAllKeys()),
         request(kvStore.getAll()),
         request(tx.objectStore("photos").getAll()),
+        request(tx.objectStore("diary").getAll()),
       ]);
-      return { entries, photos, kv: Object.fromEntries(keys.map((k, i) => [k, values[i]])) };
+      return { entries, photos, diary, kv: Object.fromEntries(keys.map((k, i) => [k, values[i]])) };
     },
     putEntries: (list) => run("entries", "readwrite", (s) => list.forEach((e) => s.put(e))),
     putPhotos: (list) => run("photos", "readwrite", (s) => list.forEach((p) => s.put(p))),
+    putDiary: (list) => run("diary", "readwrite", (s) => list.forEach((d) => s.put(d))),
     putFile: (key, blob) => run("photoFiles", "readwrite", (s) => s.put(blob, key)),
     getFile: (key) => request(db.transaction("photoFiles").objectStore("photoFiles").get(key)).then((b) => b ?? null),
     deleteFiles: (keys) => run("photoFiles", "readwrite", (s) => keys.forEach((k) => s.delete(k))),
     setKV: (key, value) => run("kv", "readwrite", (s) => s.put(value, key)),
     clearAll: async () => {
-      for (const name of ["entries", "kv", "photos", "photoFiles"]) await run(name, "readwrite", (s) => s.clear());
+      for (const name of ["entries", "kv", "photos", "photoFiles", "diary"]) await run(name, "readwrite", (s) => s.clear());
     },
   };
 }
@@ -76,6 +80,7 @@ function indexedDBAdapter(db) {
 function localStorageAdapter() {
   const ENTRIES = "mimi.db.entries";
   const PHOTOS = "mimi.db.photos";
+  const DIARY = "mimi.db.diary";
   const kvKey = (k) => `mimi.db.kv.${k}`;
   const fileKey = (k) => `mimi.db.file.${k}`;
   const get = (k, fallback) => {
@@ -90,9 +95,9 @@ function localStorageAdapter() {
       localStorage.setItem(k, JSON.stringify(v));
     } catch {}
   };
-  const merge = (key, list) => {
-    const byId = new Map(get(key, []).map((x) => [x.id, x]));
-    for (const x of list) byId.set(x.id, x);
+  const merge = (key, list, id = (x) => x.id) => {
+    const byId = new Map(get(key, []).map((x) => [id(x), x]));
+    for (const x of list) byId.set(id(x), x);
     set(key, [...byId.values()]);
   };
   const toDataURL = (blob) => new Promise((resolve) => {
@@ -109,13 +114,16 @@ function localStorageAdapter() {
         const k = localStorage.key(i);
         if (k.startsWith("mimi.db.kv.")) kv[k.slice("mimi.db.kv.".length)] = get(k, null);
       }
-      return { entries: get(ENTRIES, []), photos: get(PHOTOS, []), kv };
+      return { entries: get(ENTRIES, []), photos: get(PHOTOS, []), diary: get(DIARY, []), kv };
     },
     async putEntries(list) {
       merge(ENTRIES, list);
     },
     async putPhotos(list) {
       merge(PHOTOS, list);
+    },
+    async putDiary(list) {
+      merge(DIARY, list, (d) => d.day);
     },
     async putFile(key, blob) {
       set(fileKey(key), await toDataURL(blob));

@@ -109,3 +109,44 @@ drop policy if exists "own photo files: delete" on storage.objects;
 create policy "own photo files: delete" on storage.objects
   for delete to authenticated
   using (bucket_id = 'photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- ---------------------------------------------------------------------------
+-- Diary (added later; re-running this whole file is safe)
+-- ---------------------------------------------------------------------------
+
+-- One private page per day: free writing plus an optional mood weather.
+create table if not exists public.diary_pages (
+  user_id     uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  day         date not null,
+  text        text not null default '' check (char_length(text) <= 20000),
+  mood        text check (mood in ('sunny', 'cloudy', 'rainy', 'stormy')),
+  updated_at  timestamptz not null,
+  synced_at   timestamptz not null default now(),
+  primary key (user_id, day)
+);
+
+create index if not exists diary_pages_user_synced_at on public.diary_pages (user_id, synced_at);
+
+-- A whole page is one row, so an older edit (say, from a phone that was offline) must
+-- never overwrite a newer one: such updates are ignored and the newer page stays.
+create or replace function public.mimi_diary_keep_newer() returns trigger
+language plpgsql as $$
+begin
+  if tg_op = 'UPDATE' and new.updated_at < old.updated_at then
+    return old;
+  end if;
+  new.synced_at := now();
+  return new;
+end;
+$$;
+
+drop trigger if exists diary_pages_touch_synced_at on public.diary_pages;
+create trigger diary_pages_touch_synced_at
+  before insert or update on public.diary_pages
+  for each row execute function public.mimi_diary_keep_newer();
+
+alter table public.diary_pages enable row level security;
+
+drop policy if exists "own diary" on public.diary_pages;
+create policy "own diary" on public.diary_pages
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

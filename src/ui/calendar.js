@@ -1,7 +1,8 @@
 // Month view of good things, plus search across every day.
 
-import { store, entriesFor, photoForEntry } from "../core/store.js";
+import { store, entriesFor, photoForEntry, diaryPage, hasDiaryPage } from "../core/store.js";
 import { photoThumb } from "./photos.js";
+import { moodIcon, moodLabel, openDiaryPage } from "./diary.js";
 import { dayKey, parseDay, formatLong, formatMonth, formatMonthYear, formatShortYear, formatWeekdayNarrow } from "../core/dates.js";
 import { plural } from "../core/dom.js";
 
@@ -55,10 +56,14 @@ export function wireCalendar(els) {
       btn.className = "day";
       btn.textContent = day;
       btn.dataset.level = Math.min(n, 5);
+      const page = diaryPage(key);
+      if (page.mood) btn.append(moodIcon(page.mood, "mood-icon day-mood"));
+      else if (hasDiaryPage(page)) btn.append(Object.assign(document.createElement("span"), { className: "day-diary" }));
       btn.disabled = key > today;
       btn.classList.toggle("is-today", key === today);
       btn.setAttribute("aria-pressed", String(key === selected));
-      btn.setAttribute("aria-label", `${formatLong(date)}: ${plural(n, "good thing")}`);
+      const diaryNote = hasDiaryPage(page) ? `, diary page${page.mood ? ` (${moodLabel(page.mood)})` : ""}` : "";
+      btn.setAttribute("aria-label", `${formatLong(date)}: ${plural(n, "good thing")}${diaryNote}`);
       btn.addEventListener("click", () => {
         selected = key;
         els.search.value = "";
@@ -79,12 +84,19 @@ export function wireCalendar(els) {
 
     const heading = document.createElement("h3");
     heading.textContent = formatLong(selected);
+    const page = diaryPage(selected);
+    const diaryLink = document.createElement("button");
+    diaryLink.type = "button";
+    diaryLink.className = "link-button cal-diary";
+    if (page.mood) diaryLink.append(moodIcon(page.mood));
+    diaryLink.append(hasDiaryPage(page) ? "Open diary page" : selected === dayKey() ? "Write in your diary" : "Write a diary page for this day");
+    diaryLink.addEventListener("click", () => openDiaryPage(selected));
     const list = entriesFor(selected);
     if (!list.length) {
       const p = document.createElement("p");
       p.className = "muted";
-      p.textContent = selected === dayKey() ? "Nothing written yet today." : "Nothing written this day.";
-      els.detail.replaceChildren(heading, p);
+      p.textContent = selected === dayKey() ? "No good things yet today." : "No good things this day.";
+      els.detail.replaceChildren(heading, p, diaryLink);
       return;
     }
     const ul = document.createElement("ul");
@@ -95,7 +107,7 @@ export function wireCalendar(els) {
       li.append(t);
       return li;
     }));
-    els.detail.replaceChildren(heading, ul);
+    els.detail.replaceChildren(heading, ul, diaryLink);
   }
 
   function renderResults(query) {
