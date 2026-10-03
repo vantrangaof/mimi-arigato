@@ -1,10 +1,10 @@
 # Mimi Arigato
 
-**A tiny cat who collects the good things in your life.**
+**A tiny cat who remembers your life.**
 
-Every day, tell Mimi one small thing worth remembering. Mimi listens. Mimi remembers. Mimi grows a little world around your memories.
+Every day, tell Mimi one small thing worth remembering. Mimi listens. Mimi remembers. Over time Mimi starts noticing the people you love, the things you like, the wishes you made and forgot, and little patterns in your life. The good things you tell Mimi are how Mimi gets to know you.
 
-> Notice → Tell Mimi → Mimi reacts → Mimi remembers → Your little world grows
+> Notice → Tell Mimi → Mimi reacts → Mimi remembers → Mimi connects things → Mimi knows you
 
 Mimi is a pet that never asks anything of you: no hunger bars, no punishments, no broken streaks. Missing a day takes nothing away. "Arigato" means thank you in Japanese; you can rename the cat (for example, Xiao Mi).
 
@@ -18,8 +18,8 @@ It's an installable web app (PWA). It works offline and without an account; sign
 |---|---|
 | **Good things** | Tell Mimi up to five good things a day. One is a good day; five is Mimi's favorite. |
 | **Mimi** | A pixel cat with moods, reactions to what you write, idle habits, and a purr. |
-| **Memories** | Mimi notices patterns on their own: favorite things, people you mention, beautiful moments. |
-| **Little world** | Mimi's room fills up with things as your good things add up, plus treasures Mimi finds. |
+| **Memories** | Mimi connects your good things into theories about you, remembers what happened a year ago, and keeps your wishes. |
+| **Little world** | Mimi's room fills up with things as your good things add up, things from your own life, and treasures Mimi finds. |
 | **Scrapbook** | Every so often Mimi keeps one of your good things as a scrapbook page. |
 
 ---
@@ -40,6 +40,8 @@ It's an installable web app (PWA). It works offline and without an account; sign
 - If you write something you've written before, Mimi remembers: *"remembers you wrote about this on Sep 28 too."*
 - **Mimi's good thing:** after your first good thing of the day, Mimi shares one of their own ("my turn!": *"A sunbeam moved onto the cushion."*). It shows under the journal for the rest of the day. Lines only mention things Mimi actually has (room items, treasures, seasonal decorations).
 - **Thank-you cards:** when a good thing mentions someone (a name, or Mom, Dad, Grandma…), an envelope button appears next to it. It makes a 1080×1350 pixel card ("Thank you, Lin!") with your words, Mimi, and "with love from Trang & Mimi" to save or send. You can change who it's for.
+- **One year ago today:** on a date you wrote something in an earlier year, a small card at the top of the journal shows what you told Mimi then (with its photo), and Mimi says something about it: *"You still like ramen. Some things are very reliable."*, *"Anna is still around. Mimi is glad."*, or, if you made a wish that day that later came true, *"…And then you did it."* Mimi mentions it once when you open the app that day.
+- **Wishes:** when a good thing says *"I want to…"*, *"I'd love to…"*, *"someday I'll…"*, *"I wish I could…"* or *"my dream is to…"*, Mimi folds the wish into the jar ("folded your wish into the jar: “learn pottery.”"), and a little paper tag hangs on the jar. When a later good thing mentions the same thing ("Went to my first pottery class!"), Mimi says *"remembers you wished to “learn pottery” on Oct 4, 2025. Did you just do it?!"* Now and then the jar gives you a wish back instead of a star ("Still keeping it safe for you."). Removing the good thing that made a wish removes the wish.
 - **Stuck?** Tap "Stuck? Pick something to think about" for prompts: something tiny, someone who was kind, something that made you laugh, something delicious, something you're proud of, something cute, something beautiful, something worth remembering.
 - The first question of each day rotates ("Tell me something tiny…", "What made you smile?").
 - Remove an entry with × (for typos).
@@ -80,6 +82,7 @@ Everything unlocks by total good things and never goes away:
 | 500 | Starry window |
 
 - The journal shows what's next: *"Next for Mimi's world: a cushion at 50 good things."*
+- **Things from your life:** when something comes up in three good things, a small object for it appears in the room and Mimi says *"has been noticing a theme. A coffee mug appeared in the room."* There are 18: coffee mug, teapot, stack of books, radio, toy mouse (cats), dog bone, umbrella (rain), vase of flowers, little pot (cooking), noodle bowl, cupcake (sweets), suitcase (travel), beach ball (the sea), sneakers (walks and runs), camera (photos), game controller, paint palette (art), popcorn (movies). Four sit on the floor and two on a little wall shelf; with more than six, the most-mentioned ones show. Tap one for a line ("sniffs your coffee mug. Still warm."). They never go away.
 - **Jar of good things:** a jar on a shelf under the window fills with paper stars (one per 5 good things, up to 16). Tap it, or shake your phone, and Mimi pulls out a random past good thing and reads it to you. On iPhone, shaking asks for motion permission the first time you tap the jar. On days your diary weather is rainy or stormy, the stars glimmer and Mimi likes to sit by the jar. That's the only thing Mimi takes from the diary: the weather, never the words.
 - **Your photo on the wall:** once the wall picture is unlocked (75), it shows one of your photos, pixelated to match the room. It's your newest photo unless you choose one with **Hang in Mimi's room** in the photo viewer.
 - **Weekly postcard:** on Sundays Mimi leaves a postcard on the floor about the week (Monday to Sunday): how many good things, how often you laughed, who came up, what kept showing up, and Mimi's favorite of the week. It stays until the next one (Monday to Saturday you see last week's), sparkles until read, and Mimi says "mail!" once when it arrives.
@@ -103,7 +106,14 @@ Everything unlocks by total good things and never goes away:
 - When signed in, photos sync to a **private** Supabase Storage bucket; other devices download thumbnails right away and full images when opened.
 
 ### Mimi's things (tabs)
-- **Memories:** *What Mimi has learned* ("Mimi thinks you really like coffee." "You talked about Lin 3 times. Mimi knows Lin must be important." "Your mom came up 4 times. That sounds special.") plus a **Memory cabinet** of drawers Mimi sorts on their own: People, Food, Things you were proud of, Things that made you laugh, Beautiful moments, Kindness, Rest, Moving your body, Hard days you got through, Little things, and Treasures Mimi found.
+- **Memories:** **Mimi's theories** first: every few days (at most one every 3 days, after 10 good things) Mimi connects some of your good things into a numbered theory, mentions it when you open the app, and keeps it forever. Mimi looks for:
+  - people who are around when good things happen (*"Good things happen suspiciously often when Anna is around."*), who make you laugh, and what's better with whom (*"Coffee is better with Lin, apparently."*), plus family who keep showing up
+  - things that go together (*"Coffee on a rainy day might be your favorite thing in the world. Just a theory."*)
+  - things you've liked for a long time, and things that went quiet (*"You used to talk about cooking a lot. Not since March. Mimi is just noticing. No pressure."*)
+  - what kind of person you are, according to a cat (*"A suspicious amount of your happiness is edible."*, *"You find good things even on hard days."*)
+  - when good things happen (a weekday, mornings or late nights)
+
+  Theories never use percentages or scores, and never use the diary. Then *What Mimi has learned* ("Mimi thinks you really like coffee." "You talked about Lin 3 times. Mimi knows Lin must be important." "Your mom came up 4 times. That sounds special.") plus a **Memory cabinet** of drawers Mimi sorts on their own: People, Food, Things you were proud of, Things that made you laugh, Beautiful moments, Kindness, Rest, Moving your body, Hard days you got through, Little things, Wishes in the jar, Wishes that came true, and Treasures Mimi found.
 - **Diary:** a private page per day for whatever happened or whatever's on your mind, not only good things. It saves as you type. Pick the day's **mood weather** (sunny, cloudy, rainy, stormy) if you like. A little sleeping Mimi keeps you company on the page and flicks her tail while you type, but she never reads or reacts to what you write: diary pages never show up in Memories, Scrapbook, Month, the picture of today, or search. Past pages are listed underneath; tap one to read or edit it.
 - **Scrapbook:** at 10, 25, 50, 75, 100 good things, then every 50, Mimi keeps one entry (preferring warm moments) as a taped-in page. Flip through them.
 - **Month:** "Your October": how many good things across how many days, what kinds, "You mentioned coffee 11 times," and **Mimi's favorite memory** of the month.
@@ -175,6 +185,10 @@ src/
     scrapbook.js        When pages are added and which entry is kept
     mimi-good.js        Mimi's own good thing of the day
     postcard.js         The weekly postcard's lines
+    themes.js           Things you keep mentioning, and the objects they put in the room
+    theories.js         Mimi's theories: connecting good things into conclusions
+    wishes.js           Finding wishes in good things and noticing when they come true
+    year-ago.js         Good things from this date in earlier years, and Mimi's remark
   ui/                   One module per part of the page
     habitat.js          Room on screen, pixel sizing, petting
     topbar.js           Days together, sound toggle, settings icon
@@ -187,7 +201,8 @@ src/
     bedtime.js          Tuck Mimi in at night
     postcard.js         The postcard on the floor and its dialog
     thanks.js           Thank-you cards
-    journal.js          Writing good things, prompts, unlock and scrapbook events
+    journal.js          Writing good things, prompts, unlock, scrapbook, wish and room-thing events
+    year-ago.js         The "one year ago today" card
     tabs.js             Accessible tabs
     memories.js         Memory cabinet
     scrapbook.js        Scrapbook pages
@@ -215,7 +230,7 @@ Mimi is **local-first**: the on-device database is what the app reads and writes
 | Store | Contents |
 |---|---|
 | `entries` | One record per good thing: `{ id, day, text, createdAt, updatedAt, deleted, synced }` |
-| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` counters, `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked` |
+| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` counters, `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`; synced: `theories`, `wishes`, `roomThings` |
 | `photos` | Photo details: `{ id, day, caption, entryId, createdAt, updatedAt, deleted, synced, uploaded, hasFull, hasThumb }` |
 | `photoFiles` | The image files, keyed `<photo id>:full` and `<photo id>:thumb` |
 
@@ -226,7 +241,7 @@ Data from earlier versions (plain localStorage) moves into the database automati
 | Table | Contents |
 |---|---|
 | `entries` | `id, user_id, day, text, created_at, updated_at, deleted, synced_at` |
-| `user_state` | `user_id, data (jsonb: settings, scrapbook, treasures, milestones, firstMet), updated_at` |
+| `user_state` | `user_id, data (jsonb: settings, scrapbook, treasures, milestones, firstMet, theories, wishes, roomThings), updated_at` |
 | `photos` | `id, user_id, day, caption, entry_id, created_at, updated_at, deleted, synced_at` |
 | Storage bucket `photos` | Private image files at `<user id>/<photo id>.jpg` and `…-thumb.jpg` |
 
@@ -239,7 +254,7 @@ Row-level security means each person can only read and write their own rows.
 - **When:** right after sign-in, on open, about 1.5 s after any change, when the device comes back online, and every 5 minutes.
 - **Entries:** changed entries are pushed; then everything other devices changed since the last pull is fetched, ordered by `synced_at` (stamped by the server, so wrong device clocks don't matter). If the same entry changed in two places, the newer edit wins.
 - **Deletions** are kept as tombstones (`deleted = true`) so every device learns about them.
-- **Settings** merge field by field (the most recent change to each setting wins); **scrapbook, treasures and milestones** are combined, so a new device never wipes your history.
+- **Settings** merge field by field (the most recent change to each setting wins); **scrapbook, treasures, milestones, theories, wishes and room things** are combined, so a new device never wipes your history. A wish that came true on either device stays true.
 - Anything you wrote before signing in is uploaded to your account when you sign in.
 - Pet and treat counters stay on each device.
 
@@ -299,6 +314,11 @@ Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing access
 - Fur from a photo uses the main color near the middle of the photo, so a busy background can pull the color off. Alternative: let you tap the cat in the photo to choose the color.
 - Monthly share card: a pixel image of the month's good things and weather.
 - Optional AI reactions for entries the keyword rules don't recognize.
+
+**To decide (from the theories / wishes build)**
+- Capitalized place names count as people ("Kyoto"), so they can get a thank-you envelope or a people theory. A small list of places, or optional AI, would fix it.
+- Wishes match on keywords, so "I want to learn to make bread" can come true from "had bread". Mimi asks ("Did you just do it?!") rather than declares; a "not yet" button in Memories could undo it.
+- "Noticing change" ("you used to say you didn't like going places alone") needs AI to do well; theories cover the simpler "went quiet" and "liked for a long time".
 
 ## Credits
 

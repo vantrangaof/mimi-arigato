@@ -1,13 +1,17 @@
-// The jar of good things: tap it (or shake your phone) and Mimi pulls out a past good thing.
+// The jar of good things: tap it (or shake your phone) and Mimi pulls out a past good thing,
+// or now and then a folded wish that's still waiting.
 
 import { allEntries, store, read, write } from "../core/store.js";
-import { dayKey, formatShortYear } from "../core/dates.js";
+import { dayKey, daysBetween, formatShortYear } from "../core/dates.js";
 import { pick } from "../core/dom.js";
 import { purr } from "../cat/sound.js";
+import { openWishes } from "../memory/wishes.js";
 
 const RECENT = 6; // don't pull the same star again this soon
 const SHAKE = 22; // change in acceleration (m/s²) that counts as a shake
 const MOTION_ASKED = "motionAsked";
+const WISH_CHANCE = 0.25;
+const WISH_AGE = 14; // days before a wish starts turning up
 
 export function wireJar(mimi) {
   const recent = [];
@@ -15,6 +19,16 @@ export function wireJar(mimi) {
   function pull() {
     if (mimi.isAsleep()) {
       mimi.react(["mrr…", "is too sleepy to open the jar."], { hearts: 0, hold: 2000 });
+      return;
+    }
+    const waiting = openWishes().filter((w) => daysBetween(w.key, dayKey()) >= WISH_AGE);
+    if (waiting.length && Math.random() < WISH_CHANCE) {
+      const wish = pick(waiting);
+      if (store.settings.sound) purr({ volume: 0.5 });
+      mimi.announce([
+        ["*crinkle*", "finds a folded wish in the jar…", { hearts: 0, hold: 1500 }],
+        ["♡", `“${wish.what}” (${formatShortYear(wish.key)}). Still keeping it safe for you.`, { hearts: 2, hold: 4200 }],
+      ]);
       return;
     }
     const all = allEntries();

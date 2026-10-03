@@ -19,6 +19,9 @@ export const KEYS = {
   firstMet: "firstMet",
   milestones: "milestones",
   surprises: "surprises",
+  theories: "theories",
+  wishes: "wishes",
+  roomThings: "roomThings",
 };
 
 const DEFAULT_SETTINGS = {
@@ -46,6 +49,9 @@ export const store = {
   settings: { ...DEFAULT_SETTINGS },
   scrapbook: [], // [{ at: 25, key, text }]
   treasures: [], // [{ id: "button", key }]
+  theories: [], // Mimi's theories, in the order found: [{ id, key, text }] (see memory/theories.js)
+  wishes: [], // [{ id, key, text, what, words, done: null | { key, text } }] (see memory/wishes.js)
+  roomThings: [], // things from your life that appeared in the room: [{ id, key }] (see memory/themes.js)
 
   save(...names) {
     for (const name of names) {
@@ -254,6 +260,9 @@ function loadMemory() {
   settingsSnapshot = { ...store.settings };
   store.scrapbook = read(KEYS.scrapbook, []);
   store.treasures = read(KEYS.treasures, []);
+  store.theories = read(KEYS.theories, []);
+  store.wishes = read(KEYS.wishes, []);
+  store.roomThings = read(KEYS.roomThings, []);
 }
 
 export async function initStore() {
@@ -304,7 +313,7 @@ export const entriesToday = () => entriesFor(dayKey());
 export const totalThings = () => live().length;
 export const allEntries = () => live()
   .sort((a, b) => a.day.localeCompare(b.day) || a.createdAt - b.createdAt)
-  .map(({ day, text }) => ({ key: day, text }));
+  .map(({ day, text, createdAt }) => ({ key: day, text, at: createdAt }));
 
 // Days since the previous visit (0 on a first visit); records today's visit.
 export function daysAway() {
@@ -437,7 +446,16 @@ export function cloudState() {
     treasures: store.treasures,
     milestones: read(KEYS.milestones, []),
     firstMet: read(KEYS.firstMet, null),
+    theories: store.theories,
+    wishes: store.wishes,
+    roomThings: store.roomThings,
   };
+}
+
+// A wish that came true on either device stays true.
+function mergeWishes(a = [], b = []) {
+  const merged = unionBy(a, b, (w) => w.id);
+  return merged.map((w) => (w.done ? w : { ...w, done: b.find((x) => x.id === w.id)?.done ?? null }));
 }
 
 const unionBy = (a = [], b = [], key) => [...a, ...b.filter((x) => !a.some((y) => key(y) === key(x)))];
@@ -462,6 +480,9 @@ export function mergeCloudState(remote = {}) {
     treasures: unionBy(local.treasures, remote.treasures, (t) => t.id),
     milestones: [...new Set([...local.milestones, ...(remote.milestones ?? [])])],
     firstMet: firstMets[0] ?? null,
+    theories: unionBy(local.theories, remote.theories, (t) => t.id),
+    wishes: mergeWishes(local.wishes, remote.wishes),
+    roomThings: unionBy(local.roomThings, remote.roomThings, (t) => t.id),
   };
 
   if (JSON.stringify(merged) !== JSON.stringify(local)) {
@@ -469,7 +490,10 @@ export function mergeCloudState(remote = {}) {
     settingsSnapshot = { ...merged.settings };
     store.scrapbook = merged.scrapbook;
     store.treasures = merged.treasures;
-    for (const key of ["settings", "settingsTimes", "scrapbook", "treasures", "milestones", "firstMet"]) {
+    store.theories = merged.theories;
+    store.wishes = merged.wishes;
+    store.roomThings = merged.roomThings;
+    for (const key of ["settings", "settingsTimes", "scrapbook", "treasures", "milestones", "firstMet", "theories", "wishes", "roomThings"]) {
       if (merged[key] != null) write(KEYS[key], merged[key]);
     }
     emit();
@@ -482,7 +506,7 @@ export function mergeCloudState(remote = {}) {
 export function exportBackup() {
   return JSON.stringify({
     app: "mimi-arigato",
-    version: 4,
+    version: 5,
     exportedAt: new Date().toISOString(),
     days: store.days,
     entries: live(),
@@ -490,6 +514,9 @@ export function exportBackup() {
     scrapbook: store.scrapbook,
     treasures: store.treasures,
     firstMet: read(KEYS.firstMet, null),
+    theories: store.theories,
+    wishes: store.wishes,
+    roomThings: store.roomThings,
     diary: diaryPages().map(({ day, text, mood, updatedAt }) => ({ day, text, mood, updatedAt })),
   }, null, 2);
 }
@@ -544,6 +571,26 @@ export function importBackup(text) {
       }
     }
   }
+  const clean = (s, n = 500) => (typeof s === "string" ? s.slice(0, n) : "");
+  if (Array.isArray(data.theories)) {
+    for (const t of data.theories) {
+      if (typeof t?.id === "string" && isDayKey(t.key) && typeof t.text === "string" && !store.theories.some((x) => x.id === t.id)) {
+        store.theories.push({ id: t.id, key: t.key, text: clean(t.text) });
+      }
+    }
+  }
+  if (Array.isArray(data.wishes)) {
+    for (const w of data.wishes) {
+      if (typeof w?.id !== "string" || !isDayKey(w.key) || !Array.isArray(w.words) || store.wishes.some((x) => x.id === w.id)) continue;
+      const done = w.done && isDayKey(w.done.key) ? { key: w.done.key, text: clean(w.done.text) } : null;
+      store.wishes.push({ id: w.id, key: w.key, text: clean(w.text), what: clean(w.what, 80), words: w.words.filter((x) => typeof x === "string").slice(0, 8), done });
+    }
+  }
+  if (Array.isArray(data.roomThings)) {
+    for (const t of data.roomThings) {
+      if (typeof t?.id === "string" && isDayKey(t.key) && !store.roomThings.some((x) => x.id === t.id)) store.roomThings.push({ id: t.id, key: t.key });
+    }
+  }
   if (isDayKey(data.firstMet)) {
     const current = read(KEYS.firstMet, null);
     if (!current || data.firstMet < current) write(KEYS.firstMet, data.firstMet);
@@ -551,6 +598,6 @@ export function importBackup(text) {
 
   if (Array.isArray(data.diary)) mergeRemoteDiary(data.diary.filter((d) => d && typeof d === "object"), { synced: false });
 
-  store.save("days", "settings", "scrapbook", "treasures");
+  store.save("days", "settings", "scrapbook", "treasures", "theories", "wishes", "roomThings");
   return added;
 }

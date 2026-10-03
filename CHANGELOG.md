@@ -4,6 +4,15 @@ Progress log for Mimi Arigato. Newest first.
 
 ## 2026-10-04
 
+### Mimi remembers your life
+- New tagline: **"A tiny cat who remembers your life."** (README, page description, manifest).
+- **One year ago today:** a card at the top of the journal with good things from this date in earlier years (and their photos), plus Mimi's remark (a thing or person that's still around, a wish that came true, or something warm). Mimi mentions it once per day on open.
+- **Mimi's theories:** `memory/theories.js` connects good things (people + categories, people + themes, theme pairs, long-time favorites, things that went quiet, what kind of person you are, weekday and time of day). At most one new theory every 3 days after 10 good things; numbered cards in Memories. `{cat}` in theory text becomes the cat's name.
+- **Wishes:** "I want to… / I'd love to… / someday I'll…" in a good thing becomes a wish in the jar (paper tag on the jar). A later good thing with the same keyword marks it come true ("Did you just do it?!"). The jar sometimes hands back a waiting wish (after 14 days). Memories has "Wishes in the jar" and "Wishes that came true".
+- **Things from your life:** 18 themes (`memory/themes.js`); 3 mentions puts a pixel object in the room (4 floor slots, 2 on a wall shelf), kept forever.
+- Names at the start of an entry ("Anna made me laugh") now count for theories, what Mimi has learned, and the year-ago remark when that name shows up elsewhere.
+- Theories, wishes and room things sync inside `user_state` and are in backups (version 5). No schema change; no `schema.sql` re-run needed.
+
 ### Eight small things
 - **Mimi's good thing:** after your first good thing each day Mimi shares one of their own; shown under the journal for the rest of the day.
 - **Your photo on the wall:** the wall picture (75) shows a pixelated photo; "Hang in Mimi's room" in the photo viewer picks which one (`settings.framePhoto`).

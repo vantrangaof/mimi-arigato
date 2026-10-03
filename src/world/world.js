@@ -188,6 +188,57 @@ const DECOR = {
   ]], { y: "#ffc93c", z: "#ffffff", p: "#e86a92", P: "#ffb3c8", W: "#a8714f" }],
 };
 
+// Things from your life (see memory/themes.js): 5×4 pixel objects on the floor and a wall shelf.
+const THING_ART = {
+  coffee: [".e.e.", "RRRR.", "RRRRR", "RRRR."],
+  tea: ["..k..", ".mmmm", "mmmm.", ".mm.."],
+  books: ["RRRR.", "BBBBB", ".yyyy", "mmmm."],
+  music: ["...k.", "ooooo", "oeoko", "ooooo"],
+  cats: ["k....", ".k...", ".ggg.", "ggggp"],
+  dogs: [".....", "e...e", "eeeee", "e...e"],
+  rain: [".BBB.", "BBBBB", "..k..", "..kk."],
+  flowers: ["p.y.p", ".lGl.", ".BBB.", ".BBB."],
+  cooking: [".e.e.", "kkkkk", ".ggg.", ".ggg."],
+  noodles: ["....k", "...k.", "RyyyR", ".RRR."],
+  sweets: ["..R..", ".ppp.", "ppppp", ".bbb."],
+  travel: [".kkk.", "ooooo", "oWoWo", "ooooo"],
+  sea: [".RRe.", "RReBB", "yyyBB", ".yyB."],
+  walks: ["BB...", "BBB..", "BBBBB", "eeeee"],
+  photos: [".kk..", "nnnnn", "nBeBn", "nnnnn"],
+  games: ["nnnnn", "nynRn", "nnnnn", "n...n"],
+  art: [".sss.", "sRsBs", "ssyss", ".ss.."],
+  movies: [".eye.", "eeyee", "ReReR", "ReReR"],
+};
+const THING_COLORS = {
+  k: "var(--room-line)", e: "#ffffff", R: "#ef6f6c", B: "#7fb3e6", y: "#ffd166", m: "#8fd9b6",
+  b: "#e8c9b0", W: "#a8714f", g: "#b7aeb9", p: "#ff8fb1", G: "#4f9a5c", l: "#7cc47f",
+  o: "#ff9f43", n: "#4a4560", s: "#f2d29b",
+};
+const THING_SLOTS = [[7, 30], [22, 30], [27, 30], [32, 30], [29, 0], [34, 0]];
+const SHELF = [29, 4, ["WWWWWWWWWW"]];
+export const MAX_THINGS = THING_SLOTS.length;
+
+const THING_LINES = {
+  coffee: "sniffs your coffee mug. Still warm.",
+  tea: "keeps the teapot company.",
+  books: "sits on your books. Reading is hard.",
+  music: "bops their head to the little radio.",
+  cats: "pounces on the toy mouse. Got it.",
+  dogs: "doesn't know why there's a dog bone here, but allows it.",
+  rain: "guards your umbrella in case it rains.",
+  flowers: "sniffs the flowers very carefully.",
+  cooking: "peeks into the pot. Empty. Sad.",
+  noodles: "is guarding the noodle bowl.",
+  sweets: "is not looking at the cupcake. At all.",
+  travel: "sits in your suitcase so you can't leave without them.",
+  sea: "boops the beach ball.",
+  walks: "is ready for a walk.",
+  photos: "poses for the camera.",
+  games: "pressed a button on the controller. Nothing happened.",
+  art: "stepped on the paint palette. Art.",
+  movies: "stole one piece of popcorn.",
+};
+
 export function skyFor(hour = new Date().getHours()) {
   if (hour >= 6 && hour < 17) return "day";
   if (hour >= 17 && hour < 19) return "dusk";
@@ -195,7 +246,8 @@ export function skyFor(hour = new Date().getHours()) {
 }
 
 // Draws the room once; returns update(state) to show what's unlocked and what's around:
-// { total, found, season, photo (a data URL or null), postcard ("new", "read" or null), glow }.
+// { total, found, season, photo (a data URL or null), postcard ("new", "read" or null), glow,
+//   things (theme ids of your things, in slot order), wishes (true if a wish is in the jar) }.
 // onItem(line) is called when an item is clicked so Mimi can comment on it; onJar and
 // onPostcard when the jar or the postcard is tapped.
 export function renderRoom(svg, { onItem, onJar, onPostcard }) {
@@ -239,9 +291,16 @@ export function renderRoom(svg, { onItem, onJar, onPostcard }) {
   postcard.addEventListener("click", () => onPostcard());
 
   const treasures = svgEl("g", { class: "treasures" });
-  svg.append(treasures, postcard);
+  const things = svgEl("g", { class: "things" });
+  svg.append(things, treasures, postcard);
+  let thingsShown = "";
 
-  return function update({ total, found, season = null, photo: photoURL = null, postcard: card = null, glow = false }) {
+  // A paper wish tag tied to the jar while a wish is waiting inside.
+  const wishTag = svgEl("g", { class: "wish-tag" });
+  drawArt(wishTag, [6, 13, ["k.", "ee", "ey"]], { k: "var(--room-line)", e: "#fff7d6", y: "#ffd166" });
+  jar.appendChild(wishTag);
+
+  return function update({ total, found, season = null, photo: photoURL = null, postcard: card = null, glow = false, things: mine = [], wishes = false }) {
     svg.dataset.sky = skyFor();
     const framed = Boolean(photoURL) && isUnlocked("picture", total);
     for (const [id, g] of Object.entries(items)) {
@@ -274,6 +333,22 @@ export function renderRoom(svg, { onItem, onJar, onPostcard }) {
 
     postcard.classList.toggle("is-on", Boolean(card));
     postcard.classList.toggle("is-new", card === "new");
+
+    wishTag.classList.toggle("is-on", wishes);
+
+    if (thingsShown !== mine.join()) {
+      thingsShown = mine.join();
+      things.replaceChildren();
+      const shown = mine.filter((id) => THING_ART[id]).slice(0, MAX_THINGS);
+      if (shown.length > 4) drawArt(things, SHELF);
+      shown.forEach((id, i) => {
+        const g = svgEl("g", { class: `room-item is-on thing thing-${id}` });
+        const [x, y] = THING_SLOTS[i];
+        drawArt(g, [x, y, THING_ART[id]], THING_COLORS);
+        g.addEventListener("click", () => onItem(THING_LINES[id]));
+        things.appendChild(g);
+      });
+    }
 
     treasures.replaceChildren();
     found.slice(-TREASURE_SLOTS.length).forEach((t, i) => {

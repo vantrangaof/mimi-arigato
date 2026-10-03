@@ -30,6 +30,9 @@ import { wireJar } from "./ui/jar.js";
 import { wireBedtime } from "./ui/bedtime.js";
 import { wirePostcard, postcardGreeting } from "./ui/postcard.js";
 import { wireThanks } from "./ui/thanks.js";
+import { wireYearAgo, yearAgoGreeting } from "./ui/year-ago.js";
+import { discoverTheory } from "./memory/theories.js";
+import { claimRoomThings, roomThingLine } from "./memory/themes.js";
 import { initCloud } from "./cloud/sync.js";
 
 await initStore();
@@ -74,6 +77,8 @@ wireJournal(mimi, {
   mimiGood: $("mimiGood"),
   onThank: thanks.open,
 });
+
+wireYearAgo($("yearAgo"));
 
 wireTabs($("thingsTabs"));
 wirePhotos(mimi, {
@@ -124,7 +129,7 @@ wireShare({
 });
 
 // Greeting on open: milestones, a seasonal hello, then a welcome back or a rare surprise,
-// a new postcard, then asking your name.
+// a new postcard, something from a year ago, a new theory or room thing, then asking your name.
 mimi.settle();
 if (fillScrapbook().length) store.save("scrapbook");
 const greetings = newMilestones();
@@ -144,6 +149,18 @@ else {
 }
 const mail = postcardGreeting();
 if (mail) greetings.push(mail);
+const memory = yearAgoGreeting();
+if (memory) greetings.push(memory);
+const theory = discoverTheory();
+if (theory) {
+  store.save("theories");
+  greetings.push(["hmm…", "has a new theory about you. It's in Memories.", { hearts: 2, hold: 3400 }]);
+}
+const things = claimRoomThings(); // good things synced from another device can add some too
+if (things.length) {
+  store.save("roomThings");
+  greetings.push(...things.map((t) => ["hmm!", roomThingLine(t), { hearts: 2, hold: 3600 }]));
+}
 if (needsIntro()) greetings.push(["hi!", "would love to know your name.", { hearts: 0, hold: 3000 }]);
 if (greetings.length) setTimeout(() => mimi.announce(greetings), 700);
 

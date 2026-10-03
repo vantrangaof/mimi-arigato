@@ -7,9 +7,11 @@ import {
 import { dayKey, formatShort } from "../core/dates.js";
 import { applyLook, setCustomFur, FURS } from "../cat/sprite.js";
 import { meow, purr } from "../cat/sound.js";
-import { renderRoom, isUnlocked, validWear, ACCESSORIES, ROOM_W, ROOM_H, PHOTO_SIZE } from "../world/world.js";
+import { renderRoom, isUnlocked, validWear, ACCESSORIES, ROOM_W, ROOM_H, PHOTO_SIZE, MAX_THINGS } from "../world/world.js";
 import { seasonOn } from "../world/seasons.js";
 import { weekPostcard, postcardSeen } from "../memory/postcard.js";
+import { roomThingIds } from "../memory/themes.js";
+import { openWishes } from "../memory/wishes.js";
 
 const wide = matchMedia("(min-width: 960px)");
 
@@ -117,6 +119,8 @@ export function wireHabitat({ mimi, look, wrap, sprite, room, tally, onJar, onPo
       photo,
       postcard: card ? (postcardSeen(card) ? "read" : "new") : null,
       glow: greyDay(),
+      things: roomThingIds(MAX_THINGS),
+      wishes: openWishes().length > 0,
     });
     const framed = framedPhoto();
     if (framed && isUnlocked("picture", totalThings())) {

@@ -15,6 +15,8 @@ import { mimiGoodThing, goodThingLine } from "../memory/mimi-good.js";
 import { pixelSVG } from "../core/pixel.js";
 import { fillScrapbook } from "../memory/scrapbook.js";
 import { newMilestones } from "../memory/relationship.js";
+import { claimRoomThings, roomThingLine } from "../memory/themes.js";
+import { noticeWish, forgetWish, madeLine, cameTrueLine } from "../memory/wishes.js";
 
 const DAILY = 5;
 
@@ -109,6 +111,7 @@ export function wireJournal(mimi, els) {
           "aria-label": `Remove “${text}”`,
           onclick: () => {
             removeEntry(dayKey(), i);
+            if (forgetWish(dayKey(), text)) store.save("wishes");
             store.save("days");
             els.input.focus();
           },
@@ -178,9 +181,14 @@ export function wireJournal(mimi, els) {
     }
 
     const n = entriesToday().length;
-    const events = [echo
+    const wish = noticeWish(text, today);
+    const events = [wish.cameTrue.length
+      ? ["!!", cameTrueLine(wish.cameTrue[0]), { hearts: 5, hold: 4200 }]
+      : echo
       ? ["♡", echoLine(echo), { hearts: 2, hold: 3000 }]
       : [...reactionFor(text, n), { hearts: n === DAILY ? 5 : 1, hold: 2200 }]];
+    if (wish.made) events.push(["a wish!", madeLine(wish.made), { hearts: 2, hold: 3400 }]);
+    for (const theme of claimRoomThings(today)) events.push(["hmm!", roomThingLine(theme), { hearts: 2, hold: 3600 }]);
 
     for (const item of WORLD.filter((w) => before < w.need && before + 1 >= w.need)) {
       if (item.kind === "acc") store.settings.wear = { ...store.settings.wear, [item.slot]: item.id };
@@ -196,7 +204,7 @@ export function wireJournal(mimi, els) {
     // After your first good thing of the day, Mimi shares theirs.
     if (n === 1) events.push(["my turn!", goodThingLine(mimiGoodThing()), { hearts: 1, hold: 3400 }]);
 
-    store.save("days", "settings", "scrapbook");
+    store.save("days", "settings", "scrapbook", "wishes", "roomThings");
     if (store.settings.sound) purr({ volume: 0.6 });
     mimi.announce(events);
     saving = false;

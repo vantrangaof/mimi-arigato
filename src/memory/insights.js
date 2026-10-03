@@ -100,6 +100,15 @@ export function namesIn(text) {
     .filter((w) => /^\p{Lu}\p{Ll}+$/u.test(w) && !NOT_NAMES.has(w) && w !== catName());
 }
 
+// Names in a good thing, including a first word that shows up as a name in other entries
+// ("Anna made me laugh"). Pass known = knownNames() when checking many entries.
+export const knownNames = (entries = allEntries()) => new Set(entries.flatMap((e) => namesIn(e.text)));
+export function peopleIn(text, known = knownNames()) {
+  const first = text.match(/^\p{Lu}\p{Ll}+/u)?.[0];
+  const names = namesIn(text);
+  return first && known.has(first) && !names.includes(first) ? [first, ...names] : names;
+}
+
 const FAMILY_TITLES = { mom: "Mom", dad: "Dad", sister: "Sis", brother: "Bro", grandma: "Grandma", grandpa: "Grandpa" };
 
 // Who a good thing could be a thank-you to: a name in it, or a family member. "" if no one.
@@ -134,7 +143,8 @@ export function learnedFacts(entries = allEntries()) {
   }
 
   const people = new Map();
-  for (const e of entries) for (const who of new Set(namesIn(e.text))) people.set(who, (people.get(who) ?? 0) + 1);
+  const known = knownNames(entries);
+  for (const e of entries) for (const who of new Set(peopleIn(e.text, known))) people.set(who, (people.get(who) ?? 0) + 1);
   for (const [who, n] of people) {
     if (n >= 2) facts.push({ n: n + 0.5, text: `You talked about ${who} ${n} times. ${name} knows ${who} must be important.` });
   }

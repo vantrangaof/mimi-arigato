@@ -1,10 +1,26 @@
-// Memory Cabinet: what Mimi has learned, and drawers of entries Mimi sorted on their own.
+// Memories: Mimi's theories, what Mimi has learned, and the Memory cabinet: drawers of
+// entries Mimi sorted on their own, treasures, and wishes.
 
 import { el } from "../core/dom.js";
-import { formatShortYear } from "../core/dates.js";
+import { dayKey, daysBetween, formatShortYear } from "../core/dates.js";
 import { store, catName, totalThings } from "../core/store.js";
 import { CATEGORIES, learnedFacts, shelves } from "../memory/insights.js";
 import { TREASURES } from "../world/world.js";
+import { theoryText } from "../memory/theories.js";
+import { openWishes, wishesCameTrue } from "../memory/wishes.js";
+
+function theoryCards(name) {
+  if (!store.theories.length) return null;
+  const today = dayKey();
+  const cards = store.theories.map((t, i) => el("li", { class: `theory${daysBetween(t.key, today) < 3 ? " is-new" : ""}` },
+    el("div", { class: "theory-head" },
+      el("span", { class: "theory-number", text: `${name}'s theory #${i + 1}` }),
+      el("span", { class: "entry-date", text: formatShortYear(t.key) }),
+    ),
+    el("span", { text: theoryText(t) }),
+  )).reverse();
+  return el("ol", { class: "theories" }, ...cards);
+}
 
 const DRAWER_LIMIT = 30;
 
@@ -35,13 +51,23 @@ export function wireMemories(panel) {
     const drawers = Object.entries(CATEGORIES)
       .filter(([id]) => sorted[id].length)
       .map(([id, c]) => drawer(c.label, sorted[id]));
+    const wishes = openWishes();
+    if (wishes.length) drawers.push(drawer("Wishes in the jar", [...wishes].reverse().map((w) => ({ key: w.key, text: w.what }))));
+    const cameTrue = wishesCameTrue();
+    if (cameTrue.length) {
+      drawers.push(drawer("Wishes that came true", [...cameTrue].reverse()
+        .map((w) => ({ key: w.done.key, text: `${w.what} (wished on ${formatShortYear(w.key)})` }))));
+    }
     if (store.treasures.length) {
       drawers.push(drawer(`Treasures ${name} found`, store.treasures
         .map((t) => ({ key: t.key, text: TREASURES[t.id]?.label ?? t.id }))
         .reverse()));
     }
 
+    const theories = theoryCards(name);
     panel.replaceChildren(
+      el("h3", { class: "panel-heading", text: `${name}'s theories` }),
+      theories ?? el("p", { class: "muted", text: `${name} is quietly working on some theories about you. They take a little while.` }),
       el("h3", { class: "panel-heading", text: `What ${name} has learned` }),
       learned,
       el("h3", { class: "panel-heading", text: "Memory cabinet" }),

@@ -674,3 +674,39 @@ mark {
 .postcard-favorite figcaption { font-size: 0.8125rem; font-weight: 700; color: var(--ink-soft); }
 .postcard-favorite blockquote { margin: 4px 0 0; overflow-wrap: anywhere; }
 .postcard-sign { margin: 0; text-align: right; font-family: var(--font-pixel); color: var(--accent); }
+
+/* ---- one year ago today ---- */
+
+.year-ago {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px dashed var(--grid-strong);
+  border-radius: 3px;
+  background: var(--paper);
+}
+.year-ago-year { margin: 0; }
+.year-ago-year + .year-ago-year { padding-top: 10px; border-top: 1px solid var(--grid-strong); }
+.year-ago-year figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.year-ago-label { font-family: var(--font-pixel); color: var(--accent); }
+.year-ago-list { list-style: none; margin: 6px 0 0; padding: 0; line-height: 1.5; }
+.year-ago-list li { display: flex; align-items: center; gap: 8px; overflow-wrap: anywhere; }
+.year-ago-list li + li { margin-top: 4px; }
+.year-ago-remark { margin: 6px 0 0; font-size: 0.875rem; color: var(--ink-soft); }
+
+/* ---- Mimi's theories, wishes ---- */
+
+.theories { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.theory {
+  padding: 10px 12px;
+  border: 2px solid var(--sheet-edge);
+  border-radius: 3px;
+  background: var(--paper);
+  box-shadow: 2px 2px 0 var(--cat-shadow);
+  line-height: 1.5;
+}
+.theory-head { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
+.theory-number { font-family: var(--font-pixel); color: var(--accent); }
+.theory.is-new .theory-number::after { content: " new"; color: var(--ink-soft); }
+.wish-done { color: var(--ink-soft); }

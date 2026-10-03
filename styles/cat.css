@@ -35,6 +35,7 @@
 
 .room-item { visibility: hidden; cursor: pointer; }
 .room-item.is-on { visibility: visible; }
+.wish-tag:not(.is-on) { display: none; }
 .treasure { cursor: pointer; }
 
 /* Your photo in the wall frame, drawn at half-pixels so it still reads as pixel art. */
