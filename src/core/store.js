@@ -22,6 +22,7 @@ export const KEYS = {
   theories: "theories",
   wishes: "wishes",
   roomThings: "roomThings",
+  reminders: "reminders",
 };
 
 const DEFAULT_SETTINGS = {
@@ -51,6 +52,7 @@ export const store = {
   treasures: [], // [{ id: "button", key }]
   theories: [], // Mimi's theories, in the order found: [{ id, key, text }] (see memory/theories.js)
   wishes: [], // [{ id, key, text, what, words, done: null | { key, text } }] (see memory/wishes.js)
+  reminders: [], // sticky notes: things to remind you of (see memory/reminders.js)
   roomThings: [], // things from your life that appeared in the room: [{ id, key }] (see memory/themes.js)
 
   save(...names) {
@@ -263,6 +265,7 @@ function loadMemory() {
   store.theories = read(KEYS.theories, []);
   store.wishes = read(KEYS.wishes, []);
   store.roomThings = read(KEYS.roomThings, []);
+  store.reminders = read(KEYS.reminders, []);
 }
 
 export async function initStore() {
@@ -449,7 +452,15 @@ export function cloudState() {
     theories: store.theories,
     wishes: store.wishes,
     roomThings: store.roomThings,
+    reminders: store.reminders,
   };
+}
+
+// Sticky notes change after they're made (done, moved, removed): the newer version of each wins.
+function mergeNewest(a = [], b = []) {
+  const byId = new Map(a.map((x) => [x.id, x]));
+  for (const x of b) if (!byId.has(x.id) || x.updatedAt > byId.get(x.id).updatedAt) byId.set(x.id, x);
+  return [...byId.values()];
 }
 
 // A wish that came true on either device stays true.
@@ -483,6 +494,7 @@ export function mergeCloudState(remote = {}) {
     theories: unionBy(local.theories, remote.theories, (t) => t.id),
     wishes: mergeWishes(local.wishes, remote.wishes),
     roomThings: unionBy(local.roomThings, remote.roomThings, (t) => t.id),
+    reminders: mergeNewest(local.reminders, remote.reminders),
   };
 
   if (JSON.stringify(merged) !== JSON.stringify(local)) {
@@ -493,7 +505,8 @@ export function mergeCloudState(remote = {}) {
     store.theories = merged.theories;
     store.wishes = merged.wishes;
     store.roomThings = merged.roomThings;
-    for (const key of ["settings", "settingsTimes", "scrapbook", "treasures", "milestones", "firstMet", "theories", "wishes", "roomThings"]) {
+    store.reminders = merged.reminders;
+    for (const key of ["settings", "settingsTimes", "scrapbook", "treasures", "milestones", "firstMet", "theories", "wishes", "roomThings", "reminders"]) {
       if (merged[key] != null) write(KEYS[key], merged[key]);
     }
     emit();
@@ -517,6 +530,7 @@ export function exportBackup() {
     theories: store.theories,
     wishes: store.wishes,
     roomThings: store.roomThings,
+    reminders: store.reminders.filter((r) => !r.deleted),
     diary: diaryPages().map(({ day, text, mood, updatedAt }) => ({ day, text, mood, updatedAt })),
   }, null, 2);
 }
@@ -591,6 +605,23 @@ export function importBackup(text) {
       if (typeof t?.id === "string" && isDayKey(t.key) && !store.roomThings.some((x) => x.id === t.id)) store.roomThings.push({ id: t.id, key: t.key });
     }
   }
+  if (Array.isArray(data.reminders)) {
+    const repeats = [null, "day", "week", "month", "year"];
+    for (const r of data.reminders) {
+      if (typeof r?.id !== "string" || !isDayKey(r.due) || typeof r.text !== "string" || store.reminders.some((x) => x.id === r.id)) continue;
+      store.reminders.push({
+        id: r.id,
+        text: clean(r.text, 140),
+        due: r.due,
+        time: /^\d{2}:\d{2}$/.test(r.time) ? r.time : null,
+        repeat: repeats.includes(r.repeat) ? r.repeat : null,
+        done: isDayKey(r.done) ? r.done : null,
+        createdAt: Number(r.createdAt) || Date.now(),
+        updatedAt: Number(r.updatedAt) || Date.now(),
+        deleted: false,
+      });
+    }
+  }
   if (isDayKey(data.firstMet)) {
     const current = read(KEYS.firstMet, null);
     if (!current || data.firstMet < current) write(KEYS.firstMet, data.firstMet);
@@ -598,6 +629,6 @@ export function importBackup(text) {
 
   if (Array.isArray(data.diary)) mergeRemoteDiary(data.diary.filter((d) => d && typeof d === "object"), { synced: false });
 
-  store.save("days", "settings", "scrapbook", "treasures", "theories", "wishes", "roomThings");
+  store.save("days", "settings", "scrapbook", "treasures", "theories", "wishes", "roomThings", "reminders");
   return added;
 }

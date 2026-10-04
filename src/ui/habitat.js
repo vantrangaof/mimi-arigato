@@ -12,6 +12,7 @@ import { seasonOn } from "../world/seasons.js";
 import { weekPostcard, postcardSeen } from "../memory/postcard.js";
 import { roomThingIds } from "../memory/themes.js";
 import { openWishes } from "../memory/wishes.js";
+import { dueReminders } from "../memory/reminders.js";
 
 const wide = matchMedia("(min-width: 960px)");
 
@@ -92,7 +93,7 @@ async function pixelatedPhoto(id) {
   return data;
 }
 
-export function wireHabitat({ mimi, look, wrap, sprite, room, tally, onJar, onPostcard }) {
+export function wireHabitat({ mimi, look, wrap, sprite, room, tally, onJar, onPostcard, onSticky }) {
   // Sizing
   fitGrid(sprite);
   addEventListener("resize", () => fitGrid(sprite));
@@ -108,6 +109,7 @@ export function wireHabitat({ mimi, look, wrap, sprite, room, tally, onJar, onPo
     onItem: (line) => mimi.react(["♡", line], { hearts: 1 }),
     onJar,
     onPostcard,
+    onSticky,
   });
   let photo = null; // data URL of the framed photo
   const render = () => {
@@ -121,6 +123,7 @@ export function wireHabitat({ mimi, look, wrap, sprite, room, tally, onJar, onPo
       glow: greyDay(),
       things: roomThingIds(MAX_THINGS),
       wishes: openWishes().length > 0,
+      sticky: dueReminders().length > 0,
     });
     const framed = framedPhoto();
     if (framed && isUnlocked("picture", totalThings())) {

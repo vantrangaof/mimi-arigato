@@ -116,6 +116,31 @@
           <p class="muted small world-next" id="worldNext"></p>
         </section>
 
+        <!-- Sticky notes: things to remind you of -->
+        <section class="card stickies-card" id="stickyCard" aria-labelledby="stickyTitle">
+          <h2 class="card-title" id="stickyTitle">Sticky notes</h2>
+          <p class="muted small sticky-intro">Things you don't want to forget. Mimi holds on to them.</p>
+          <div id="stickyList"></div>
+          <form class="thanks-form" id="stickyForm" autocomplete="off">
+            <label class="visually-hidden" for="stickyInput">Remind me to…</label>
+            <input class="text-input" id="stickyInput" type="text" maxlength="140" required>
+            <button class="thanks-send" type="submit">Give to Mimi</button>
+          </form>
+          <div class="sticky-when" id="stickyWhen" hidden>
+            <label><span class="visually-hidden">Day</span><input class="text-input" id="stickyDate" type="date"></label>
+            <label><span class="visually-hidden">Time (optional)</span><input class="text-input time" id="stickyTime" type="time"></label>
+            <label><span class="visually-hidden">Repeat</span>
+              <select class="text-input" id="stickyRepeat">
+                <option value="">once</option>
+                <option value="day">every day</option>
+                <option value="week">every week</option>
+                <option value="month">every month</option>
+                <option value="year">every year</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
         <!-- Mimi's things -->
         <section class="card things" aria-label="Mimi's things">
           <div class="tabs" id="thingsTabs" role="tablist" aria-label="Mimi's things">

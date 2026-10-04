@@ -4,6 +4,13 @@ Progress log for Mimi Arigato. Newest first.
 
 ## 2026-10-04
 
+### Sticky notes (reminders)
+- New **Sticky notes** card: "text Mom tomorrow at 6", "pay rent on the 1st every month"… parsed on-device (`memory/reminders.js`) into day, time and repeat, editable before saving.
+- Mimi mentions due notes on open (once a day) and at a note's time while the app is open; a sticky note appears on the room wall while something is due. ✓ / later (tomorrow) / add to calendar (.ics with alert and repeat rule) / remove. Never scolds.
+- `core/ics.js` shared by the daily reminder and sticky notes.
+- Notes sync in `user_state` (newest change per note wins) and are in backups. No schema change.
+- Design for review: visiting cats + hide a treasure (first multiplayer game), in `docs/superpowers/specs/`.
+
 ### Mimi remembers your life
 - New tagline: **"A tiny cat who remembers your life."** (README, page description, manifest).
 - **One year ago today:** a card at the top of the journal with good things from this date in earlier years (and their photos), plus Mimi's remark (a thing or person that's still around, a wish that came true, or something warm). Mimi mentions it once per day on open.

@@ -1,6 +1,7 @@
 // Settings sheet: names, fur, daily reminder, account, backup.
 
 import { download } from "../core/dom.js";
+import { calendarEvent } from "../core/ics.js";
 import { dayKey } from "../core/dates.js";
 import { store, catName, exportBackup, importBackup, totalThings } from "../core/store.js";
 import { FURS, setCustomFur } from "../cat/sprite.js";
@@ -26,36 +27,14 @@ function span(className, text) {
   return s;
 }
 
-function reminderICS(time) {
-  const [hh, mm] = time.split(":");
-  const d = new Date();
-  const ymd = dayKey(d).replaceAll("-", "");
-  const stamp = d.toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
-  const name = catName();
-  const url = location.protocol.startsWith("http") ? location.href.split("?")[0] : "";
-  return [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Mimi Arigato//EN",
-    "BEGIN:VEVENT",
-    `UID:mimi-daily-${Date.now()}@mimi-arigato`,
-    `DTSTAMP:${stamp}`,
-    `DTSTART:${ymd}T${hh}${mm}00`,
-    "DURATION:PT5M",
-    "RRULE:FREQ=DAILY",
-    `SUMMARY:Tell ${name} five good things`,
-    `DESCRIPTION:${name} is waiting to hear about your day.${url ? `\\n${url}` : ""}`,
-    ...(url ? [`URL:${url}`] : []),
-    "BEGIN:VALARM",
-    "ACTION:DISPLAY",
-    `DESCRIPTION:Tell ${name} five good things`,
-    "TRIGGER:PT0M",
-    "END:VALARM",
-    "END:VEVENT",
-    "END:VCALENDAR",
-    "",
-  ].join("\r\n");
-}
+const reminderICS = (time) => calendarEvent({
+  uid: `mimi-daily-${Date.now()}`,
+  day: dayKey(),
+  time,
+  repeat: "day",
+  summary: `Tell ${catName()} five good things`,
+  description: `${catName()} is waiting to hear about your day.`,
+});
 
 export function wireSettings(els) {
   let furNote = "";

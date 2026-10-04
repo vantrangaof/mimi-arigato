@@ -154,6 +154,9 @@ const JAR_INSIDE = [2, 14, 4, 4]; // x, y, width, height of the glass
 const STAR_COLORS = ["#ffd166", "#ff8fb1", "#7fb3e6", "#8fd9b6", "#c8b4ef"];
 export const jarStars = (total) => Math.min(JAR_INSIDE[2] * JAR_INSIDE[3], Math.ceil(total / 5));
 
+// A sticky note on the wall while Mimi is holding a note for today (see memory/reminders.js).
+const STICKY = [11, 0, ["yyyyy", "ykkky", "yyyyy", "ykkyo"]];
+
 // Mimi's weekly postcard, lying on the floor in front of the cushion.
 const POSTCARD = [16, 31, ["kkkkkk", "kSrrSk", "kkkkkk"]];
 
@@ -247,10 +250,11 @@ export function skyFor(hour = new Date().getHours()) {
 
 // Draws the room once; returns update(state) to show what's unlocked and what's around:
 // { total, found, season, photo (a data URL or null), postcard ("new", "read" or null), glow,
-//   things (theme ids of your things, in slot order), wishes (true if a wish is in the jar) }.
+//   things (theme ids of your things, in slot order), wishes (true if a wish is in the jar),
+//   sticky (true while a note is due) }.
 // onItem(line) is called when an item is clicked so Mimi can comment on it; onJar and
 // onPostcard when the jar or the postcard is tapped.
-export function renderRoom(svg, { onItem, onJar, onPostcard }) {
+export function renderRoom(svg, { onItem, onJar, onPostcard, onSticky }) {
   svg.append(
     svgEl("rect", { x: 0, y: 29, width: ROOM_W, height: 1, fill: "var(--floor-edge)" }),
     svgEl("rect", { x: 0, y: 30, width: ROOM_W, height: ROOM_H - 30, fill: "var(--floor)" }),
@@ -290,6 +294,11 @@ export function renderRoom(svg, { onItem, onJar, onPostcard }) {
   postcard.appendChild(svgEl("rect", { class: "postcard-new twinkle", x: 22, y: 30, width: 1, height: 1, fill: "var(--accent)" }));
   postcard.addEventListener("click", () => onPostcard());
 
+  const sticky = svgEl("g", { class: "room-item item-sticky", role: "button", "aria-label": "Sticky note" });
+  drawArt(sticky, STICKY, { y: "#ffe27a", k: "#c9a227", o: "#e8c45a" });
+  sticky.addEventListener("click", () => onSticky());
+  svg.appendChild(sticky);
+
   const treasures = svgEl("g", { class: "treasures" });
   const things = svgEl("g", { class: "things" });
   svg.append(things, treasures, postcard);
@@ -300,7 +309,7 @@ export function renderRoom(svg, { onItem, onJar, onPostcard }) {
   drawArt(wishTag, [6, 13, ["k.", "ee", "ey"]], { k: "var(--room-line)", e: "#fff7d6", y: "#ffd166" });
   jar.appendChild(wishTag);
 
-  return function update({ total, found, season = null, photo: photoURL = null, postcard: card = null, glow = false, things: mine = [], wishes = false }) {
+  return function update({ total, found, season = null, photo: photoURL = null, postcard: card = null, glow = false, things: mine = [], wishes = false, sticky: noteDue = false }) {
     svg.dataset.sky = skyFor();
     const framed = Boolean(photoURL) && isUnlocked("picture", total);
     for (const [id, g] of Object.entries(items)) {
@@ -335,6 +344,7 @@ export function renderRoom(svg, { onItem, onJar, onPostcard }) {
     postcard.classList.toggle("is-new", card === "new");
 
     wishTag.classList.toggle("is-on", wishes);
+    sticky.classList.toggle("is-on", noteDue);
 
     if (thingsShown !== mine.join()) {
       thingsShown = mine.join();

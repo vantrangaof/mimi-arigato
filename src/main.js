@@ -31,6 +31,7 @@ import { wireBedtime } from "./ui/bedtime.js";
 import { wirePostcard, postcardGreeting } from "./ui/postcard.js";
 import { wireThanks } from "./ui/thanks.js";
 import { wireYearAgo, yearAgoGreeting } from "./ui/year-ago.js";
+import { wireReminders, stickyGreeting } from "./ui/reminders.js";
 import { discoverTheory } from "./memory/theories.js";
 import { claimRoomThings, roomThingLine } from "./memory/themes.js";
 import { initCloud } from "./cloud/sync.js";
@@ -53,7 +54,18 @@ const jar = wireJar(mimi);
 const postcard = wirePostcard(mimi, { dialog: $("postcardDialog"), body: $("postcardBody") });
 const thanks = wireThanks(mimi, { dialog: $("thanksDialog"), to: $("thanksTo"), img: $("thanksImg"), save: $("thanksSave"), share: $("thanksShare") });
 
-wireHabitat({ mimi, look, wrap, sprite, room: $("roomArt"), tally: $("tally"), onJar: jar.tap, onPostcard: postcard.open });
+const stickies = wireReminders(mimi, {
+  card: $("stickyCard"),
+  list: $("stickyList"),
+  form: $("stickyForm"),
+  input: $("stickyInput"),
+  when: $("stickyWhen"),
+  date: $("stickyDate"),
+  time: $("stickyTime"),
+  repeat: $("stickyRepeat"),
+});
+
+wireHabitat({ mimi, look, wrap, sprite, room: $("roomArt"), tally: $("tally"), onJar: jar.tap, onPostcard: postcard.open, onSticky: stickies.show });
 wireNote({ button: $("mimiNote"), text: $("noteText"), signature: $("noteSign") });
 wireTopbar({ together: $("together"), soundToggle: $("soundToggle"), settingsOpen: $("settingsOpen"), cloudButton: $("cloudButton") });
 wireIntro(mimi, { card: $("intro"), form: $("introForm"), input: $("introName"), skip: $("introSkip"), title: $("introTitle"), note: $("introNote") });
@@ -129,7 +141,7 @@ wireShare({
 });
 
 // Greeting on open: milestones, a seasonal hello, then a welcome back or a rare surprise,
-// a new postcard, something from a year ago, a new theory or room thing, then asking your name.
+// a new postcard, notes Mimi is holding, something from a year ago, a new theory or room thing, then asking your name.
 mimi.settle();
 if (fillScrapbook().length) store.save("scrapbook");
 const greetings = newMilestones();
@@ -149,6 +161,8 @@ else {
 }
 const mail = postcardGreeting();
 if (mail) greetings.push(mail);
+const notes = stickyGreeting();
+if (notes) greetings.push(notes);
 const memory = yearAgoGreeting();
 if (memory) greetings.push(memory);
 const theory = discoverTheory();

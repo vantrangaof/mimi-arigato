@@ -51,6 +51,14 @@ It's an installable web app (PWA). It works offline and without an account; sign
 - Milestones are celebrated once: Day 1 "nice to meet you", Day 7 "recognizes you now", Day 30 "knows some of your favorite things", Day 100, one year; and 50 / 100 / 250 / 500 / 1,000 good things.
 - After a few days away: *"you're back! Mimi kept your room cozy while you were away."*
 
+### Sticky notes (reminders)
+- A **Sticky notes** card under the journal: tell Mimi what you don't want to forget, in your own words. *"text Mom tomorrow at 6"*, *"pay bills on Friday"*, *"pay rent on the 1st every month"*, *"water the plants every Sunday"*, *"dentist Oct 12 at 9:30am"*, *"take out trash tonight"*, *"call grandma in 3 days"*.
+- As you type, Mimi fills in the day, time and repeat (once, every day/week/month/year), and you can change them before tapping **Give to Mimi**. With no day the note is for today; "at 6" means 6 pm.
+- **Mimi holds them:** when you open the app with notes due, Mimi says *"psst… is holding a note for you: “Text Mom.”"*, and a little yellow sticky note appears on the room's wall (tap it to jump to the notes). If the app is open at a note's time, Mimi taps your hand.
+- On each note: **✓** (Mimi: *"hopes Mom says hi back."*, *"doesn't understand money, but is proud of you."*), **later** (moves it to tomorrow), **add to calendar** (a calendar event with an alert, repeating if the note repeats), and **×**. A repeating note moves on to its next day when checked.
+- Mimi never scolds: a note from an earlier day just says "from Oct 2". **Coming up** lists the next few notes.
+- Web apps can't send notifications on their own, so the alert at the right time comes from your calendar app ("add to calendar"). Notes sync and are in backups.
+
 ### Mimi, the cat
 - **Tap Mimi** to pet them: a **meow** or **purr** (real recordings), happy ^ ^ eyes, blush, tail wags, a floating heart, and a little line ("leans into your hand."). Sometimes Mimi recalls one of your past entries.
 - **Sound on/off:** speaker button at the top right (remembered). On iPhone, the ring/silent switch also mutes web sounds.
@@ -122,7 +130,7 @@ Everything unlocks by total good things and never goes away:
 ### Settings
 - Your name, the cat's name, fur color (Strawberry, Peach, Cloud, Midnight, Snow).
 - **Account & sync** (also the **Sign in** / cloud button at the top): create an account with your email and a password (or sign in to an existing one). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
-- **Daily reminder:** adds a repeating event to your calendar app (web apps can't schedule notifications on their own).
+- **Daily reminder:** adds a repeating event to your calendar app (web apps can't schedule notifications on their own). For other reminders, use Sticky notes.
 - **Backup / Restore:** download everything as a file; restoring merges and never deletes.
 - **Share a picture of today:** a 1080×1350 pixel card of the cat with today's good things.
 
@@ -169,6 +177,7 @@ src/
     dom.js              Small DOM helpers
     pixel.js            Draws pixel art as SVG
     images.js           Shrinks photos before saving
+    ics.js              Calendar files (daily reminder, sticky notes)
   cat/                  The cat itself
     sprite.js           Sprite data, fur palettes, accessories, SVG and canvas drawing
     mimi.js             Moods, reactions, idle habits, sleep schedule
@@ -189,6 +198,7 @@ src/
     theories.js         Mimi's theories: connecting good things into conclusions
     wishes.js           Finding wishes in good things and noticing when they come true
     year-ago.js         Good things from this date in earlier years, and Mimi's remark
+    reminders.js        Sticky notes: reading "text Mom tomorrow at 6", due and repeating notes
   ui/                   One module per part of the page
     habitat.js          Room on screen, pixel sizing, petting
     topbar.js           Days together, sound toggle, settings icon
@@ -203,6 +213,7 @@ src/
     thanks.js           Thank-you cards
     journal.js          Writing good things, prompts, unlock, scrapbook, wish and room-thing events
     year-ago.js         The "one year ago today" card
+    reminders.js        Sticky notes card, Mimi's "psst" at a note's time
     tabs.js             Accessible tabs
     memories.js         Memory cabinet
     scrapbook.js        Scrapbook pages
@@ -230,7 +241,7 @@ Mimi is **local-first**: the on-device database is what the app reads and writes
 | Store | Contents |
 |---|---|
 | `entries` | One record per good thing: `{ id, day, text, createdAt, updatedAt, deleted, synced }` |
-| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` counters, `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`; synced: `theories`, `wishes`, `roomThings` |
+| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` counters, `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`; synced: `theories`, `wishes`, `roomThings`, `reminders`; per device: `stickyGreeted`, `stickySaid` |
 | `photos` | Photo details: `{ id, day, caption, entryId, createdAt, updatedAt, deleted, synced, uploaded, hasFull, hasThumb }` |
 | `photoFiles` | The image files, keyed `<photo id>:full` and `<photo id>:thumb` |
 
@@ -241,7 +252,7 @@ Data from earlier versions (plain localStorage) moves into the database automati
 | Table | Contents |
 |---|---|
 | `entries` | `id, user_id, day, text, created_at, updated_at, deleted, synced_at` |
-| `user_state` | `user_id, data (jsonb: settings, scrapbook, treasures, milestones, firstMet, theories, wishes, roomThings), updated_at` |
+| `user_state` | `user_id, data (jsonb: settings, scrapbook, treasures, milestones, firstMet, theories, wishes, roomThings, reminders), updated_at` |
 | `photos` | `id, user_id, day, caption, entry_id, created_at, updated_at, deleted, synced_at` |
 | Storage bucket `photos` | Private image files at `<user id>/<photo id>.jpg` and `…-thumb.jpg` |
 
@@ -254,7 +265,7 @@ Row-level security means each person can only read and write their own rows.
 - **When:** right after sign-in, on open, about 1.5 s after any change, when the device comes back online, and every 5 minutes.
 - **Entries:** changed entries are pushed; then everything other devices changed since the last pull is fetched, ordered by `synced_at` (stamped by the server, so wrong device clocks don't matter). If the same entry changed in two places, the newer edit wins.
 - **Deletions** are kept as tombstones (`deleted = true`) so every device learns about them.
-- **Settings** merge field by field (the most recent change to each setting wins); **scrapbook, treasures, milestones, theories, wishes and room things** are combined, so a new device never wipes your history. A wish that came true on either device stays true.
+- **Settings** merge field by field (the most recent change to each setting wins); **scrapbook, treasures, milestones, theories, wishes and room things** are combined, so a new device never wipes your history. A wish that came true on either device stays true; for sticky notes the most recent change to each note wins.
 - Anything you wrote before signing in is uploaded to your account when you sign in.
 - Pet and treat counters stay on each device.
 
@@ -290,7 +301,8 @@ Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing access
 
 ## Next up
 
-- **Visiting cats:** share a read-only link to your room; your cat shows up as a visitor in a friend's room for a day. Needs new Supabase tables and sharing rules (a public "room snapshot" per user, an invite/visit table, row-level security that allows reading a friend's snapshot only).
+- **Visiting cats + Hide a treasure** (first multiplayer game): add friends with an invite link, visit their room, hide one of your treasures in a spot in your room for a friend to find ("*sniff sniff* warmer!"); the finder keeps a copy tagged with where it came from. Design for review: [docs/superpowers/specs/2026-10-04-visiting-cats-hide-a-treasure-design.md](docs/superpowers/specs/2026-10-04-visiting-cats-hide-a-treasure-design.md). Later games on the same friends: paint together (a shared pixel canvas that hangs in both rooms), fishing together (live, co-op).
+- **Real notifications for sticky notes:** Web Push from a Supabase scheduled function (needs sign-in; on iPhone only for the installed app).
 - **"Mimi Wrapped" in December:** a year-in-review story you tap through (total good things, top people, favorite things, mood weather across the year, scrapbook highlights), built from Month, Memories and Scrapbook, with a share card at the end.
 
 ## Ideas for later
