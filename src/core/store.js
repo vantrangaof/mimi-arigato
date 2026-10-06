@@ -35,6 +35,7 @@ const DEFAULT_SETTINGS = {
   sound: true,
   customFur: null, // fur colors picked from a photo of your cat (see cat/fur-photo.js)
   framePhoto: null, // id of the photo hanging in Mimi's room (null = the newest photo)
+  shareThings: true, // friends who visit see your things from your life (see world/room-snapshot.js)
 };
 
 let db;

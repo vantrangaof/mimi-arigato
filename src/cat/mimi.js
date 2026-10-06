@@ -129,17 +129,29 @@ export function makeMimi({ wrap, bubble, state, look, context }) {
   }
 
   // Plays reactions one after another: [[sound, text, options], ...], then calls onDone.
+  let playing = null; // the list being announced, so later() can add to it
   function announce(items, onDone) {
     clearTimeout(queueTimer);
+    items = [...items];
+    playing = items;
     const run = (i) => {
       queued = i < items.length - 1;
-      if (i >= items.length) return onDone?.();
+      if (i >= items.length) {
+        if (playing === items) playing = null;
+        return onDone?.();
+      }
       const [sound, text, options = {}] = items[i];
       react([sound, text], options);
       const wait = (options.hold ?? 1800) + (options.hearts ?? 1) * 140 + 300;
       queueTimer = setTimeout(() => run(i + 1), wait);
     };
     run(0);
+  }
+
+  // Like announce, but waits for whatever Mimi is already announcing instead of cutting it off.
+  function later(items) {
+    if (playing) playing.push(...items);
+    else announce(items);
   }
 
   setInterval(settle, 30_000);
@@ -149,6 +161,7 @@ export function makeMimi({ wrap, bubble, state, look, context }) {
     settle,
     react,
     announce,
+    later,
     isAsleep: asleep,
     setFull(value) {
       full = value;

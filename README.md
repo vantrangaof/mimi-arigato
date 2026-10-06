@@ -131,6 +131,7 @@ Everything unlocks by total good things and never goes away:
 - Your name, the cat's name, fur color (Strawberry, Peach, Cloud, Midnight, Snow).
 - **Account & sync** (also the **Sign in** / cloud button at the top): create an account with your email and a password (or sign in to an existing one). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
 - **Daily reminder:** adds a repeating event to your calendar app (web apps can't schedule notifications on their own). For other reminders, use Sticky notes.
+- **Friends** (when signed in): "Invite a friend" makes a code like `ABC-234` and a link to share; a friend opens the link or types the code under "Have a code?" and says yes. Tap a friend to **visit their room**: their cat, unlocks, treasures, seasonal decor and things from their life. Never their good things, diary or photos. "Show my things to friends" hides your things from your life from visitors. Either of you can remove the friendship.
 - **Backup / Restore:** download everything as a file; restoring merges and never deletes.
 - **Share a picture of today:** a 1080×1350 pixel card of the cat with today's good things.
 
@@ -169,7 +170,8 @@ src/
   main.js               Startup: opens the database and wires the modules together
   config.js             Supabase project URL + public anon key (empty = no cloud sync)
   cloud/
-    sync.js             Sign-in with email + password, push/pull sync with Supabase (entries, photos, state)
+    sync.js             Sign-in with email + password, push/pull sync with Supabase (entries, photos, state, room)
+    friends.js          Invite codes, the friends list, a friend's room
   core/                 Infrastructure, no UI
     db.js               IndexedDB database (localStorage fallback)
     store.js            In-memory data + persistence, change events, backup/restore
@@ -187,6 +189,7 @@ src/
     world.js            Unlock list, the pixel room, treasures
     surprises.js        Rare finds and dreams
     seasons.js          Halloween, Christmas, Lunar New Year, your anniversary
+    room-snapshot.js    What friends see when they visit (only the room)
   memory/               How Mimi understands you (pure logic)
     insights.js         Keyword reactions, categories, learned facts, monthly recap
     quotes.js           Mimi's notes and how a new one is picked each visit
@@ -222,6 +225,8 @@ src/
     play.js             Treats and laser play
     settings.js         Settings dialog, reminder file, backup
     account.js          Account & sync section in Settings
+    friends.js          Friends section in Settings: invites, friends list
+    visit.js            Visiting a friend's room
     share.js            Share picture
 ```
 
@@ -254,11 +259,14 @@ Data from earlier versions (plain localStorage) moves into the database automati
 | `entries` | `id, user_id, day, text, created_at, updated_at, deleted, synced_at` |
 | `user_state` | `user_id, data (jsonb: settings, scrapbook, treasures, milestones, firstMet, theories, wishes, roomThings, reminders), updated_at` |
 | `photos` | `id, user_id, day, caption, entry_id, created_at, updated_at, deleted, synced_at` |
+| `friend_invites` | `code, user_id, created_at, expires_at, used_by`: one-use codes, 7 days |
+| `friends` | `user_id, friend_id, created_at`: one row each way, made only by `accept_invite()` |
+| `rooms` | `user_id, snapshot (jsonb: cat name, fur, wear, total, treasures, things, season), updated_at`: readable by friends |
 | Storage bucket `photos` | Private image files at `<user id>/<photo id>.jpg` and `…-thumb.jpg` |
 
 Entries also have a `photo_id` column linking a good thing to its photo.
 
-Row-level security means each person can only read and write their own rows.
+Row-level security means each person can only read and write their own rows. The one exception is `rooms`: your friends can read your room snapshot. `peek_invite()` and `accept_invite()` are the only way to use someone else's invite code.
 
 ### How sync works
 
@@ -301,7 +309,7 @@ Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing access
 
 ## Next up
 
-- **Visiting cats + Hide a treasure** (first multiplayer game): add friends with an invite link, visit their room, hide one of your treasures in a spot in your room for a friend to find ("*sniff sniff* warmer!"); the finder keeps a copy tagged with where it came from. Design for review: [docs/superpowers/specs/2026-10-04-visiting-cats-hide-a-treasure-design.md](docs/superpowers/specs/2026-10-04-visiting-cats-hide-a-treasure-design.md). Later games on the same friends: paint together (a shared pixel canvas that hangs in both rooms), fishing together (live, co-op).
+- **Hide a treasure** (step 2 of the first multiplayer game; friends and visiting are done): hide one of your treasures in a spot in your room for a friend to find ("*sniff sniff* warmer!"); the finder keeps a copy tagged with where it came from. Then step 3, your cat visiting a friend's room for a day. Design: [docs/superpowers/specs/2026-10-04-visiting-cats-hide-a-treasure-design.md](docs/superpowers/specs/2026-10-04-visiting-cats-hide-a-treasure-design.md). Later games on the same friends: paint together (a shared pixel canvas that hangs in both rooms), fishing together (live, co-op).
 - **Real notifications for sticky notes:** Web Push from a Supabase scheduled function (needs sign-in; on iPhone only for the installed app).
 - **"Mimi Wrapped" in December:** a year-in-review story you tap through (total good things, top people, favorite things, mood weather across the year, scrapbook highlights), built from Month, Memories and Scrapbook, with a share card at the end.
 

@@ -2,6 +2,18 @@
 
 Progress log for Mimi Arigato. Newest first.
 
+## 2026-10-06
+
+### Friends and visiting (multiplayer, step 1)
+- **Settings → Friends** (when signed in): "Invite a friend" makes a one-use code (`ABC-234`, 7 days) plus a link (`#invite=…`) to share or copy. A friend opens the link (Settings opens on "Be friends with Xiao Mi's human?") or types the code under "Have a code?" (for when an iPhone opens the link in Safari instead of the installed app).
+- Tap a friend to **visit their room** in a sheet: their cat (fur, including a photo palette, and what they wear), unlocks, treasures, seasonal decor and things from their life, read-only. Tapping their cat or things gets visitor lines ("Mochi sniffs you politely."). Never good things, diary, photos or theories.
+- **Show my things to friends** switch (on by default; synced with settings).
+- Mimi greets you when someone accepted your invite. Removing a friend ends it for both people.
+- Sync uploads a room snapshot (`rooms` table) whenever it changes.
+- Mimi's startup greetings now wait for any greeting already playing instead of cutting it off (`mimi.later`).
+- **Schema change:** re-run `supabase/schema.sql` (adds `friend_invites`, `friends`, `rooms`, `peek_invite()`, `accept_invite()`).
+- Decided with the user: things-from-your-life switch, a hidden treasure stays in your room, invite link plus code. Next: hide a treasure.
+
 ## 2026-10-04
 
 ### Sticky notes (reminders)

@@ -1,4 +1,4 @@
-# Visiting cats + Hide a treasure — design (draft for review)
+# Visiting cats + Hide a treasure — design
 
 **Goal.** The first thing friends do together in Mimi: visit each other's rooms, and hide a treasure for a friend to find. Asynchronous, so you're never both needed at once. Chosen by the user on 2026-10-04 over "paint together" and "fishing together", which can reuse the friends and rooms built here.
 
@@ -37,21 +37,21 @@ RPCs (security definer, each checks `auth.uid()`):
 - `hidden_for_me()`: hidden treasures waiting for me, without the spot.
 - `guess_spot(id, spot)`: returns `found`, `warm` or `cold`. On `found` it stamps `found_at`.
 
-**Room snapshot** (written on each sync when it changed): `{ catName, fur, customFur, wear, total, treasures, roomThings, season }`. It holds no entry text. Room things do reveal themes ("a coffee mug"); see the open questions.
+**Room snapshot** (written on each sync when it changed): `{ v, catName, fur, customFur, wear, total, treasures, things, season, day }`. As built, the invite preview is a `peek_invite()` RPC (returns the cat name and whether it's your own code). It holds no entry text. Room things do reveal themes ("a coffee mug"); see the open questions.
 
 **On the device:** `store.friends` (a cache for showing the list offline) and found gifts in `store.treasures` as `{ id, key, from: "Xiao Mi" }`. Gift treasures are keyed `id@owner` so they don't collide with your own (`unionBy` in `mergeCloudState` changes to that key).
 
 ## Build order
-1. **Friends + room snapshot + visiting** (schema, invite link, Friends section, read-only room sheet that reuses `renderRoom` and `applyLook`).
+1. ✅ (2026-10-06) **Friends + room snapshot + visiting** (schema, invite link, Friends section, read-only room sheet that reuses `renderRoom` and `applyLook`).
 2. **Hide a treasure** (long-press menu, spots per room, RPCs, gift treasures, "found it" greetings).
 3. **Visitor cat** in a friend's room for a day (a small `visits` table).
 
 Every part needs both people signed in. Offline, Friends shows "connect to visit".
 
-## Open questions for the user
-- Should friends see your **things from your life** (coffee mug and so on)? They hint at what you write about. Options: yes (default) / a "show my things to friends" switch / never.
-- Should a hidden treasure leave **your** room while it's hidden ("it's at Mochi's now"), or stay put?
-- An invite **code to type** as well as the link, for when the link opens in the wrong browser on iPhone (the same problem the magic-link sign-in had)?
+## Decisions (user, 2026-10-05)
+- **Things from your life:** friends see them, with a "Show my things to friends" switch in Settings (on by default). When it's off, the snapshot leaves out `roomThings`.
+- **Hidden treasure:** stays in your room; the friend gets a copy when they find it.
+- **Invites:** link **and** a short code to type (Settings → Friends → "Have a code?").
 
 ## Testing
 Extend the mock Supabase used for the sync tests with `friends`, `rooms`, `hidden_treasures` and the three RPCs, and run two headless Chrome profiles as two users: invite → accept → visit → hide → guess cold/warm/found → gift appears with its tag. Then a real two-account test on the live site, since sign-in itself hasn't been tested live yet.

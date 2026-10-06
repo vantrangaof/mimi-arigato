@@ -22,6 +22,8 @@ import { wireSettings } from "./ui/settings.js";
 import { wireIntro, needsIntro } from "./ui/intro.js";
 import { wireShare } from "./ui/share.js";
 import { wireAccount } from "./ui/account.js";
+import { wireFriends } from "./ui/friends.js";
+import { wireVisit } from "./ui/visit.js";
 import { wireNote } from "./ui/note.js";
 import { wireWardrobe } from "./ui/wardrobe.js";
 import { wirePhotos } from "./ui/photos.js";
@@ -132,6 +134,14 @@ wireSettings({
   backupNote: $("backupNote"),
 });
 wireAccount($("accountBody"));
+const friends = wireFriends(mimi, {
+  section: $("friendsSection"),
+  body: $("friendsBody"),
+  settings: $("settings"),
+  opener: $("settingsOpen"),
+  visit: wireVisit({ dialog: $("visitDialog"), title: $("visitTitle"), body: $("visitBody") }),
+});
+$("settingsOpen").addEventListener("click", () => friends.refresh());
 wireShare({
   open: $("shareOpen"),
   dialog: $("shareDialog"),
@@ -176,7 +186,7 @@ if (things.length) {
   greetings.push(...things.map((t) => ["hmm!", roomThingLine(t), { hearts: 2, hold: 3600 }]));
 }
 if (needsIntro()) greetings.push(["hi!", "would love to know your name.", { hearts: 0, hold: 3000 }]);
-if (greetings.length) setTimeout(() => mimi.announce(greetings), 700);
+if (greetings.length) setTimeout(() => mimi.later(greetings), 700);
 
 preloadSound();
 initCloud();

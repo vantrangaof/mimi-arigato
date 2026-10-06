@@ -7,6 +7,7 @@
 //   photos: details sync like entries; image files live in a private Storage bucket
 //   ("photos/<user id>/<photo id>.jpg" and "-thumb.jpg"). Thumbnails download right away,
 //   full images only when opened.
+//   room    a snapshot of your room that friends can visit (see world/room-snapshot.js)
 // Sync runs on sign-in, on open, shortly after changes, when back online, and every few minutes.
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config.js";
@@ -15,6 +16,7 @@ import {
   unsyncedPhotos, markPhotosSynced, mergeRemotePhotos, photoFile, savePhotoFile, photoById,
   unsyncedDiary, markDiarySynced, mergeRemoteDiary,
 } from "../core/store.js";
+import { roomSnapshot } from "../world/room-snapshot.js";
 
 const CLIENT_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const PAGE = 1000;
@@ -32,6 +34,12 @@ let status = { state: "off" }; // off | signed-out | syncing | synced | error
 export const cloudConfigured = () => Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 export const cloudStatus = () => ({ ...status, email: session?.user?.email ?? null });
 export const onCloudChange = (fn) => document.addEventListener("mimi:cloud", fn);
+
+// The client and your user id while signed in, for the friends features (cloud/friends.js).
+export async function cloud() {
+  if (!session) return null;
+  return { c: await getClient(), uid: session.user.id };
+}
 
 function setStatus(next) {
   status = next;
@@ -289,6 +297,20 @@ async function syncState(c) {
   }
 }
 
+// Uploads the room snapshot when it changed since the last upload.
+async function pushRoom(c) {
+  const snapshot = roomSnapshot();
+  const key = `roomPushed:${session.user.id}`;
+  if (read(key, null) === stable(snapshot)) return;
+  const { error } = await c.from("rooms").upsert({
+    user_id: session.user.id,
+    snapshot,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+  write(key, stable(snapshot));
+}
+
 export async function syncNow() {
   if (!session) return;
   if (syncing) {
@@ -306,6 +328,7 @@ export async function syncNow() {
     await syncState(c);
     await pushDiary(c);
     await pullDiary(c);
+    await pushRoom(c);
     setStatus({ state: "synced", lastSync: Date.now() });
   } catch (err) {
     setStatus({ state: "error", error: friendly(err), lastSync: status.lastSync });

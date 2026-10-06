@@ -214,6 +214,11 @@
       <div id="accountBody"></div>
     </div>
 
+    <div class="sheet-section" id="friendsSection" hidden>
+      <span class="sheet-label">Friends</span>
+      <div id="friendsBody"></div>
+    </div>
+
     <div class="sheet-section">
       <span class="sheet-label">Backup</span>
       <p class="muted">Your good things are saved only in this browser. Download a backup to keep them safe or move them to another device.</p>
@@ -281,6 +286,14 @@
       <button class="pixel-button primary" id="thanksSave" type="button">Save picture</button>
       <button class="pixel-button" id="thanksShare" type="button" hidden>Send</button>
     </div>
+  </dialog>
+
+  <dialog class="sheet visit-sheet" id="visitDialog" aria-labelledby="visitTitle">
+    <form method="dialog" class="sheet-head">
+      <h2 class="card-title" id="visitTitle">A friend's room</h2>
+      <button class="icon-button small" value="close" aria-label="Close">×</button>
+    </form>
+    <div id="visitBody"></div>
   </dialog>
 
   <script type="module" src="src/main.js"></script>

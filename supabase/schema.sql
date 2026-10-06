@@ -150,3 +150,115 @@ alter table public.diary_pages enable row level security;
 drop policy if exists "own diary" on public.diary_pages;
 create policy "own diary" on public.diary_pages
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
+-- Friends and visiting (added later; re-running this whole file is safe)
+-- ---------------------------------------------------------------------------
+
+-- Invite codes: one person makes a code, a friend uses it once within 7 days.
+create table if not exists public.friend_invites (
+  code        text primary key check (code ~ '^[A-Z0-9]{6}$'),
+  user_id     uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  expires_at  timestamptz not null default now() + interval '7 days',
+  used_by     uuid references auth.users (id) on delete set null
+);
+
+-- One row each way: (me, my friend) and (my friend, me).
+create table if not exists public.friends (
+  user_id     uuid not null references auth.users (id) on delete cascade,
+  friend_id   uuid not null references auth.users (id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  primary key (user_id, friend_id)
+);
+
+-- What friends see when they visit: only the room (cat, unlocks, treasures, your things).
+-- Never any good things, diary, photos or theories.
+create table if not exists public.rooms (
+  user_id     uuid primary key default auth.uid() references auth.users (id) on delete cascade,
+  snapshot    jsonb not null default '{}'::jsonb,
+  updated_at  timestamptz not null default now()
+);
+
+alter table public.friend_invites enable row level security;
+alter table public.friends enable row level security;
+alter table public.rooms enable row level security;
+
+drop policy if exists "own invites" on public.friend_invites;
+create policy "own invites" on public.friend_invites
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id and used_by is null);
+
+-- Friendships are only made by accept_invite below; either side can end one.
+drop policy if exists "see own friends" on public.friends;
+create policy "see own friends" on public.friends
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "remove own friends" on public.friends;
+create policy "remove own friends" on public.friends
+  for delete using (auth.uid() = user_id);
+
+drop policy if exists "own room" on public.rooms;
+create policy "own room" on public.rooms
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "friends visit rooms" on public.rooms;
+create policy "friends visit rooms" on public.rooms
+  for select using (exists (
+    select 1 from public.friends f where f.user_id = auth.uid() and f.friend_id = rooms.user_id
+  ));
+
+-- Ending a friendship removes it for both people.
+create or replace function public.mimi_unfriend_both() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  delete from public.friends where user_id = old.friend_id and friend_id = old.user_id;
+  return old;
+end;
+$$;
+
+drop trigger if exists friends_unfriend_both on public.friends;
+create trigger friends_unfriend_both
+  after delete on public.friends
+  for each row execute function public.mimi_unfriend_both();
+
+-- The inviter's cat name, so the app can ask "Be friends with Mochi's human?" first
+-- (own = true when it's your own code). Returns null when the code is wrong, used or expired.
+create or replace function public.peek_invite(invite_code text) returns jsonb
+language sql stable security definer set search_path = public as $$
+  select jsonb_build_object('cat_name', coalesce(r.snapshot ->> 'catName', 'Mimi'), 'own', i.user_id = auth.uid())
+  from public.friend_invites i
+  left join public.rooms r on r.user_id = i.user_id
+  where i.code = upper(invite_code)
+    and i.used_by is null
+    and i.expires_at > now();
+$$;
+
+-- Uses an invite: both people become friends. Returns the inviter's id, or raises an error.
+create or replace function public.accept_invite(invite_code text) returns uuid
+language plpgsql security definer set search_path = public as $$
+declare
+  inviter uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'sign in first';
+  end if;
+  select user_id into inviter from public.friend_invites
+    where code = upper(invite_code) and used_by is null and expires_at > now()
+    for update;
+  if inviter is null then
+    raise exception 'invite not found';
+  end if;
+  if inviter = auth.uid() then
+    raise exception 'own invite';
+  end if;
+  update public.friend_invites set used_by = auth.uid() where code = upper(invite_code);
+  insert into public.friends (user_id, friend_id) values (auth.uid(), inviter), (inviter, auth.uid())
+    on conflict do nothing;
+  return inviter;
+end;
+$$;
+
+revoke execute on function public.peek_invite(text) from public, anon;
+revoke execute on function public.accept_invite(text) from public, anon;
+grant execute on function public.peek_invite(text) to authenticated;
+grant execute on function public.accept_invite(text) to authenticated;

@@ -207,9 +207,10 @@ export function renderCat(svg) {
   return look;
 }
 
-// wear: { head, neck, face } item ids ("none" for an empty slot).
-export function applyLook(wrap, { fur, wear }) {
-  const palette = FURS[fur];
+// wear: { head, neck, face } item ids ("none" for an empty slot). customFur: a friend's
+// photo palette (yours is FURS.custom).
+export function applyLook(wrap, { fur, wear, customFur = null }) {
+  const palette = fur === "custom" && typeof customFur?.body === "string" ? customFur : FURS[fur];
   for (const [key, cssVar] of Object.entries(FUR_VARS)) {
     // Strawberry keeps the stylesheet colors so its dark-mode tweaks still apply.
     if (palette?.[key] && fur !== "pink") wrap.style.setProperty(cssVar, palette[key]);
