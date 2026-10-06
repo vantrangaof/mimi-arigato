@@ -1,51 +1,90 @@
-// Things to do with Mimi: treats and a laser dot to chase.
+// Things to do with Mimi: fish, water and cuddles you earn with good things, and a laser dot to chase.
 
-import { KEYS, dailyCount, setDailyCount } from "../core/store.js";
-import { replay } from "../core/dom.js";
+import { store, KEYS, dailyCount, setDailyCount, entriesToday, catName } from "../core/store.js";
+import { replay, pick } from "../core/dom.js";
 import { pixelSVG } from "../core/pixel.js";
-import { store } from "../core/store.js";
 import { purr } from "../cat/sound.js";
 
-const MAX_TREATS = 3;
-const FISH = [".bbbb.b", "bFeFFbb", "bFFFFbb", ".bbbb.b"];
-const FISH_COLORS = { b: "#3f6797", F: "#a6d4f7", e: "#1b2a3a" };
+// Each good thing told today earns one fish, one drink of water and one cuddle to give
+// whenever you like. Mimi never gets hungry or thirsty: these are treats, not needs.
+const CARE = {
+  fish: {
+    key: KEYS.treats,
+    label: "Fish",
+    art: [".bbbb.b", "bFeFFbb", "bFFFFbb", ".bbbb.b"],
+    colors: { b: "#3f6797", F: "#a6d4f7", e: "#1b2a3a" },
+    spot: "spots a fish!",
+    done: [["nom nom", "loved that fish."], ["mrrp!", "ate the whole fish, tail first."], ["nom", "licks their whiskers. Delicious."]],
+  },
+  water: {
+    key: KEYS.water,
+    label: "Water",
+    art: ["..b..", ".bWb.", "bWWWb", "bWWWb", ".bbb."],
+    colors: { b: "#3f8fd2", W: "#bfe6ff" },
+    className: "water-drop",
+    spot: "hears the water bowl!",
+    done: [["lap lap", "drinks a little water. Refreshing!"], ["slurp", "got water on their nose."], ["lap", "sips very politely."]],
+  },
+  cuddle: {
+    key: KEYS.cuddles,
+    label: "Cuddle",
+    done: [["prrrr", "melts into a purring puddle."], ["♡♡", "snuggles into your arms."], ["purr~", "kneads your sleeve happily."]],
+  },
+};
 
-export function wireTreat(btn, mimi, wrap) {
+export function wireCare(buttons, mimi, wrap) {
   let busy = false;
+  const earned = () => Math.min(entriesToday().length, 5);
+  const left = (care) => Math.max(0, earned() - dailyCount(care.key));
 
   function label() {
-    const left = MAX_TREATS - dailyCount(KEYS.treats);
-    btn.textContent = left > 0 ? `Treat (${left})` : "Full of treats";
-    btn.setAttribute("aria-label", left > 0 ? `Give a treat, ${left} left today` : "No treats left today");
+    for (const [id, btn] of Object.entries(buttons)) {
+      const care = CARE[id];
+      const n = left(care);
+      btn.textContent = n ? `${care.label} ×${n}` : care.label;
+      btn.setAttribute("aria-label", n ? `${care.label}: ${n} to give` : `${care.label}: tell ${catName()} a good thing to earn one`);
+    }
   }
 
-  btn.addEventListener("click", () => {
+  function finish(care) {
+    setDailyCount(care.key, dailyCount(care.key) + 1);
+    label();
+    mimi.setActivity(null);
+    if (store.settings.sound) purr();
+    mimi.react(pick(care.done), { hearts: care === CARE.cuddle ? 4 : 2, hold: 2200 });
+    busy = false;
+  }
+
+  function give(care) {
     if (busy) return;
-    const used = dailyCount(KEYS.treats);
-    if (used >= MAX_TREATS) {
+    if (!left(care)) {
       replay(wrap, "is-shake");
-      mimi.react(["mm-mm", "is too full for more treats today."], { hearts: 0 });
+      mimi.react(earned() >= 5
+        ? ["♡", "is completely spoiled today. Thank you!"]
+        : ["mrrp?", `gets a ${care.label.toLowerCase()} for every good thing you tell them.`], { hearts: 0, hold: 2600 });
       return;
     }
     busy = true;
-    mimi.setActivity("spots a fish treat!");
-    const fish = pixelSVG(FISH, FISH_COLORS, "fish");
-    wrap.appendChild(fish);
-    fish.addEventListener("animationend", () => {
-      fish.remove();
+    if (!care.art) {
+      replay(wrap, "is-squish");
+      finish(care);
+      return;
+    }
+    mimi.setActivity(care.spot);
+    const drop = pixelSVG(care.art, care.colors, `fish ${care.className ?? ""}`);
+    wrap.appendChild(drop);
+    drop.addEventListener("animationend", () => {
+      drop.remove();
       wrap.classList.add("is-chomping");
       setTimeout(() => {
         wrap.classList.remove("is-chomping");
-        setDailyCount(KEYS.treats, used + 1);
-        label();
-        mimi.setActivity(null);
-        if (store.settings.sound) purr();
-        mimi.react(["nom nom", "loved that treat."], { hearts: 2 });
-        busy = false;
+        finish(care);
       }, 900);
     }, { once: true });
-  });
+  }
 
+  for (const [id, btn] of Object.entries(buttons)) btn.addEventListener("click", () => give(CARE[id]));
+  store.on(label);
   label();
 }
 

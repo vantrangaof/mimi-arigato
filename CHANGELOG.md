@@ -4,6 +4,13 @@ Progress log for Mimi Arigato. Newest first.
 
 ## 2026-10-06
 
+### Mimi's AI: real good things, fish & water, Chat with Mimi
+- **AI check:** when signed in, Mimi reads each good thing first (Gemini 2.5 Flash-Lite through `api/mimi.mjs`). Not a real good thing (gibberish, filler, padding) → Mimi tilts her head and asks what was good; it stays in the box and isn't saved. Something painful → Mimi comforts you instead. Real ones get a reply about that exact thing. Signed out, offline, or AI down → accepted as before.
+- **Fish, water and cuddles** replace "Give a treat": each good thing told today earns one of each to give when you like. Mimi never gets hungry or thirsty (no-guilt rule kept).
+- **Chat with Mimi:** a chat sheet (look borrowed from Urban Bento's Hiro chat: round bubbles, chips, pill input, typing dots). Mimi knows your names, days together, recent good things and wishes, never your diary. The chat stays on this device; "Start over" clears it.
+- `api/mimi.mjs` keeps the prompts and model on the server (it can't be used as a general AI), checks your Supabase sign-in, and allows 120 AI calls per person per day (`ai_usage` table, `mimi_ai_call()`).
+- **Setup:** add `GEMINI_API_KEY` in Vercel → Settings → Environment Variables, and re-run `supabase/schema.sql`.
+
 ### Light mode
 - **Settings → Appearance:** Day & night (default: light 6 am–7 pm, dark otherwise, switching while the app is open) / Match my phone / Light / Dark. Saved with your settings (syncs), and mirrored to localStorage so an inline script applies it before the page draws. The browser bar color follows the choice.
 

@@ -244,6 +244,8 @@
   animation: fish-drop 700ms steps(7, end) forwards;
 }
 
+.water-drop { left: calc(var(--px) * 13.5); width: calc(var(--px) * 5); height: calc(var(--px) * 5); }
+
 @keyframes fish-drop {
   from { transform: translateY(calc(var(--px) * -16)); }
   to   { transform: translateY(0); opacity: 0.9; }

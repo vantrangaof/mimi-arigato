@@ -64,7 +64,8 @@ It's an installable web app (PWA). It works offline and without an account; sign
 - **Sound on/off:** speaker button at the top right (remembered). On iPhone, the ring/silent switch also mutes web sounds.
 - **Idle habits:** every so often Mimi grooms a paw, yawns, dozes, stretches, chases their tail, stares at you, looks out the window, watches the aquarium fish, admires their accessory, or sits by the journal "waiting to hear about your day."
 - **Time of day:** asleep 10 pm to 6 am ("z z z"; tap to wake). Morning stretch, lunchtime thoughts, evening "ready to hear about your day."
-- **Treats:** a fish drops in and Mimi chomps it (3 a day).
+- **Fish, water, cuddles:** each good thing you tell Mimi today earns one of each to give whenever you like (a fish drops in, a water drop, a purring snuggle). Mimi never gets hungry or thirsty.
+- **Good things are checked:** when signed in, Mimi (AI) reads each one first. Random words or filler get a gentle "what was good about it?" and aren't saved; something painful gets comfort instead. Offline, everything is accepted.
 - **Bedtime:** from 9 pm to 6 am a **Tuck in** button appears. Mimi climbs under a blanket, whispers today's good things back to you one by one, says goodnight, and the room's lights dim. Mimi stays asleep until morning (petting still wakes them for a moment).
 - **Dress up:** a wardrobe with one item per slot (head, neck, face) and a live preview. Free from the start: party hat, bell collar, round glasses. Unlocked by good things: little flower (5), ribbon bow (15), cozy scarf (40), beret (120), tiny crown (200).
 - **Play:** a laser dot for 20 seconds; Mimi pounces when it lands on them. Steer it with your finger or mouse, or let it wander.
@@ -133,6 +134,7 @@ Everything unlocks by total good things and never goes away:
 - **Account & sync** (also the **Sign in** / cloud button at the top): create an account with your email and a password (or sign in to an existing one). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
 - **Daily reminder:** adds a repeating event to your calendar app (web apps can't schedule notifications on their own). For other reminders, use Sticky notes.
 - **Friends** (when signed in): "Invite a friend" makes a code like `ABC-234` and a link to share; a friend opens the link or types the code under "Have a code?" and says yes. Tap a friend to **visit their room**: their cat, unlocks, treasures, seasonal decor and things from their life. Never their good things, diary or photos. "Show my things to friends" hides your things from your life from visitors. Either of you can remove the friendship.
+- **Chat with Mimi** (when signed in): the Chat button opens a little conversation with your cat. Mimi knows your names, your recent good things and wishes (never your diary). The chat stays on this device.
 - **Backup / Restore:** download everything as a file; restoring merges and never deletes.
 - **Share a picture of today:** a 1080×1350 pixel card of the cat with today's good things.
 
@@ -156,6 +158,7 @@ index.html              Page markup (the room, journal, tabs, dialogs)
 manifest.webmanifest    Install-to-home-screen metadata
 sw.js                   Offline support (network first, cached copy when offline)
 supabase/schema.sql     Cloud database tables and security rules (run once in Supabase)
+api/mimi.mjs            Vercel function: Mimi's AI (good-thing check + chat, Gemini), 120 calls/person/day
 assets/
   icon.svg              App icon (vector)
   icons/                PNG app icons (home screen, maskable, Apple touch, favicon)
@@ -172,6 +175,7 @@ src/
   config.js             Supabase project URL + public anon key (empty = no cloud sync)
   cloud/
     sync.js             Sign-in with email + password, push/pull sync with Supabase (entries, photos, state, room)
+    ai.js               Asks api/mimi.mjs to check a good thing or chat
     friends.js          Invite codes, the friends list, a friend's room
   core/                 Infrastructure, no UI
     db.js               IndexedDB database (localStorage fallback)
@@ -223,12 +227,13 @@ src/
     scrapbook.js        Scrapbook pages
     month.js            Monthly recap
     calendar.js         Calendar and search
-    play.js             Treats and laser play
+    play.js             Fish, water, cuddles, and laser play
     settings.js         Settings dialog, reminder file, backup
     account.js          Account & sync section in Settings
     friends.js          Friends section in Settings: invites, friends list
     visit.js            Visiting a friend's room
     theme.js            Day & night, match my phone, light, dark
+    chat.js             Chat with Mimi
     share.js            Share picture
 ```
 
@@ -248,7 +253,7 @@ Mimi is **local-first**: the on-device database is what the app reads and writes
 | Store | Contents |
 |---|---|
 | `entries` | One record per good thing: `{ id, day, text, createdAt, updatedAt, deleted, synced }` |
-| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` counters, `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`; synced: `theories`, `wishes`, `roomThings`, `reminders`; per device: `stickyGreeted`, `stickySaid` |
+| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` (fish)/`water`/`cuddles` counters, `chat` (Chat with Mimi, device only), `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`; synced: `theories`, `wishes`, `roomThings`, `reminders`; per device: `stickyGreeted`, `stickySaid` |
 | `photos` | Photo details: `{ id, day, caption, entryId, createdAt, updatedAt, deleted, synced, uploaded, hasFull, hasThumb }` |
 | `photoFiles` | The image files, keyed `<photo id>:full` and `<photo id>:thumb` |
 
@@ -264,6 +269,7 @@ Data from earlier versions (plain localStorage) moves into the database automati
 | `friend_invites` | `code, user_id, created_at, expires_at, used_by`: one-use codes, 7 days |
 | `friends` | `user_id, friend_id, created_at`: one row each way, made only by `accept_invite()` |
 | `rooms` | `user_id, snapshot (jsonb: cat name, fur, wear, total, treasures, things, season), updated_at`: readable by friends |
+| `ai_usage` | `user_id, day, checks, chats`: AI calls per day, counted by `mimi_ai_call()` |
 | Storage bucket `photos` | Private image files at `<user id>/<photo id>.jpg` and `…-thumb.jpg` |
 
 Entries also have a `photo_id` column linking a good thing to its photo.
@@ -277,7 +283,7 @@ Row-level security means each person can only read and write their own rows. The
 - **Deletions** are kept as tombstones (`deleted = true`) so every device learns about them.
 - **Settings** merge field by field (the most recent change to each setting wins); **scrapbook, treasures, milestones, theories, wishes and room things** are combined, so a new device never wipes your history. A wish that came true on either device stays true; for sticky notes the most recent change to each note wins.
 - Anything you wrote before signing in is uploaded to your account when you sign in.
-- Pet and treat counters stay on each device.
+- Pet, fish, water and cuddle counters and the chat stay on each device.
 
 ## Cloud sync setup (about 5 minutes)
 

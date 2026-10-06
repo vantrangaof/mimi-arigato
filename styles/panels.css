@@ -785,3 +785,89 @@ mark {
 /* A friend's room, sized to the sheet (visit.js sets --px). */
 .visit-room { display: grid; place-items: center; padding: 8px 0; background: var(--paper); border-radius: 3px; }
 .visit-line { min-height: 2.6em; margin: 12px 0 0; }
+
+/* ---- chat with Mimi ----
+   The softer look (round bubbles, diffuse shadow, chips, pill input, typing dots) is borrowed
+   from Urban Bento's Hiro chat; the colors stay Mimi's. */
+
+.chat-sheet { --chat-shadow: 0 12px 32px rgba(120, 50, 85, 0.1), 0 2px 8px rgba(120, 50, 85, 0.07); padding-bottom: 14px; }
+.chat-sheet[open] { display: flex; flex-direction: column; height: min(88dvh, 44rem); }
+.chat-head { gap: 10px; justify-content: flex-start; flex: none; }
+.chat-head .card-title { flex: 1; }
+.chat-avatar { --px: 1.5px; display: block; width: 48px; height: 44px; padding: 0; }
+
+.chat-log { flex: 1 1 auto; overflow-y: auto; list-style: none; margin: 0 -4px; padding: 8px 4px 4px; display: flex; flex-direction: column; gap: 10px; }
+.chat-msg { display: flex; animation: chat-in 180ms ease-out; }
+.chat-msg.from-you { justify-content: flex-end; }
+.chat-bubble {
+  max-width: 85%;
+  margin: 0;
+  padding: 10px 15px;
+  border-radius: 22px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  box-shadow: var(--chat-shadow);
+}
+.from-mimi .chat-bubble { background: var(--paper); border: 1px solid var(--sheet-edge); border-top-left-radius: 6px; }
+.from-you .chat-bubble { background: var(--accent); color: #fff; border-top-right-radius: 6px; }
+.is-trouble .chat-bubble { color: var(--ink-soft); font-style: italic; }
+@keyframes chat-in { from { opacity: 0; transform: translateY(8px); } }
+
+.chat-typing { display: inline-flex; gap: 5px; padding: 14px 16px; }
+.chat-typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: chat-dot 1.2s ease-in-out infinite; }
+.chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+.chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes chat-dot { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+
+.chat-chips { flex: none; display: flex; gap: 8px; overflow-x: auto; padding: 10px 2px 2px; scrollbar-width: none; }
+.chat-chips[hidden] { display: none; }
+.chat-chip {
+  flex: none;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--ink);
+  background: transparent;
+  border: 1.5px solid var(--sheet-edge);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.chat-chip:hover { border-color: var(--accent); }
+
+.chat-form { flex: none; position: relative; margin-top: 10px; }
+.chat-form[hidden] { display: none; }
+.chat-input {
+  width: 100%;
+  padding: 13px 56px 13px 18px;
+  font: inherit;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--sheet-edge);
+  border-radius: 999px;
+  box-shadow: var(--chat-shadow);
+}
+.chat-input:focus { outline: 3px dashed var(--focus); outline-offset: 2px; }
+.chat-send {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: #fff;
+  background: var(--accent);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.chat-send svg { width: 14px; height: 14px; }
+.chat-send:disabled { opacity: 0.5; cursor: default; }
+.chat-note { flex: none; margin: 10px 0 0; font-size: 0.75rem; color: var(--ink-soft); text-align: center; }
+.chat-reset { flex: none; align-self: center; margin-top: 4px; font-size: 0.8125rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-msg { animation: none; }
+  .chat-typing span { animation-duration: 2.4s; }
+}

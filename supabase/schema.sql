@@ -262,3 +262,46 @@ revoke execute on function public.peek_invite(text) from public, anon;
 revoke execute on function public.accept_invite(text) from public, anon;
 grant execute on function public.peek_invite(text) to authenticated;
 grant execute on function public.accept_invite(text) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Mimi's AI usage (added later; re-running this whole file is safe)
+-- ---------------------------------------------------------------------------
+
+-- How many AI calls (good-thing checks and chat) each person made per day. The Vercel
+-- function api/mimi.mjs calls mimi_ai_call() with the person's own sign-in token, so
+-- a bad token is refused and everyone's count only ever goes up.
+create table if not exists public.ai_usage (
+  user_id  uuid not null references auth.users (id) on delete cascade,
+  day      date not null,
+  checks   integer not null default 0,
+  chats    integer not null default 0,
+  primary key (user_id, day)
+);
+
+alter table public.ai_usage enable row level security;
+
+drop policy if exists "see own ai usage" on public.ai_usage;
+create policy "see own ai usage" on public.ai_usage
+  for select using (auth.uid() = user_id);
+
+-- Counts one call and returns today's total (checks + chats).
+create or replace function public.mimi_ai_call(call_kind text) returns integer
+language plpgsql security definer set search_path = public as $$
+declare
+  total integer;
+begin
+  if auth.uid() is null then
+    raise exception 'sign in first' using errcode = '42501';
+  end if;
+  insert into public.ai_usage (user_id, day, checks, chats)
+    values (auth.uid(), current_date, (call_kind = 'check')::int, (call_kind = 'chat')::int)
+    on conflict (user_id, day) do update
+      set checks = ai_usage.checks + (call_kind = 'check')::int,
+          chats = ai_usage.chats + (call_kind = 'chat')::int
+    returning checks + chats into total;
+  return total;
+end;
+$$;
+
+revoke execute on function public.mimi_ai_call(text) from public, anon;
+grant execute on function public.mimi_ai_call(text) to authenticated;

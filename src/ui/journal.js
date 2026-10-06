@@ -17,6 +17,7 @@ import { fillScrapbook } from "../memory/scrapbook.js";
 import { newMilestones } from "../memory/relationship.js";
 import { claimRoomThings, roomThingLine } from "../memory/themes.js";
 import { noticeWish, forgetWish, madeLine, cameTrueLine } from "../memory/wishes.js";
+import { checkGoodThing } from "../cloud/ai.js";
 
 const DAILY = 5;
 
@@ -166,6 +167,22 @@ export function wireJournal(mimi, els) {
     if (saving || !text || entriesToday().length >= DAILY) return;
     saving = true;
 
+    // Mimi reads it first (when signed in). Something that isn't a real good thing stays in
+    // the box and earns nothing; if the AI can't be reached, it's accepted as always.
+    els.send.disabled = true;
+    mimi.setActivity("is reading…");
+    const check = await checkGoodThing(text, { catName: catName(), userName: userName() });
+    mimi.setActivity(null);
+    els.send.disabled = false;
+    if (check.verdict === "unclear" || check.verdict === "hard") {
+      const hard = check.verdict === "hard";
+      mimi.react(hard ? ["♡", `curls up next to you: “${check.reply}”`] : ["hmm?", `tilts their head: “${check.reply}”`], { hearts: hard ? 2 : 0, hold: 5200 });
+      saving = false;
+      els.input.focus();
+      return;
+    }
+    const said = check.verdict === "good" && check.reply ? check.reply : null;
+
     const today = dayKey();
     const before = totalThings();
     const echo = echoOf(text, today);
@@ -186,6 +203,8 @@ export function wireJournal(mimi, els) {
       ? ["!!", cameTrueLine(wish.cameTrue[0]), { hearts: 5, hold: 4200 }]
       : echo
       ? ["♡", echoLine(echo), { hearts: 2, hold: 3000 }]
+      : said
+      ? [reactionFor(text, n)[0], `says: “${said}”`, { hearts: n === DAILY ? 5 : 1, hold: 3400 }]
       : [...reactionFor(text, n), { hearts: n === DAILY ? 5 : 1, hold: 2200 }]];
     if (wish.made) events.push(["a wish!", madeLine(wish.made), { hearts: 2, hold: 3400 }]);
     for (const theme of claimRoomThings(today)) events.push(["hmm!", roomThingLine(theme), { hearts: 2, hold: 3600 }]);

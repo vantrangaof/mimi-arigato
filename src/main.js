@@ -17,7 +17,7 @@ import { wireMemories } from "./ui/memories.js";
 import { wireScrapbook } from "./ui/scrapbook.js";
 import { wireMonth } from "./ui/month.js";
 import { wireCalendar } from "./ui/calendar.js";
-import { wireTreat, wirePlay } from "./ui/play.js";
+import { wireCare, wirePlay } from "./ui/play.js";
 import { wireSettings } from "./ui/settings.js";
 import { applyTheme } from "./ui/theme.js";
 import { wireIntro, needsIntro } from "./ui/intro.js";
@@ -25,6 +25,7 @@ import { wireShare } from "./ui/share.js";
 import { wireAccount } from "./ui/account.js";
 import { wireFriends } from "./ui/friends.js";
 import { wireVisit } from "./ui/visit.js";
+import { wireChat } from "./ui/chat.js";
 import { wireNote } from "./ui/note.js";
 import { wireWardrobe } from "./ui/wardrobe.js";
 import { wirePhotos } from "./ui/photos.js";
@@ -118,7 +119,7 @@ wireCalendar({
   detail: $("calDetail"),
 });
 
-wireTreat($("treatBtn"), mimi, wrap);
+wireCare({ fish: $("fishBtn"), water: $("waterBtn"), cuddle: $("cuddleBtn") }, mimi, wrap);
 wireWardrobe(mimi, { open: $("dressBtn"), dialog: $("wardrobeDialog"), preview: $("wardrobePreview"), previewCat: $("wardrobeCat"), slots: $("wardrobeSlots"), next: $("wardrobeNext") });
 const play = wirePlay($("playBtn"), mimi, wrap, $("habitat"), look);
 wireBedtime($("tuckBtn"), mimi, $("habitat"));
@@ -146,6 +147,19 @@ const friends = wireFriends(mimi, {
   visit: wireVisit({ dialog: $("visitDialog"), title: $("visitTitle"), body: $("visitBody") }),
 });
 $("settingsOpen").addEventListener("click", () => friends.refresh());
+wireChat({
+  open: $("chatBtn"),
+  dialog: $("chatDialog"),
+  title: $("chatTitle"),
+  head: $("chatHead"),
+  log: $("chatLog"),
+  chips: $("chatChips"),
+  form: $("chatForm"),
+  input: $("chatInput"),
+  send: $("chatSend"),
+  note: $("chatNote"),
+  reset: $("chatReset"),
+});
 wireShare({
   open: $("shareOpen"),
   dialog: $("shareDialog"),

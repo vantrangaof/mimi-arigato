@@ -14,7 +14,9 @@ export const KEYS = {
   scrapbook: "scrapbook",
   treasures: "treasures",
   pets: "pets",
-  treats: "treats",
+  treats: "treats", // fish given today (see ui/play.js)
+  water: "water",
+  cuddles: "cuddles",
   visit: "lastVisit",
   firstMet: "firstMet",
   milestones: "milestones",

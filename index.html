@@ -60,7 +60,10 @@
         </button>
 
         <div class="actions">
-          <button class="pixel-button" id="treatBtn" type="button">Give a treat</button>
+          <button class="pixel-button" id="fishBtn" type="button">Fish</button>
+          <button class="pixel-button" id="waterBtn" type="button">Water</button>
+          <button class="pixel-button" id="cuddleBtn" type="button">Cuddle</button>
+          <button class="pixel-button primary" id="chatBtn" type="button">Chat</button>
           <button class="pixel-button" id="playBtn" type="button" aria-pressed="false">Play</button>
           <button class="pixel-button" id="dressBtn" type="button">Dress up</button>
           <button class="pixel-button" id="tuckBtn" type="button" hidden>Tuck in</button>
@@ -300,6 +303,25 @@
       <button class="icon-button small" value="close" aria-label="Close">×</button>
     </form>
     <div id="visitBody"></div>
+  </dialog>
+
+  <dialog class="sheet chat-sheet" id="chatDialog" aria-labelledby="chatTitle">
+    <form method="dialog" class="sheet-head chat-head">
+      <span id="chatHead"></span>
+      <h2 class="card-title" id="chatTitle">Chat with Mimi</h2>
+      <button class="icon-button small" value="close" aria-label="Close">×</button>
+    </form>
+    <ol class="chat-log" id="chatLog" aria-live="polite"></ol>
+    <div class="chat-chips" id="chatChips"></div>
+    <form class="chat-form" id="chatForm" autocomplete="off">
+      <label class="visually-hidden" for="chatInput">Message</label>
+      <input class="chat-input" id="chatInput" type="text" maxlength="500" placeholder="Say something…" enterkeyhint="send">
+      <button class="chat-send" id="chatSend" type="submit" aria-label="Send">
+        <svg viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M3 0h1v1h-1zM2 1h1v1h-1zM3 1h1v1h-1zM4 1h1v1h-1zM1 2h1v1h-1zM3 2h1v1h-1zM5 2h1v1h-1zM0 3h1v1h-1zM3 3h1v1h-1zM6 3h1v1h-1zM3 4h1v1h-1zM3 5h1v1h-1zM3 6h1v1h-1z"/></svg>
+      </button>
+    </form>
+    <p class="chat-note" id="chatNote"></p>
+    <button class="link-button chat-reset" id="chatReset" type="button" hidden>Start over</button>
   </dialog>
 
   <script type="module" src="src/main.js"></script>
