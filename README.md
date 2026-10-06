@@ -317,6 +317,8 @@ Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing access
 
 ## Next up
 
+- **Pick up here (2026-10-07):** the AI check, earned fish/water/cuddles and Chat with Mimi are built (`ec41a7d`) but only tested with a fake Gemini. Before testing for real: push the 4 local commits, add `GEMINI_API_KEY` in Vercel, re-run `supabase/schema.sql`. Then check real Gemini replies and that Vercel runs `api/mimi.mjs`.
+- **Tasks that earn food and water** (still to design): right now only good things earn fish/water/cuddles. Ideas: small daily kindnesses ("drink a glass of water", "text someone you love"), finishing your own sticky notes, or both. Must keep the no-guilt rule (no missed-task penalties, Mimi never hungry).
 - **Hide a treasure** (step 2 of the first multiplayer game; friends and visiting are done): hide one of your treasures in a spot in your room for a friend to find ("*sniff sniff* warmer!"); the finder keeps a copy tagged with where it came from. Then step 3, your cat visiting a friend's room for a day. Design: [docs/superpowers/specs/2026-10-04-visiting-cats-hide-a-treasure-design.md](docs/superpowers/specs/2026-10-04-visiting-cats-hide-a-treasure-design.md). Later games on the same friends: paint together (a shared pixel canvas that hangs in both rooms), fishing together (live, co-op).
 - **Real notifications for sticky notes:** Web Push from a Supabase scheduled function (needs sign-in; on iPhone only for the installed app).
 - **"Mimi Wrapped" in December:** a year-in-review story you tap through (total good things, top people, favorite things, mood weather across the year, scrapbook highlights), built from Month, Memories and Scrapbook, with a share card at the end.

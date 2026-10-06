@@ -4,6 +4,9 @@ Progress log for Mimi Arigato. Newest first.
 
 ## 2026-10-06
 
+### Where we stopped
+- Talked through rewards: food and water come from telling Mimi good things (AI checks they're real, built) and from doing tasks (not designed yet). Next session: push and test the AI on the live site, then design tasks. See README "Next up".
+
 ### Mimi's AI: real good things, fish & water, Chat with Mimi
 - **AI check:** when signed in, Mimi reads each good thing first (Gemini 2.5 Flash-Lite through `api/mimi.mjs`). Not a real good thing (gibberish, filler, padding) → Mimi tilts her head and asks what was good; it stays in the box and isn't saved. Something painful → Mimi comforts you instead. Real ones get a reply about that exact thing. Signed out, offline, or AI down → accepted as before.
 - **Fish, water and cuddles** replace "Give a treat": each good thing told today earns one of each to give when you like. Mimi never gets hungry or thirsty (no-guilt rule kept).
