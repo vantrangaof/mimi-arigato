@@ -109,6 +109,62 @@
   margin: 18px 0 24px;
 }
 
+/* Treat tray: what you've earned for Mimi today, and how to earn more. */
+.treat-tray {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 16px auto 0;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  text-align: left;
+  color: var(--ink-soft);
+  background: var(--sheet);
+  border: 2px dashed var(--sheet-edge);
+  border-radius: 3px;
+}
+.treat-tray:disabled { cursor: default; }
+.treat-tray.is-asking { color: var(--ink); border-color: var(--accent); cursor: pointer; }
+.treat-tray.is-asking .tray-text { text-decoration: underline dotted var(--accent); text-underline-offset: 3px; }
+.treat-tray.is-earned { animation: earned 600ms steps(4, end); }
+.tray-icons { display: flex; align-items: center; gap: 4px; flex: none; }
+.tray-icon { width: 21px; height: 12px; }
+.tray-water { width: 15px; height: 15px; }
+.tray-heart { width: 16px; height: 14px; }
+
+.treat-tray + .actions { margin-top: 12px; }
+.pixel-button { position: relative; }
+.pixel-button.is-empty { color: var(--ink-soft); border-style: dashed; box-shadow: none; }
+.pixel-button.is-earned { animation: earned 600ms steps(4, end); }
+.earn-pop {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  padding: 1px 5px;
+  font-size: 13px;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 3px;
+  pointer-events: none;
+  animation: earn-pop 1400ms steps(8, end) forwards;
+}
+
+@keyframes earned { 50% { transform: translateY(-3px); border-color: var(--accent); } }
+@keyframes earn-pop {
+  0% { transform: translateY(4px); opacity: 0; }
+  20%, 70% { transform: translateY(-4px); opacity: 1; }
+  100% { transform: translateY(-14px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .treat-tray.is-earned, .pixel-button.is-earned { animation: none; }
+  .earn-pop { animation-duration: 1400ms; animation-timing-function: linear; }
+}
+
 .footer {
   text-align: center;
   font-size: 0.875rem;

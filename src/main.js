@@ -93,6 +93,7 @@ wireJournal(mimi, {
   attachInput: $("attachInput"),
   attachPreview: $("attachPreview"),
   mimiGood: $("mimiGood"),
+  earnHint: $("earnHint"),
   onThank: thanks.open,
 });
 
@@ -119,7 +120,13 @@ wireCalendar({
   detail: $("calDetail"),
 });
 
-wireCare({ fish: $("fishBtn"), water: $("waterBtn"), cuddle: $("cuddleBtn") }, mimi, wrap);
+wireCare({ fish: $("fishBtn"), water: $("waterBtn"), cuddle: $("cuddleBtn") }, mimi, wrap, {
+  tray: $("treatTray"),
+  icons: $("trayIcons"),
+  text: $("trayText"),
+  form: $("thanksForm"),
+  input: $("thanksInput"),
+});
 wireWardrobe(mimi, { open: $("dressBtn"), dialog: $("wardrobeDialog"), preview: $("wardrobePreview"), previewCat: $("wardrobeCat"), slots: $("wardrobeSlots"), next: $("wardrobeNext") });
 const play = wirePlay($("playBtn"), mimi, wrap, $("habitat"), look);
 wireBedtime($("tuckBtn"), mimi, $("habitat"));

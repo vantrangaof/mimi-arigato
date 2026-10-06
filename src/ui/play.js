@@ -1,12 +1,14 @@
 // Things to do with Mimi: fish, water and cuddles you earn with good things, and a laser dot to chase.
 
 import { store, KEYS, dailyCount, setDailyCount, entriesToday, catName } from "../core/store.js";
-import { replay, pick } from "../core/dom.js";
+import { el, replay, pick, capitalize } from "../core/dom.js";
 import { pixelSVG } from "../core/pixel.js";
 import { purr } from "../cat/sound.js";
+import { heartSVG } from "../cat/mimi.js";
 
 // Each good thing told today earns one fish, one drink of water and one cuddle to give
 // whenever you like. Mimi never gets hungry or thirsty: these are treats, not needs.
+const MAX_EARNED = 5;
 const CARE = {
   fish: {
     key: KEYS.treats,
@@ -32,17 +34,60 @@ const CARE = {
   },
 };
 
-export function wireCare(buttons, mimi, wrap) {
+// Earn more by telling good things: the tray above the buttons says how, and tapping it (or an
+// empty button) takes you to the good-things box.
+export function wireCare(buttons, mimi, wrap, tray) {
   let busy = false;
-  const earned = () => Math.min(entriesToday().length, 5);
+  const earned = () => Math.min(entriesToday().length, MAX_EARNED);
   const left = (care) => Math.max(0, earned() - dailyCount(care.key));
+  let seen = earned();
+
+  tray.icons.replaceChildren(
+    pixelSVG(CARE.fish.art, CARE.fish.colors, "tray-icon"),
+    pixelSVG(CARE.water.art, CARE.water.colors, "tray-icon tray-water"),
+    heartSVG("tray-icon tray-heart"),
+  );
+
+  function trayLine() {
+    const name = catName();
+    const n = earned();
+    const toGive = Object.values(CARE).some((care) => left(care));
+    if (n === 0) return { text: `Tell ${name} a good thing to earn a fish, water and a cuddle ↓`, ask: true };
+    if (toGive) return { text: `You earned treats! Tap Fish, Water or Cuddle to give them to ${name}.`, ask: false };
+    if (n < MAX_EARNED) return { text: `All given! Tell ${name} another good thing to earn more ↓ (${n} of ${MAX_EARNED} today)`, ask: true };
+    return { text: `${capitalize(name)} is completely spoiled today ♡`, ask: false };
+  }
 
   function label() {
     for (const [id, btn] of Object.entries(buttons)) {
       const care = CARE[id];
       const n = left(care);
       btn.textContent = n ? `${care.label} ×${n}` : care.label;
+      btn.classList.toggle("is-empty", !n);
       btn.setAttribute("aria-label", n ? `${care.label}: ${n} to give` : `${care.label}: tell ${catName()} a good thing to earn one`);
+    }
+    const line = trayLine();
+    tray.text.textContent = line.text;
+    tray.tray.classList.toggle("is-asking", line.ask);
+    tray.tray.disabled = !line.ask;
+  }
+
+  // Take you to the good-things box and make it glow.
+  function guide() {
+    if (tray.form.hidden) return;
+    tray.form.scrollIntoView({ behavior: "smooth", block: "center" });
+    tray.input.focus({ preventScroll: true });
+    replay(tray.form, "is-calling");
+  }
+
+  // A good thing was just accepted: show what it earned.
+  function celebrate(gained) {
+    replay(tray.tray, "is-earned");
+    for (const btn of Object.values(buttons)) {
+      replay(btn, "is-earned");
+      const pop = el("span", { class: "earn-pop", text: `+${gained}`, "aria-hidden": "true" });
+      pop.addEventListener("animationend", () => pop.remove());
+      btn.appendChild(pop);
     }
   }
 
@@ -59,9 +104,12 @@ export function wireCare(buttons, mimi, wrap) {
     if (busy) return;
     if (!left(care)) {
       replay(wrap, "is-shake");
-      mimi.react(earned() >= 5
-        ? ["♡", "is completely spoiled today. Thank you!"]
-        : ["mrrp?", `gets a ${care.label.toLowerCase()} for every good thing you tell them.`], { hearts: 0, hold: 2600 });
+      if (earned() >= MAX_EARNED) {
+        mimi.react(["♡", "is completely spoiled today. Thank you!"], { hearts: 0, hold: 2600 });
+        return;
+      }
+      mimi.react(["mrrp?", `would love a ${care.label.toLowerCase()}! Tell them something good to earn one.`], { hearts: 0, hold: 3200 });
+      guide();
       return;
     }
     busy = true;
@@ -84,7 +132,13 @@ export function wireCare(buttons, mimi, wrap) {
   }
 
   for (const [id, btn] of Object.entries(buttons)) btn.addEventListener("click", () => give(CARE[id]));
-  store.on(label);
+  tray.tray.addEventListener("click", guide);
+  store.on(() => {
+    label();
+    const now = earned();
+    if (now > seen) celebrate(now - seen);
+    seen = now;
+  });
   label();
 }
 

@@ -122,6 +122,9 @@ export function wireJournal(mimi, els) {
 
     els.form.hidden = full;
     els.stuck.hidden = full;
+    els.earnHint.hidden = full;
+    els.earnHint.classList.remove("is-warning");
+    els.earnHint.textContent = `Each good thing earns ${name} a fish, water and a cuddle.`;
     els.done.hidden = !full;
     els.done.textContent = `${name} will keep these safe. See you tomorrow${userName() ? `, ${userName()}` : ""}.`;
     els.send.textContent = name.length <= 8 ? `Tell ${name}` : "Tell";
@@ -177,6 +180,10 @@ export function wireJournal(mimi, els) {
     if (check.verdict === "unclear" || check.verdict === "hard") {
       const hard = check.verdict === "hard";
       mimi.react(hard ? ["♡", `curls up next to you: “${check.reply}”`] : ["hmm?", `tilts their head: “${check.reply}”`], { hearts: hard ? 2 : 0, hold: 5200 });
+      if (!hard) {
+        els.earnHint.textContent = `Not saved: ${catName()} only gets treats for real good things, even tiny ones.`;
+        els.earnHint.classList.add("is-warning");
+      }
       saving = false;
       els.input.focus();
       return;

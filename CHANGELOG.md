@@ -4,6 +4,11 @@ Progress log for Mimi Arigato. Newest first.
 
 ## 2026-10-06
 
+### Showing how to earn treats
+- **Treat tray** above Mimi's buttons says what to do: "Tell Mimi a good thing to earn a fish, water and a cuddle ↓" → "You earned treats! Tap Fish, Water or Cuddle…" → "All given! Tell Mimi another good thing to earn more (1 of 5 today)" → "completely spoiled today ♡". When it's asking, tapping it scrolls to the good-things box, focuses it and makes it glow.
+- Fish/Water/Cuddle look dashed and faded when there's nothing to give; tapping one takes you to the box too. A good thing that gets accepted pops "+1" on each.
+- A line under the box: "Each good thing earns Mimi a fish, water and a cuddle." If the AI doesn't accept it: "Not saved: Mimi only gets treats for real good things, even tiny ones."
+
 ### Where we stopped
 - Talked through rewards: food and water come from telling Mimi good things (AI checks they're real, built) and from doing tasks (not designed yet). Next session: push and test the AI on the live site, then design tasks. See README "Next up".
 

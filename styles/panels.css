@@ -97,7 +97,12 @@
 
 .remove:hover, .remove:focus-visible { opacity: 1; background: var(--grid-strong); }
 
-.thanks-form { display: flex; gap: 8px; margin-top: 14px; }
+.thanks-form { display: flex; gap: 8px; margin-top: 14px; border-radius: 4px; }
+.thanks-form.is-calling { animation: calling 1600ms steps(8, end); }
+@keyframes calling { 0%, 50% { box-shadow: 0 0 0 4px var(--focus); } 25%, 75%, 100% { box-shadow: 0 0 0 0 transparent; } }
+
+.earn-hint { margin: 6px 0 0; font-size: 0.8125rem; color: var(--ink-soft); }
+.earn-hint.is-warning { color: var(--accent); font-weight: 600; }
 
 .thanks-send {
   flex: none;
