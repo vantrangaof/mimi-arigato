@@ -129,7 +129,7 @@ Everything unlocks by total good things and never goes away:
 
 ### Settings
 - Your name, the cat's name, fur color (Strawberry, Peach, Cloud, Midnight, Snow).
-- **Appearance:** Match my phone (default), Light or Dark. Follows you to your other devices.
+- **Appearance:** Day & night (default: light from 6 am, dark from 7 pm, like the sky in Mimi's window), Match my phone, Light or Dark. Follows you to your other devices.
 - **Account & sync** (also the **Sign in** / cloud button at the top): create an account with your email and a password (or sign in to an existing one). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
 - **Daily reminder:** adds a repeating event to your calendar app (web apps can't schedule notifications on their own). For other reminders, use Sticky notes.
 - **Friends** (when signed in): "Invite a friend" makes a code like `ABC-234` and a link to share; a friend opens the link or types the code under "Have a code?" and says yes. Tap a friend to **visit their room**: their cat, unlocks, treasures, seasonal decor and things from their life. Never their good things, diary or photos. "Show my things to friends" hides your things from your life from visitors. Either of you can remove the friendship.
@@ -228,7 +228,7 @@ src/
     account.js          Account & sync section in Settings
     friends.js          Friends section in Settings: invites, friends list
     visit.js            Visiting a friend's room
-    theme.js            Light / dark / match my phone
+    theme.js            Day & night, match my phone, light, dark
     share.js            Share picture
 ```
 

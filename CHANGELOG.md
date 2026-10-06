@@ -5,7 +5,7 @@ Progress log for Mimi Arigato. Newest first.
 ## 2026-10-06
 
 ### Light mode
-- **Settings → Appearance:** Match my phone / Light / Dark. Saved with your settings (syncs), and mirrored to localStorage so an inline script applies it before the page draws. The browser bar color follows the choice.
+- **Settings → Appearance:** Day & night (default: light 6 am–7 pm, dark otherwise, switching while the app is open) / Match my phone / Light / Dark. Saved with your settings (syncs), and mirrored to localStorage so an inline script applies it before the page draws. The browser bar color follows the choice.
 
 ### Friends and visiting (multiplayer, step 1)
 - **Settings → Friends** (when signed in): "Invite a friend" makes a one-use code (`ABC-234`, 7 days) plus a link (`#invite=…`) to share or copy. A friend opens the link (Settings opens on "Be friends with Xiao Mi's human?") or types the code under "Have a code?" (for when an iPhone opens the link in Safari instead of the installed app).

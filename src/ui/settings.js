@@ -75,7 +75,7 @@ export function wireSettings(els) {
   }
 
   function renderTheme() {
-    const current = THEMES.some((t) => t.id === store.settings.theme) ? store.settings.theme : "auto";
+    const current = THEMES.some((t) => t.id === store.settings.theme) ? store.settings.theme : "daynight";
     els.theme.replaceChildren(...THEMES.map((t) => radio("theme", t.id, current === t.id, false, [span("", t.label)])));
   }
 
