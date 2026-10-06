@@ -6,6 +6,7 @@ import { dayKey } from "../core/dates.js";
 import { store, catName, exportBackup, importBackup, totalThings } from "../core/store.js";
 import { FURS, setCustomFur } from "../cat/sprite.js";
 import { furFromPhoto } from "../cat/fur-photo.js";
+import { THEMES } from "./theme.js";
 
 function radio(name, value, checked, disabled, content) {
   const label = document.createElement("label");
@@ -73,11 +74,17 @@ export function wireSettings(els) {
     }
   }
 
+  function renderTheme() {
+    const current = THEMES.some((t) => t.id === store.settings.theme) ? store.settings.theme : "auto";
+    els.theme.replaceChildren(...THEMES.map((t) => radio("theme", t.id, current === t.id, false, [span("", t.label)])));
+  }
+
   function render() {
     if (document.activeElement !== els.name) els.name.value = store.settings.name;
     if (document.activeElement !== els.userName) els.userName.value = store.settings.userName;
     els.name.placeholder = "Mimi";
     els.reminder.value = store.settings.reminder;
+    renderTheme();
     renderFur();
   }
 
@@ -98,6 +105,10 @@ export function wireSettings(els) {
   });
   els.name.addEventListener("input", () => {
     store.settings.name = els.name.value.slice(0, 16);
+    store.save("settings");
+  });
+  els.theme.addEventListener("change", (e) => {
+    store.settings.theme = e.target.value;
     store.save("settings");
   });
   els.fur.addEventListener("change", (e) => {

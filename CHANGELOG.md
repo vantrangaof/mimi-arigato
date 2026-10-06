@@ -4,6 +4,9 @@ Progress log for Mimi Arigato. Newest first.
 
 ## 2026-10-06
 
+### Light mode
+- **Settings → Appearance:** Match my phone / Light / Dark. Saved with your settings (syncs), and mirrored to localStorage so an inline script applies it before the page draws. The browser bar color follows the choice.
+
 ### Friends and visiting (multiplayer, step 1)
 - **Settings → Friends** (when signed in): "Invite a friend" makes a one-use code (`ABC-234`, 7 days) plus a link (`#invite=…`) to share or copy. A friend opens the link (Settings opens on "Be friends with Xiao Mi's human?") or types the code under "Have a code?" (for when an iPhone opens the link in Safari instead of the installed app).
 - Tap a friend to **visit their room** in a sheet: their cat (fur, including a photo palette, and what they wear), unlocks, treasures, seasonal decor and things from their life, read-only. Tapping their cat or things gets visitor lines ("Mochi sniffs you politely."). Never good things, diary, photos or theories.

@@ -19,6 +19,7 @@ import { wireMonth } from "./ui/month.js";
 import { wireCalendar } from "./ui/calendar.js";
 import { wireTreat, wirePlay } from "./ui/play.js";
 import { wireSettings } from "./ui/settings.js";
+import { applyTheme } from "./ui/theme.js";
 import { wireIntro, needsIntro } from "./ui/intro.js";
 import { wireShare } from "./ui/share.js";
 import { wireAccount } from "./ui/account.js";
@@ -39,6 +40,8 @@ import { claimRoomThings, roomThingLine } from "./memory/themes.js";
 import { initCloud } from "./cloud/sync.js";
 
 await initStore();
+applyTheme(store.settings.theme);
+store.on(() => applyTheme(store.settings.theme)); // also when another device changes it
 
 const wrap = $("catWrap");
 const sprite = $("catSprite");
@@ -126,6 +129,7 @@ wireSettings({
   open: $("settingsOpen"),
   name: $("catName"),
   userName: $("userName"),
+  theme: $("themeChoices"),
   fur: $("furChoices"),
   reminder: $("reminderTime"),
   addReminder: $("reminderAdd"),
