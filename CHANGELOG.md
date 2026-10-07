@@ -2,6 +2,19 @@
 
 Progress log for Mimi Arigato. Newest first.
 
+## 2026-10-07
+
+### Mimi keeps every good thing
+- The AI no longer decides whether a good thing is "real". It now picks a verdict: **good** (a reply about that exact thing), **small** ("idk", "today was okay": kept, and Mimi says something like "i'll keep this little one"), **oops** (keyboard mashing only: stays in the box, "did a paw slip?"), or **hard** (comfort, as before). Small ones earn fish, water and cuddles like any other.
+- Removed "Not saved: Mimi only gets treats for real good things". The oops hint is now "Not saved yet: fix it and tap Tell again."
+- The app still understands the old `unclear` verdict, in case an older server answers.
+
+### Nothing special today
+- A "Nothing special today" link under "Stuck?" (only before your first good thing). Mimi says "some days are just days. Here's a fish anyway." and you get one fish, water and cuddle to give. It isn't saved as a good thing and only counts for today on this device (`quietDay`).
+
+### Roadmap from a design review
+- Reviewed another AI's ideas against what's built. Agreed order (see README "Next up"): AI tags people/places/things → tappable room objects with memories → a page per person or thing → theories you can correct → "Mimi remembers before you do". Skipped for now: memory graph view, personality modes, stats and chapters (save for Wrapped), friendship tree.
+
 ## 2026-10-06
 
 ### Showing how to earn treats

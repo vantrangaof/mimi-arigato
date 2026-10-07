@@ -1,13 +1,14 @@
 // Things to do with Mimi: fish, water and cuddles you earn with good things, and a laser dot to chase.
 
-import { store, KEYS, dailyCount, setDailyCount, entriesToday, catName } from "../core/store.js";
+import { store, KEYS, dailyCount, setDailyCount, entriesToday, quietToday, catName } from "../core/store.js";
 import { el, replay, pick, capitalize } from "../core/dom.js";
 import { pixelSVG } from "../core/pixel.js";
 import { purr } from "../cat/sound.js";
 import { heartSVG } from "../cat/mimi.js";
 
 // Each good thing told today earns one fish, one drink of water and one cuddle to give
-// whenever you like. Mimi never gets hungry or thirsty: these are treats, not needs.
+// whenever you like, and so does "Nothing special today" (being here is enough).
+// Mimi never gets hungry or thirsty: these are treats, not needs.
 const MAX_EARNED = 5;
 const CARE = {
   fish: {
@@ -38,7 +39,7 @@ const CARE = {
 // empty button) takes you to the good-things box.
 export function wireCare(buttons, mimi, wrap, tray) {
   let busy = false;
-  const earned = () => Math.min(entriesToday().length, MAX_EARNED);
+  const earned = () => Math.min(entriesToday().length + (quietToday() ? 1 : 0), MAX_EARNED);
   const left = (care) => Math.max(0, earned() - dailyCount(care.key));
   let seen = earned();
 

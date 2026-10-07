@@ -120,6 +120,7 @@
 .thanks-send:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--cat-shadow); }
 
 .stuck { margin-top: 10px; }
+.nothing-button { display: block; margin-top: 8px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
 .thanks-done { margin: 14px 0 0; line-height: 1.5; color: var(--ink-soft); }

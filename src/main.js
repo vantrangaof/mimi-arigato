@@ -86,6 +86,7 @@ wireJournal(mimi, {
   send: $("thanksSend"),
   stuck: $("stuck"),
   stuckButton: $("stuckButton"),
+  nothing: $("nothingButton"),
   chips: $("promptChips"),
   done: $("thanksDone"),
   share: $("shareOpen"),

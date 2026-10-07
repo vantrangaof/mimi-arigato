@@ -1,4 +1,4 @@
-// Mimi's AI: asks api/mimi.mjs (a Vercel function) to check a good thing or to chat.
+// Mimi's AI: asks api/mimi.mjs (a Vercel function) to react to a good thing or to chat.
 // Only while signed in (the function counts calls per person). Everything here fails soft:
 // if the AI can't be reached, good things are accepted as before and chat says so kindly.
 
@@ -30,7 +30,8 @@ async function ask(body, timeout) {
   }
 }
 
-// { verdict: "good" | "unclear" | "hard", reply } or { error }. Callers accept the good thing on error.
+// { verdict: "good" | "small" | "oops" | "hard", reply } or { error }. Every good thing is kept except
+// "oops" (keyboard mashing) and "hard" (Mimi comforts you instead); on error it's kept as always.
 export const checkGoodThing = (text, { catName, userName }) =>
   ask({ kind: "check", text, catName, userName }, CHECK_TIMEOUT_MS);
 

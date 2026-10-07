@@ -65,7 +65,8 @@ It's an installable web app (PWA). It works offline and without an account; sign
 - **Idle habits:** every so often Mimi grooms a paw, yawns, dozes, stretches, chases their tail, stares at you, looks out the window, watches the aquarium fish, admires their accessory, or sits by the journal "waiting to hear about your day."
 - **Time of day:** asleep 10 pm to 6 am ("z z z"; tap to wake). Morning stretch, lunchtime thoughts, evening "ready to hear about your day."
 - **Fish, water, cuddles:** each good thing you tell Mimi today earns one of each to give whenever you like (a fish drops in, a water drop, a purring snuggle). Mimi never gets hungry or thirsty.
-- **Good things are checked:** when signed in, Mimi (AI) reads each one first. Random words or filler get a gentle "what was good about it?" and aren't saved; something painful gets comfort instead. Offline, everything is accepted.
+- **Mimi reads your good things:** when signed in, Mimi (AI) reads each one first and replies to that exact thing. Mimi keeps every one, however small ("idk, today was okay" → *"i'll keep this little one."*). Only keyboard mashing stays in the box ("did a paw slip?"), and something painful gets comfort instead. Offline, Mimi uses keyword reactions.
+- **Nothing special today:** before your first good thing, tap it and Mimi says *"some days are just days. Here's a fish anyway."* You get a fish, water and cuddle to give. Being here is enough.
 - **Bedtime:** from 9 pm to 6 am a **Tuck in** button appears. Mimi climbs under a blanket, whispers today's good things back to you one by one, says goodnight, and the room's lights dim. Mimi stays asleep until morning (petting still wakes them for a moment).
 - **Dress up:** a wardrobe with one item per slot (head, neck, face) and a live preview. Free from the start: party hat, bell collar, round glasses. Unlocked by good things: little flower (5), ribbon bow (15), cozy scarf (40), beret (120), tiny crown (200).
 - **Play:** a laser dot for 20 seconds; Mimi pounces when it lands on them. Steer it with your finger or mouse, or let it wander.
@@ -253,7 +254,7 @@ Mimi is **local-first**: the on-device database is what the app reads and writes
 | Store | Contents |
 |---|---|
 | `entries` | One record per good thing: `{ id, day, text, createdAt, updatedAt, deleted, synced }` |
-| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` (fish)/`water`/`cuddles` counters, `chat` (Chat with Mimi, device only), `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`; synced: `theories`, `wishes`, `roomThings`, `reminders`; per device: `stickyGreeted`, `stickySaid` |
+| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` (fish)/`water`/`cuddles` counters, `quietDay` ("Nothing special today"), `chat` (Chat with Mimi, device only), `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`; synced: `theories`, `wishes`, `roomThings`, `reminders`; per device: `stickyGreeted`, `stickySaid` |
 | `photos` | Photo details: `{ id, day, caption, entryId, createdAt, updatedAt, deleted, synced, uploaded, hasFull, hasThumb }` |
 | `photoFiles` | The image files, keyed `<photo id>:full` and `<photo id>:thumb` |
 
@@ -316,6 +317,14 @@ Notes:
 Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing accessories, streak freezes, coins, energy, ads, quests. Mimi says one thing: *"Tell me one nice thing."*
 
 ## Next up
+
+**Direction (2026-10-07):** make Mimi's memory the heart of the app: *your life slowly becomes a little world.* Build these in order:
+1. **The AI tags each good thing** with the people, places, foods and activities in it (same call as the check, no extra cost). Fixes "Kyoto is a person" and adds places. Signed out: keyword rules as now.
+2. **Room objects you can tap that show their memories:** the coffee cup lists your coffee good things, the suitcase lists your places.
+3. **A page per person or thing** ("Anna": first mentioned, how often, what you did together, a theory, a scrapbook-style page).
+4. **Theories you can correct:** "Nope" → *"Mimi quietly removes rain from the evidence board."*, "You're onto something" keeps it.
+5. **Mimi remembers before you do:** turn "went quiet" into an occasional greeting ("Do you remember that little café? I hope you're still going.").
+Then: letters to future you, the Let-It-Go jar (never saved), diary weather showing in the room. Not now: a memory graph screen, personality modes, friendship tree; save stats and chapters for Mimi Wrapped.
 
 - **Pick up here (2026-10-07):** the AI check, earned fish/water/cuddles and Chat with Mimi are built (`ec41a7d`) but only tested with a fake Gemini. Before testing for real: push the 4 local commits, add `GEMINI_API_KEY` in Vercel, re-run `supabase/schema.sql`. Then check real Gemini replies and that Vercel runs `api/mimi.mjs`.
 - **Tasks that earn food and water** (still to design): right now only good things earn fish/water/cuddles. Ideas: small daily kindnesses ("drink a glass of water", "text someone you love"), finishing your own sticky notes, or both. Must keep the no-guilt rule (no missed-task penalties, Mimi never hungry).

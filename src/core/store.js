@@ -17,6 +17,7 @@ export const KEYS = {
   treats: "treats", // fish given today (see ui/play.js)
   water: "water",
   cuddles: "cuddles",
+  quietDay: "quietDay", // "Nothing special today" was tapped (see ui/journal.js)
   visit: "lastVisit",
   firstMet: "firstMet",
   milestones: "milestones",
@@ -309,6 +310,13 @@ export function dailyCount(key) {
 
 export function setDailyCount(key, count) {
   write(key, { date: dayKey(), count });
+}
+
+// "Nothing special today": Mimi says that's okay and gives you a fish, water and cuddle anyway.
+export const quietToday = () => dailyCount(KEYS.quietDay) > 0;
+export function markQuietDay() {
+  setDailyCount(KEYS.quietDay, 1);
+  emit();
 }
 
 export const catName = () => store.settings.name.trim() || "Mimi";

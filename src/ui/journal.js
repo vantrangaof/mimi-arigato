@@ -4,6 +4,7 @@ import { el, capitalize } from "../core/dom.js";
 import { dayKey } from "../core/dates.js";
 import {
   store, entriesToday, entryRecordsFor, catName, userName, totalThings, addEntry, removeEntry, addPhoto, linkEntryPhoto, photoById,
+  quietToday, markQuietDay,
 } from "../core/store.js";
 import { preparePhoto, photoErrorMessage } from "../core/images.js";
 import { photoThumb } from "./photos.js";
@@ -122,6 +123,7 @@ export function wireJournal(mimi, els) {
 
     els.form.hidden = full;
     els.stuck.hidden = full;
+    els.nothing.hidden = list.length > 0 || quietToday();
     els.earnHint.hidden = full;
     els.earnHint.classList.remove("is-warning");
     els.earnHint.textContent = `Each good thing earns ${name} a fish, water and a cuddle.`;
@@ -149,6 +151,13 @@ export function wireJournal(mimi, els) {
     els.stuckButton.setAttribute("aria-expanded", String(open));
   });
 
+  // Some days nothing stands out, and that's okay: Mimi gives you a fish anyway.
+  els.nothing.addEventListener("click", () => {
+    markQuietDay();
+    if (store.settings.sound) purr({ volume: 0.5 });
+    mimi.react(["that's okay", "says some days are just days. Here's a fish anyway."], { hearts: 1, hold: 3600 });
+  });
+
   els.chips.replaceChildren(...PROMPTS.map((p) => el("button", {
     type: "button",
     class: "chip",
@@ -170,25 +179,26 @@ export function wireJournal(mimi, els) {
     if (saving || !text || entriesToday().length >= DAILY) return;
     saving = true;
 
-    // Mimi reads it first (when signed in). Something that isn't a real good thing stays in
-    // the box and earns nothing; if the AI can't be reached, it's accepted as always.
+    // Mimi reads it first (when signed in) and keeps it, however small. Only keyboard mashing
+    // stays in the box (a paw slipped), and something painful gets comfort instead.
+    // If the AI can't be reached, it's kept as always.
     els.send.disabled = true;
     mimi.setActivity("is reading…");
     const check = await checkGoodThing(text, { catName: catName(), userName: userName() });
     mimi.setActivity(null);
     els.send.disabled = false;
-    if (check.verdict === "unclear" || check.verdict === "hard") {
+    if (check.verdict === "oops" || check.verdict === "hard") {
       const hard = check.verdict === "hard";
-      mimi.react(hard ? ["♡", `curls up next to you: “${check.reply}”`] : ["hmm?", `tilts their head: “${check.reply}”`], { hearts: hard ? 2 : 0, hold: 5200 });
+      mimi.react(hard ? ["♡", `curls up next to you: “${check.reply}”`] : ["mrrp?", `tilts their head: “${check.reply}”`], { hearts: hard ? 2 : 0, hold: 5200 });
       if (!hard) {
-        els.earnHint.textContent = `Not saved: ${catName()} only gets treats for real good things, even tiny ones.`;
+        els.earnHint.textContent = "Not saved yet: fix it and tap Tell again.";
         els.earnHint.classList.add("is-warning");
       }
       saving = false;
       els.input.focus();
       return;
     }
-    const said = check.verdict === "good" && check.reply ? check.reply : null;
+    const said = check.reply && check.verdict !== "unclear" ? check.reply : null; // "unclear": an older server
 
     const today = dayKey();
     const before = totalThings();
