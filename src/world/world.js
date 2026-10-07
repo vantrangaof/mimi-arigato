@@ -254,7 +254,7 @@ export function skyFor(hour = new Date().getHours()) {
 //   sticky (true while a note is due) }.
 // onItem(line) is called when an item is clicked so Mimi can comment on it; onJar and
 // onPostcard when the jar or the postcard is tapped.
-export function renderRoom(svg, { onItem, onJar, onPostcard, onSticky }) {
+export function renderRoom(svg, { onItem, onThing, onJar, onPostcard, onSticky }) {
   svg.append(
     svgEl("rect", { x: 0, y: 29, width: ROOM_W, height: 1, fill: "var(--floor-edge)" }),
     svgEl("rect", { x: 0, y: 30, width: ROOM_W, height: ROOM_H - 30, fill: "var(--floor)" }),
@@ -355,7 +355,7 @@ export function renderRoom(svg, { onItem, onJar, onPostcard, onSticky }) {
         const g = svgEl("g", { class: `room-item is-on thing thing-${id}` });
         const [x, y] = THING_SLOTS[i];
         drawArt(g, [x, y, THING_ART[id]], THING_COLORS);
-        g.addEventListener("click", () => onItem(THING_LINES[id]));
+        g.addEventListener("click", () => (onThing ? onThing(id, THING_LINES[id]) : onItem(THING_LINES[id])));
         things.appendChild(g);
       });
     }

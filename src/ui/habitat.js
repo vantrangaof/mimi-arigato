@@ -93,7 +93,7 @@ async function pixelatedPhoto(id) {
   return data;
 }
 
-export function wireHabitat({ mimi, look, wrap, sprite, room, tally, onJar, onPostcard, onSticky }) {
+export function wireHabitat({ mimi, look, wrap, sprite, room, tally, onJar, onPostcard, onSticky, onThing }) {
   // Sizing
   fitGrid(sprite);
   addEventListener("resize", () => fitGrid(sprite));
@@ -110,6 +110,7 @@ export function wireHabitat({ mimi, look, wrap, sprite, room, tally, onJar, onPo
     onJar,
     onPostcard,
     onSticky,
+    onThing,
   });
   let photo = null; // data URL of the framed photo
   const render = () => {

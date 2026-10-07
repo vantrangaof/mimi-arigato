@@ -716,6 +716,23 @@ mark {
 .theory-number { font-family: var(--font-pixel); color: var(--accent); }
 .theory.is-new .theory-number::after { content: " new"; color: var(--ink-soft); }
 .wish-done { color: var(--ink-soft); }
+.theory-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.theory-actions .chip { padding: 4px 10px; font-size: 0.8125rem; }
+.theory-answer { display: block; margin-top: 6px; font-size: 0.8125rem; color: var(--ink-soft); }
+
+/* ---- memory pages (ui/about.js) ---- */
+
+.about-mimi { margin: 0 0 10px; padding: 8px 10px; border-radius: 3px; background: var(--paper); box-shadow: 2px 2px 0 var(--cat-shadow); line-height: 1.5; }
+.about-count { margin: 0 0 2px; font-family: var(--font-pixel); color: var(--accent); }
+.about-with { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 8px 0 0; line-height: 1.5; }
+.about-with-label { font-size: 0.8125rem; font-weight: 600; color: var(--ink-soft); }
+.about-with .link-button { padding: 0; }
+.about-theories { list-style: none; margin: 12px 0 0; padding: 0; }
+.about-theories li { display: grid; gap: 2px; margin-top: 8px; line-height: 1.5; }
+.about-entries { list-style: none; margin: 14px 0 0; padding: 0; }
+.about-entries li { display: grid; gap: 2px; padding: 8px 0; border-top: 1px solid var(--grid-strong); line-height: 1.5; overflow-wrap: anywhere; }
+.subjects { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 6px; }
+.subject-count { margin-left: 6px; font-family: var(--font-pixel); color: var(--accent); }
 
 /* ---- sticky notes ---- */
 

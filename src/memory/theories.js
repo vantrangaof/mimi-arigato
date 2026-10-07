@@ -163,4 +163,18 @@ export function discoverTheory(today = dayKey()) {
 }
 
 export const theoryText = (theory) => theory.text.replaceAll("{cat}", catName());
+
+// Theories you haven't said "Nope" to (those stay gone, and Mimi never suggests them again).
+export const shownTheories = () => store.theories.filter((t) => t.answer !== "no");
+
+// Your answer to a theory: "yes" (you're onto something) or "no" (nope). Saves it; returns what Mimi says.
+export function answerTheory(id, answer) {
+  const theory = store.theories.find((t) => t.id === id);
+  if (!theory) return null;
+  Object.assign(theory, { answer, answeredAt: Date.now() });
+  store.save("theories");
+  return answer === "yes"
+    ? ["knew it!", "adds a gold star to the evidence board."]
+    : ["oh.", "has made an error. They quietly take it off the evidence board."];
+}
 export const theoryNumber = (theory) => store.theories.indexOf(theory) + 1;

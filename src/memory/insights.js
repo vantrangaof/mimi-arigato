@@ -1,7 +1,7 @@
 // How Mimi "understands" entries, entirely on-device: keyword rules for reactions and
 // categories, plus pattern finding (favorite things, people) across everything written.
 
-import { store, allEntries, catName } from "../core/store.js";
+import { store, allEntries, catName, tagsFor, taggedPlaceWords } from "../core/store.js";
 import { formatShort } from "../core/dates.js";
 
 export const CATEGORIES = {
@@ -92,18 +92,24 @@ export function reactionFor(text, n) {
   return FALLBACKS[(n - 1) % FALLBACKS.length];
 }
 
-// Capitalized words that aren't sentence starts are probably names (works best in English).
+// Names in a good thing. If Mimi's AI read it, those are the people it found. Otherwise capitalized
+// words that aren't sentence starts are probably names (works best in English), except words the
+// AI called places in other good things ("Kyoto").
 export function namesIn(text) {
+  const tagged = tagsFor(text);
+  if (tagged) return tagged.people.filter((w) => w !== catName());
+  const places = taggedPlaceWords();
   const words = text.match(/\p{L}[\p{L}'’-]*/gu) ?? [];
   return words.slice(1)
     .map((w) => w.replace(/['’]s$/u, ""))
-    .filter((w) => /^\p{Lu}\p{Ll}+$/u.test(w) && !NOT_NAMES.has(w) && w !== catName());
+    .filter((w) => /^\p{Lu}\p{Ll}+$/u.test(w) && !NOT_NAMES.has(w) && !places.has(w) && w !== catName());
 }
 
 // Names in a good thing, including a first word that shows up as a name in other entries
 // ("Anna made me laugh"). Pass known = knownNames() when checking many entries.
 export const knownNames = (entries = allEntries()) => new Set(entries.flatMap((e) => namesIn(e.text)));
 export function peopleIn(text, known = knownNames()) {
+  if (tagsFor(text)) return namesIn(text);
   const first = text.match(/^\p{Lu}\p{Ll}+/u)?.[0];
   const names = namesIn(text);
   return first && known.has(first) && !names.includes(first) ? [first, ...names] : names;
@@ -117,7 +123,7 @@ export function thankee(text) {
   const name = namesIn(text)[0];
   if (name) return name;
   const first = text.match(/^\p{Lu}\p{Ll}+/u)?.[0];
-  if (first && !NOT_NAMES.has(first) && allEntries().some((e) => namesIn(e.text).includes(first))) return first;
+  if (first && !tagsFor(text) && !NOT_NAMES.has(first) && !taggedPlaceWords().has(first) && allEntries().some((e) => namesIn(e.text).includes(first))) return first;
   const t = lower(text);
   const family = Object.keys(FAMILY_TITLES).find((who) => FAMILY[who].test(t));
   return family ? FAMILY_TITLES[family] : "";

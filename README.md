@@ -65,7 +65,7 @@ It's an installable web app (PWA). It works offline and without an account; sign
 - **Idle habits:** every so often Mimi grooms a paw, yawns, dozes, stretches, chases their tail, stares at you, looks out the window, watches the aquarium fish, admires their accessory, or sits by the journal "waiting to hear about your day."
 - **Time of day:** asleep 10 pm to 6 am ("z z z"; tap to wake). Morning stretch, lunchtime thoughts, evening "ready to hear about your day."
 - **Fish, water, cuddles:** each good thing you tell Mimi today earns one of each to give whenever you like (a fish drops in, a water drop, a purring snuggle). Mimi never gets hungry or thirsty.
-- **Mimi reads your good things:** when signed in, Mimi (AI) reads each one first and replies to that exact thing. Mimi keeps every one, however small ("idk, today was okay" → *"i'll keep this little one."*). Only keyboard mashing stays in the box ("did a paw slip?"), and something painful gets comfort instead. Offline, Mimi uses keyword reactions.
+- **Mimi reads your good things:** when signed in, Mimi (AI) reads each one first, replies to that exact thing, and notes who, where and what it's about (people, places, things) so memory pages and theories get them right. Mimi keeps every one, however small ("idk, today was okay" → *"i'll keep this little one."*). Only keyboard mashing stays in the box ("did a paw slip?"), and something painful gets comfort instead. Offline, Mimi uses keyword reactions.
 - **Nothing special today:** before your first good thing, tap it and Mimi says *"some days are just days. Here's a fish anyway."* You get a fish, water and cuddle to give. Being here is enough.
 - **Bedtime:** from 9 pm to 6 am a **Tuck in** button appears. Mimi climbs under a blanket, whispers today's good things back to you one by one, says goodnight, and the room's lights dim. Mimi stays asleep until morning (petting still wakes them for a moment).
 - **Dress up:** a wardrobe with one item per slot (head, neck, face) and a live preview. Free from the start: party hat, bell collar, round glasses. Unlocked by good things: little flower (5), ribbon bow (15), cozy scarf (40), beret (120), tiny crown (200).
@@ -107,7 +107,7 @@ Everything unlocks by total good things and never goes away:
 
   Mimi mentions it once per event each year. Costumes come off automatically when the event ends.
 - **Surprises** (rare, at most about three a week): Mimi finds a treasure (a tiny button, a seashell, a blue feather…) that appears on the floor of the room, or tells you a dream ("dreamed about noodles last night").
-- Tap things in the room and Mimi comments on them.
+- Tap things in the room and Mimi comments on them. Tapping a **thing from your life** (the coffee mug, the suitcase…) opens its memory page: every good thing about it, who and where it tends to come with, and Mimi's theories about it.
 
 ### Photos
 - **Photos tab:** add photos of you and your cat ("Add photos", several at once). Tap one to see it large, write a caption, or delete it.
@@ -123,7 +123,9 @@ Everything unlocks by total good things and never goes away:
   - what kind of person you are, according to a cat (*"A suspicious amount of your happiness is edible."*, *"You find good things even on hard days."*)
   - when good things happen (a weekday, mornings or late nights)
 
-  Theories never use percentages or scores, and never use the diary. Then *What Mimi has learned* ("Mimi thinks you really like coffee." "You talked about Lin 3 times. Mimi knows Lin must be important." "Your mom came up 4 times. That sounds special.") plus a **Memory cabinet** of drawers Mimi sorts on their own: People, Food, Things you were proud of, Things that made you laugh, Beautiful moments, Kindness, Rest, Moving your body, Hard days you got through, Little things, Wishes in the jar, Wishes that came true, and Treasures Mimi found.
+  Theories never use percentages or scores, and never use the diary. Each one has **You're onto something** (it gets a ✓) and **Nope** (Mimi *"has made an error. They quietly take it off the evidence board."*; it's gone for good and never suggested again). Then *What Mimi has learned* ("Mimi thinks you really like coffee." "You talked about Lin 3 times. Mimi knows Lin must be important." "Your mom came up 4 times. That sounds special.") plus a **Memory cabinet** of drawers Mimi sorts on their own: People, Food, Things you were proud of, Things that made you laugh, Beautiful moments, Kindness, Rest, Moving your body, Hard days you got through, Little things, Wishes in the jar, Wishes that came true, and Treasures Mimi found.
+- **People, places and things** (in Memories): a chip for each person who came up at least twice, each place, and each thing from your life, with how many good things mention it. Tap one for its **memory page**: "3 good things since Sep 12", a line from Mimi (*"Mimi thinks Anna is important."*), who and where it comes with (tap those to hop to their page), what it goes with, Mimi's theories about it, and the good things themselves.
+- **Mimi remembers before you do:** now and then (at most every two weeks, on a quiet day) Mimi brings up someone or something you haven't mentioned in two months while you kept telling other good things: *"was just thinking about Bao. They haven't come up since June. Mimi hopes they're well."* Never a question, never a nudge.
 - **Diary:** a private page per day for whatever happened or whatever's on your mind, not only good things. It saves as you type. Pick the day's **mood weather** (sunny, cloudy, rainy, stormy) if you like. A little sleeping Mimi keeps you company on the page and flicks her tail while you type, but she never reads or reacts to what you write: diary pages never show up in Memories, Scrapbook, Month, the picture of today, or search. Past pages are listed underneath; tap one to read or edit it.
 - **Scrapbook:** at 10, 25, 50, 75, 100 good things, then every 50, Mimi keeps one entry (preferring warm moments) as a taped-in page. Flip through them.
 - **Month:** "Your October": how many good things across how many days, what kinds, "You mentioned coffee 11 times," and **Mimi's favorite memory** of the month.
@@ -207,6 +209,8 @@ src/
     theories.js         Mimi's theories: connecting good things into conclusions
     wishes.js           Finding wishes in good things and noticing when they come true
     year-ago.js         Good things from this date in earlier years, and Mimi's remark
+    about.js            Memory pages: everything about one person, place or thing
+    remember.js         "Mimi remembers before you do": something that went quiet
     reminders.js        Sticky notes: reading "text Mom tomorrow at 6", due and repeating notes
   ui/                   One module per part of the page
     habitat.js          Room on screen, pixel sizing, petting
@@ -219,6 +223,7 @@ src/
     jar.js              Jar of good things: tap or shake to pull one out
     bedtime.js          Tuck Mimi in at night
     postcard.js         The postcard on the floor and its dialog
+    about.js            Memory page sheet (room things, people, places)
     thanks.js           Thank-you cards
     journal.js          Writing good things, prompts, unlock, scrapbook, wish and room-thing events
     year-ago.js         The "one year ago today" card
@@ -253,8 +258,8 @@ Mimi is **local-first**: the on-device database is what the app reads and writes
 
 | Store | Contents |
 |---|---|
-| `entries` | One record per good thing: `{ id, day, text, createdAt, updatedAt, deleted, synced }` |
-| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` (fish)/`water`/`cuddles` counters, `quietDay` ("Nothing special today"), `chat` (Chat with Mimi, device only), `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`; synced: `theories`, `wishes`, `roomThings`, `reminders`; per device: `stickyGreeted`, `stickySaid` |
+| `entries` | One record per good thing: `{ id, day, text, createdAt, updatedAt, deleted, synced, photoId, tags }`; `tags` is `{ people, places, things }` from the AI, or null |
+| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` (fish)/`water`/`cuddles` counters, `quietDay` ("Nothing special today"), `chat` (Chat with Mimi, device only), `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`, `remembered`/`rememberedAt`; synced: `theories`, `wishes`, `roomThings`, `reminders`; per device: `stickyGreeted`, `stickySaid` |
 | `photos` | Photo details: `{ id, day, caption, entryId, createdAt, updatedAt, deleted, synced, uploaded, hasFull, hasThumb }` |
 | `photoFiles` | The image files, keyed `<photo id>:full` and `<photo id>:thumb` |
 
@@ -264,7 +269,7 @@ Data from earlier versions (plain localStorage) moves into the database automati
 
 | Table | Contents |
 |---|---|
-| `entries` | `id, user_id, day, text, created_at, updated_at, deleted, synced_at` |
+| `entries` | `id, user_id, day, text, created_at, updated_at, deleted, synced_at, photo_id, tags (jsonb)` |
 | `user_state` | `user_id, data (jsonb: settings, scrapbook, treasures, milestones, firstMet, theories, wishes, roomThings, reminders), updated_at` |
 | `photos` | `id, user_id, day, caption, entry_id, created_at, updated_at, deleted, synced_at` |
 | `friend_invites` | `code, user_id, created_at, expires_at, used_by`: one-use codes, 7 days |
@@ -318,12 +323,10 @@ Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing access
 
 ## Next up
 
-**Direction (2026-10-07):** make Mimi's memory the heart of the app: *your life slowly becomes a little world.* Build these in order:
-1. **The AI tags each good thing** with the people, places, foods and activities in it (same call as the check, no extra cost). Fixes "Kyoto is a person" and adds places. Signed out: keyword rules as now.
-2. **Room objects you can tap that show their memories:** the coffee cup lists your coffee good things, the suitcase lists your places.
-3. **A page per person or thing** ("Anna": first mentioned, how often, what you did together, a theory, a scrapbook-style page).
-4. **Theories you can correct:** "Nope" → *"Mimi quietly removes rain from the evidence board."*, "You're onto something" keeps it.
-5. **Mimi remembers before you do:** turn "went quiet" into an occasional greeting ("Do you remember that little café? I hope you're still going.").
+**Direction (2026-10-07):** make Mimi's memory the heart of the app: *your life slowly becomes a little world.* Built on 2026-10-07: AI tags (people, places, things), memory pages from room things and Memories, theories you can correct, and "Mimi remembers before you do". Ideas to grow them:
+- Tag older good things (a one-time "Mimi rereads your good things" for entries from before tags, within the daily AI limit).
+- Room objects from AI things, not only the 18 keyword themes (pottery, Taipei cafés…); a suitcase that lists your places.
+- A scrapbook-style page for a person after many mentions; thank-you cards from a person's page.
 Then: letters to future you, the Let-It-Go jar (never saved), diary weather showing in the room. Not now: a memory graph screen, personality modes, friendship tree; save stats and chapters for Mimi Wrapped.
 
 - **Pick up here (2026-10-07):** the AI check, earned fish/water/cuddles and Chat with Mimi are built (`ec41a7d`) but only tested with a fake Gemini. Before testing for real: push the 4 local commits, add `GEMINI_API_KEY` in Vercel, re-run `supabase/schema.sql`. Then check real Gemini replies and that Vercel runs `api/mimi.mjs`.
@@ -355,7 +358,7 @@ Then: letters to future you, the Let-It-Go jar (never saved), diary weather show
 - Optional AI reactions for entries the keyword rules don't recognize.
 
 **To decide (from the theories / wishes build)**
-- Capitalized place names count as people ("Kyoto"), so they can get a thank-you envelope or a people theory. A small list of places, or optional AI, would fix it.
+- Capitalized place names count as people ("Kyoto") when signed out. Signed in, the AI tags fix it (once a place is tagged anywhere, it's not a person in older entries either).
 - Wishes match on keywords, so "I want to learn to make bread" can come true from "had bread". Mimi asks ("Did you just do it?!") rather than declares; a "not yet" button in Memories could undo it.
 - "Noticing change" ("you used to say you didn't like going places alone") needs AI to do well; theories cover the simpler "went quiet" and "liked for a long time".
 

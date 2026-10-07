@@ -44,7 +44,8 @@ const DEFAULT_SETTINGS = {
 
 let db;
 let kv = {};
-let records = []; // { id, day, text, createdAt, updatedAt, deleted, synced, photoId }, oldest first
+let records = []; // { id, day, text, createdAt, updatedAt, deleted, synced, photoId, tags }, oldest first
+// tags: { people, places, things } from Mimi's AI (see cloud/ai.js), or null if it didn't read it.
 let photos = []; // { id, day, caption, entryId, createdAt, updatedAt, deleted, synced, uploaded, hasFull, hasThumb }
 let diary = new Map(); // day → { day, text, mood, updatedAt, synced }
 const photoURLs = new Map(); // "<id>:<size>" → object URL
@@ -55,7 +56,7 @@ export const store = {
   settings: { ...DEFAULT_SETTINGS },
   scrapbook: [], // [{ at: 25, key, text }]
   treasures: [], // [{ id: "button", key }]
-  theories: [], // Mimi's theories, in the order found: [{ id, key, text }] (see memory/theories.js)
+  theories: [], // Mimi's theories, in the order found: [{ id, key, text, answer?, answeredAt? }] (see memory/theories.js)
   wishes: [], // [{ id, key, text, what, words, done: null | { key, text } }] (see memory/wishes.js)
   reminders: [], // sticky notes: things to remind you of (see memory/reminders.js)
   roomThings: [], // things from your life that appeared in the room: [{ id, key }] (see memory/themes.js)
@@ -103,12 +104,37 @@ function rebuildDays() {
   for (const r of live()) (store.days[r.day] ??= []).push(r.text);
 }
 
-const persistRecords = (list) => db?.putEntries(list).catch((err) => console.warn("Mimi couldn't save entries", err));
+const persistRecords = (list) => {
+  tagIndex = null;
+  return db?.putEntries(list).catch((err) => console.warn("Mimi couldn't save entries", err));
+};
+
+// What Mimi's AI tagged in each good thing, looked up by its text (rebuilt when entries change).
+let tagIndex = null; // { byText: Map(text → tags), places: Set of capitalized words in tagged places }
+function indexTags() {
+  if (tagIndex) return tagIndex;
+  tagIndex = { byText: new Map(), places: new Set() };
+  for (const r of live()) {
+    if (!r.tags) continue;
+    tagIndex.byText.set(r.text, r.tags);
+    for (const place of r.tags.places) for (const w of place.split(/\s+/)) if (/^\p{Lu}/u.test(w)) tagIndex.places.add(w);
+  }
+  return tagIndex;
+}
+export const tagsFor = (text) => indexTags().byText.get(text) ?? null;
+export const taggedPlaceWords = () => indexTags().places;
+
+// Keeps only well-formed tags (they come from the AI, or from another device).
+export function cleanTags(t) {
+  if (!t || typeof t !== "object") return null;
+  const list = (v) => (Array.isArray(v) ? v.filter((x) => typeof x === "string" && x.trim()).map((x) => x.trim().slice(0, 32)).slice(0, 5) : []);
+  return { people: list(t.people), places: list(t.places), things: list(t.things) };
+}
 
 const newId = () => globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 
-export function addEntry(text, day = dayKey(), createdAt = Date.now(), photoId = null) {
-  const record = { id: newId(), day, text, createdAt, updatedAt: createdAt, deleted: false, synced: false, photoId };
+export function addEntry(text, day = dayKey(), createdAt = Date.now(), photoId = null, tags = null) {
+  const record = { id: newId(), day, text, createdAt, updatedAt: createdAt, deleted: false, synced: false, photoId, tags: cleanTags(tags) };
   records.push(record);
   (store.days[day] ??= []).push(text);
   persistRecords([record]);
@@ -261,6 +287,7 @@ async function migrateFromLocalStorage() {
 }
 
 function loadMemory() {
+  tagIndex = null;
   records.sort((a, b) => a.createdAt - b.createdAt);
   rebuildDays();
   store.settings = { ...DEFAULT_SETTINGS, ...read(KEYS.settings, {}) };
@@ -277,7 +304,7 @@ export async function initStore() {
   db = await openDatabase();
   const loaded = await db.loadAll();
   kv = loaded.kv;
-  records = loaded.entries.map((r) => ({ deleted: false, synced: false, updatedAt: r.createdAt, photoId: null, ...r }));
+  records = loaded.entries.map((r) => ({ deleted: false, synced: false, updatedAt: r.createdAt, photoId: null, tags: null, ...r }));
   photos = loaded.photos ?? [];
   diary = new Map((loaded.diary ?? []).map((d) => [d.day, d]));
   if (!kv.migrated) {
@@ -362,6 +389,8 @@ export function mergeRemoteEntries(rows) {
       photoId: row.photo_id ?? null,
     };
     const local = byId.get(row.id);
+    // Without the tags column (older schema) the cloud doesn't know them: keep this device's.
+    remote.tags = "tags" in row ? cleanTags(row.tags) : local?.tags ?? null;
     if (local && local.updatedAt >= remote.updatedAt) continue;
     if (local) Object.assign(local, remote);
     else records.push(remote);
@@ -475,6 +504,14 @@ function mergeNewest(a = [], b = []) {
   return [...byId.values()];
 }
 
+// Theories keep the order found; your newest answer to each ("yes" / "no") wins.
+function mergeTheories(a = [], b = []) {
+  return unionBy(a, b, (t) => t.id).map((t) => {
+    const other = b.find((x) => x.id === t.id);
+    return other && (other.answeredAt ?? 0) > (t.answeredAt ?? 0) ? { ...t, answer: other.answer, answeredAt: other.answeredAt } : t;
+  });
+}
+
 // A wish that came true on either device stays true.
 function mergeWishes(a = [], b = []) {
   const merged = unionBy(a, b, (w) => w.id);
@@ -503,7 +540,7 @@ export function mergeCloudState(remote = {}) {
     treasures: unionBy(local.treasures, remote.treasures, (t) => t.id),
     milestones: [...new Set([...local.milestones, ...(remote.milestones ?? [])])],
     firstMet: firstMets[0] ?? null,
-    theories: unionBy(local.theories, remote.theories, (t) => t.id),
+    theories: mergeTheories(local.theories, remote.theories),
     wishes: mergeWishes(local.wishes, remote.wishes),
     roomThings: unionBy(local.roomThings, remote.roomThings, (t) => t.id),
     reminders: mergeNewest(local.reminders, remote.reminders),
@@ -601,7 +638,8 @@ export function importBackup(text) {
   if (Array.isArray(data.theories)) {
     for (const t of data.theories) {
       if (typeof t?.id === "string" && isDayKey(t.key) && typeof t.text === "string" && !store.theories.some((x) => x.id === t.id)) {
-        store.theories.push({ id: t.id, key: t.key, text: clean(t.text) });
+        const answer = ["yes", "no"].includes(t.answer) ? { answer: t.answer, answeredAt: Number(t.answeredAt) || Date.now() } : {};
+        store.theories.push({ id: t.id, key: t.key, text: clean(t.text), ...answer });
       }
     }
   }

@@ -12,6 +12,24 @@ Progress log for Mimi Arigato. Newest first.
 ### Nothing special today
 - A "Nothing special today" link under "Stuck?" (only before your first good thing). Mimi says "some days are just days. Here's a fish anyway." and you get one fish, water and cuddle to give. It isn't saved as a good thing and only counts for today on this device (`quietDay`).
 
+### Mimi knows who, where and what
+- The AI check now also returns **tags**: `people`, `places`, `things` (same call, no extra cost). Saved on the entry (`entries.tags`, jsonb) and synced.
+- Names use the tags when there are any; a word the AI called a place anywhere (Kyoto) is no longer a person, in thank-you cards, theories, What Mimi has learned or the postcard. Signed out: keyword rules as before.
+- Sync keeps working before `schema.sql` is re-run: if the `tags` column is missing it syncs without it.
+
+### Memory pages
+- Tap a thing from your life in the room (coffee mug, suitcase…) for its page: count and first date, a line from Mimi, often with (people), places, goes with (other things), Mimi's theories about it, and the good things (newest 20).
+- **Memories → People, places and things:** chips with counts; people need 2 mentions. Pages link to each other.
+
+### Theories you can correct
+- Each theory has **You're onto something** (✓) and **Nope** (taken off the evidence board for good, never suggested again). Numbers stay the same. Answers sync (newest answer wins) and are in backups.
+
+### Mimi remembers before you do
+- On open, at most every 14 days and only when there aren't already 2 greetings: someone, some place or some thing with 3+ good things that hasn't come up in 60 days while you told at least 8 others. The same one at most every 180 days. Per device.
+
+### Setup
+- Re-run `supabase/schema.sql` (adds `entries.tags`).
+
 ### Roadmap from a design review
 - Reviewed another AI's ideas against what's built. Agreed order (see README "Next up"): AI tags people/places/things → tappable room objects with memories → a page per person or thing → theories you can correct → "Mimi remembers before you do". Skipped for now: memory graph view, personality modes, stats and chapters (save for Wrapped), friendship tree.
 

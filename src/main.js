@@ -33,6 +33,8 @@ import { wireDiary } from "./ui/diary.js";
 import { wireJar } from "./ui/jar.js";
 import { wireBedtime } from "./ui/bedtime.js";
 import { wirePostcard, postcardGreeting } from "./ui/postcard.js";
+import { wireAbout } from "./ui/about.js";
+import { rememberGreeting } from "./memory/remember.js";
 import { wireThanks } from "./ui/thanks.js";
 import { wireYearAgo, yearAgoGreeting } from "./ui/year-ago.js";
 import { wireReminders, stickyGreeting } from "./ui/reminders.js";
@@ -57,6 +59,7 @@ const mimi = makeMimi({
 });
 
 const jar = wireJar(mimi);
+const about = wireAbout({ dialog: $("aboutDialog"), title: $("aboutTitle"), body: $("aboutBody") });
 const postcard = wirePostcard(mimi, { dialog: $("postcardDialog"), body: $("postcardBody") });
 const thanks = wireThanks(mimi, { dialog: $("thanksDialog"), to: $("thanksTo"), img: $("thanksImg"), save: $("thanksSave"), share: $("thanksShare") });
 
@@ -71,7 +74,8 @@ const stickies = wireReminders(mimi, {
   repeat: $("stickyRepeat"),
 });
 
-wireHabitat({ mimi, look, wrap, sprite, room: $("roomArt"), tally: $("tally"), onJar: jar.tap, onPostcard: postcard.open, onSticky: stickies.show });
+wireHabitat({ mimi, look, wrap, sprite, room: $("roomArt"), tally: $("tally"), onJar: jar.tap, onPostcard: postcard.open, onSticky: stickies.show,
+  onThing: (id, line) => about.open({ kind: "theme", id }, line) });
 wireNote({ button: $("mimiNote"), text: $("noteText"), signature: $("noteSign") });
 wireTopbar({ together: $("together"), soundToggle: $("soundToggle"), settingsOpen: $("settingsOpen"), cloudButton: $("cloudButton") });
 wireIntro(mimi, { card: $("intro"), form: $("introForm"), input: $("introName"), skip: $("introSkip"), title: $("introTitle"), note: $("introNote") });
@@ -107,7 +111,7 @@ wirePhotos(mimi, {
   viewer: { dialog: $("photoViewer"), image: $("photoFull"), caption: $("photoCaption"), meta: $("photoMeta"), actions: $("photoActions") },
 });
 wireDiary(mimi, { panel: $("panel-diary"), tab: $("tab-diary") });
-wireMemories($("panel-memories"));
+wireMemories($("panel-memories"), { mimi, openAbout: about.open });
 wireScrapbook($("panel-scrapbook"));
 wireMonth($("panel-month"));
 wireCalendar({
@@ -201,6 +205,9 @@ const notes = stickyGreeting();
 if (notes) greetings.push(notes);
 const memory = yearAgoGreeting();
 if (memory) greetings.push(memory);
+// Something you used to mention, on a quiet day (not when Mimi already has lots to say).
+const remembered = greetings.length < 2 ? rememberGreeting() : null;
+if (remembered) greetings.push(remembered);
 const theory = discoverTheory();
 if (theory) {
   store.save("theories");

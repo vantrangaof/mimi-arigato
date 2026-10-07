@@ -203,7 +203,7 @@ export function wireJournal(mimi, els) {
     const today = dayKey();
     const before = totalThings();
     const echo = echoOf(text, today);
-    const record = addEntry(text, today);
+    const record = addEntry(text, today, Date.now(), null, check.tags); // tags: who, where and what (AI)
     els.input.value = "";
     prompt = null;
     if (pending) {

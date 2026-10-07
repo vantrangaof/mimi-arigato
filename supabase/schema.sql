@@ -56,6 +56,8 @@ create policy "own state" on public.user_state
 
 -- A good thing can have one photo attached.
 alter table public.entries add column if not exists photo_id uuid;
+-- What Mimi's AI noticed in a good thing: { people: [...], places: [...], things: [...] } (null if not read).
+alter table public.entries add column if not exists tags jsonb;
 
 -- Photo details. The images themselves live in the "photos" Storage bucket below.
 create table if not exists public.photos (

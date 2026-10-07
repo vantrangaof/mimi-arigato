@@ -30,7 +30,7 @@ async function ask(body, timeout) {
   }
 }
 
-// { verdict: "good" | "small" | "oops" | "hard", reply } or { error }. Every good thing is kept except
+// { verdict: "good" | "small" | "oops" | "hard", reply, tags: { people, places, things } } or { error }. Every good thing is kept except
 // "oops" (keyboard mashing) and "hard" (Mimi comforts you instead); on error it's kept as always.
 export const checkGoodThing = (text, { catName, userName }) =>
   ask({ kind: "check", text, catName, userName }, CHECK_TIMEOUT_MS);

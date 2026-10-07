@@ -142,11 +142,15 @@ export async function signOut({ forgetDevice = false } = {}) {
 const lastPullKey = (table = "entries") => `lastPull${table === "entries" ? "" : `:${table}`}:${session.user.id}`;
 const filePath = (id, size) => `${session.user.id}/${id}${size === "thumb" ? "-thumb" : ""}.jpg`;
 
+// entries.tags arrived with a later schema.sql; until it's re-run, sync without it.
+let tagsColumn = true;
+const missingTags = (error) => tagsColumn && /tags/.test(`${error?.message ?? ""} ${error?.details ?? ""}`);
+
 async function pushEntries(c) {
   const pending = unsyncedEntries();
   for (let i = 0; i < pending.length; i += PAGE) {
     const batch = pending.slice(i, i + PAGE);
-    const { error } = await c.from("entries").upsert(batch.map((r) => ({
+    const rows = () => batch.map((r) => ({
       id: r.id,
       user_id: session.user.id,
       day: r.day,
@@ -155,7 +159,13 @@ async function pushEntries(c) {
       updated_at: new Date(r.updatedAt).toISOString(),
       deleted: Boolean(r.deleted),
       photo_id: r.photoId ?? null,
-    })));
+      ...(tagsColumn ? { tags: r.tags ?? null } : {}),
+    }));
+    let { error } = await c.from("entries").upsert(rows());
+    if (missingTags(error)) {
+      tagsColumn = false;
+      ({ error } = await c.from("entries").upsert(rows()));
+    }
     if (error) throw error;
     markEntriesSynced(batch);
   }
@@ -164,11 +174,16 @@ async function pushEntries(c) {
 async function pullEntries(c) {
   let since = read(lastPullKey(), "1970-01-01T00:00:00Z");
   for (;;) {
-    const { data, error } = await c.from("entries")
-      .select("id,day,text,created_at,updated_at,deleted,photo_id,synced_at")
+    const page = () => c.from("entries")
+      .select(`id,day,text,created_at,updated_at,deleted,photo_id,synced_at${tagsColumn ? ",tags" : ""}`)
       .gt("synced_at", since)
       .order("synced_at", { ascending: true })
       .range(0, PAGE - 1);
+    let { data, error } = await page();
+    if (missingTags(error)) {
+      tagsColumn = false;
+      ({ data, error } = await page());
+    }
     if (error) throw error;
     if (!data.length) break;
     mergeRemoteEntries(data);
