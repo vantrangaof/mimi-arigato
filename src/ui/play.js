@@ -1,4 +1,5 @@
-// Things to do with Mimi: fish, water and cuddles you earn with good things, and a laser dot to chase.
+// Things to do with Mimi: fish, water and cuddles you earn with good things, and a laser dot to chase
+// (one of the games in ui/games.js; the Play button opens them).
 
 import { store, KEYS, dailyCount, setDailyCount, entriesToday, quietToday, catName } from "../core/store.js";
 import { el, replay, pick, capitalize } from "../core/dom.js";
@@ -232,6 +233,11 @@ export function wirePlay(btn, mimi, wrap, habitat, look) {
 
   habitat.addEventListener("pointermove", steer);
   habitat.addEventListener("pointerdown", steer);
-  btn.addEventListener("click", () => (playing ? stop() : start()));
-  return { isPlaying: () => playing };
+  let openGames = null;
+  btn.addEventListener("click", () => (playing ? stop() : openGames ? openGames() : start()));
+  return {
+    isPlaying: () => playing,
+    start: () => !playing && start(),
+    onOpen: (fn) => { openGames = fn; },
+  };
 }

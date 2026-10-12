@@ -1,11 +1,13 @@
 // Calendar files (.ics) so your calendar app can do the alerts a web app can't schedule.
 
 const RRULE = { day: "DAILY", week: "WEEKLY", month: "MONTHLY", year: "YEARLY" };
+const BYDAY = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 const escape = (s) => s.replace(/[\;,]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
 
 // One event with an alert. day: "YYYY-MM-DD"; time: "HH:MM" or null (all-day, alert at 9 am);
-// repeat: null | "day" | "week" | "month" | "year".
-export function calendarEvent({ uid, day, time = null, repeat = null, summary, description = "" }) {
+// repeat: null | "day" | "week" | "month" | "year"; weekdays: with repeat "week", the days it
+// repeats on (0 = Sunday).
+export function calendarEvent({ uid, day, time = null, repeat = null, weekdays = null, summary, description = "" }) {
   const ymd = day.replaceAll("-", "");
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
   const url = location.protocol.startsWith("http") ? location.href.split(/[?#]/)[0] : "";
@@ -18,7 +20,7 @@ export function calendarEvent({ uid, day, time = null, repeat = null, summary, d
     `UID:${uid}@mimi-arigato`,
     `DTSTAMP:${stamp}`,
     ...(time ? [`DTSTART:${ymd}T${time.replace(":", "")}00`, "DURATION:PT5M"] : [`DTSTART;VALUE=DATE:${ymd}`]),
-    ...(repeat ? [`RRULE:FREQ=${RRULE[repeat]}`] : []),
+    ...(repeat ? [`RRULE:FREQ=${RRULE[repeat]}${repeat === "week" && weekdays?.length ? `;BYDAY=${weekdays.map((d) => BYDAY[d]).join(",")}` : ""}`] : []),
     `SUMMARY:${escape(summary)}`,
     ...(details ? [`DESCRIPTION:${escape(details)}`] : []),
     ...(url ? [`URL:${url}`] : []),

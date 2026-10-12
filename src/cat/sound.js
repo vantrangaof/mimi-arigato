@@ -15,7 +15,8 @@ const bytes = {};
 const buffers = {};
 let current = null;
 
-function context() {
+// Shared with cat/music.js so Mimi's songs and voice use one (already unlocked) context.
+export function context() {
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return null;
   ctx ??= new AC();

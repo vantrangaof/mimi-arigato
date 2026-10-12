@@ -2,6 +2,18 @@
 
 Progress log for Mimi Arigato. Newest first.
 
+## 2026-10-12
+
+### Wake-up alarm with Mimi's music
+- A bell in the top bar (shows the time when set) opens **Wake-up alarm**: time, days (none = once), song, "Start soft and get louder".
+- Songs: three chiptunes made with Web Audio (`src/cat/music.js`, no files): Morning meow, Music box, Sunbeam waltz; Mimi's real meows on repeat; or your own music file (kept on this device in `photoFiles` as `alarm:song`, up to 15 MB). Each has a ▶ preview.
+- Ringing: a "Good morning!" sheet with Mimi bouncing and notes floating, **I'm up!** / **5 more minutes**; vibrates on Android; stops by itself after 10 minutes. Escape counts as "I'm up". A missed alarm only rings if you open the app within 3 minutes.
+- Honest about web limits: it rings only while the app is open. Tucked in at night with an alarm within 14 hours, Mimi holds a screen wake lock and says at bedtime "will wake you at 7:00 with Morning meow." **Add to calendar** makes a backup event (`ics.js` now supports weekly repeats on chosen days). **Try it now** rings once.
+- Per device only (not synced, not in backups), so your laptop doesn't ring too.
+
+### Games
+- **Play** now opens a games sheet: Laser dot (as before), **Catch the fish** (30 s, canvas, gold fish = 3), **Pairs** (6 pairs, counts tries), **Mimi's song** (repeat the tune on four paws, Simon-style). Bests per device (`gameBests`). Games never earn or cost treats; Mimi reacts in the room when you close the sheet.
+
 ## 2026-10-07
 
 ### Mimi keeps every good thing

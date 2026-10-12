@@ -69,7 +69,12 @@ It's an installable web app (PWA). It works offline and without an account; sign
 - **Nothing special today:** before your first good thing, tap it and Mimi says *"some days are just days. Here's a fish anyway."* You get a fish, water and cuddle to give. Being here is enough.
 - **Bedtime:** from 9 pm to 6 am a **Tuck in** button appears. Mimi climbs under a blanket, whispers today's good things back to you one by one, says goodnight, and the room's lights dim. Mimi stays asleep until morning (petting still wakes them for a moment).
 - **Dress up:** a wardrobe with one item per slot (head, neck, face) and a live preview. Free from the start: party hat, bell collar, round glasses. Unlocked by good things: little flower (5), ribbon bow (15), cozy scarf (40), beret (120), tiny crown (200).
-- **Play:** a laser dot for 20 seconds; Mimi pounces when it lands on them. Steer it with your finger or mouse, or let it wander.
+- **Play:** opens a little arcade (your best score in each is kept on this device; games never earn or cost treats):
+  - **Laser dot:** 20 seconds in the room; Mimi pounces when it lands on them. Steer it with your finger or mouse, or let it wander.
+  - **Catch the fish:** 30 seconds of fish falling from the sky; move Mimi under them (finger, mouse or arrow keys). Gold fish count for three. A missed fish just swims away.
+  - **Pairs:** twelve cards, six pairs of Mimi's favorite things (fish, heart, yarn, toy mouse, star, leaf). No timer, it only counts tries.
+  - **Mimi's song:** Mimi plays a tune on four colored paws, one note longer each round, and you play it back. A wrong note ends it gently (*"lost the tune too. Again?"*).
+- **Wake-up alarm:** the bell at the top. Pick a time, the days (none = once), and a song: **Morning meow**, **Music box**, **Sunbeam waltz** (little chiptunes made in the browser, no files), **Mimi's meows** (the real recording on repeat), or **your own song** (a music file kept on this device). It starts soft and gets louder (optional), and Mimi bounces and sings in a "Good morning!" screen with **I'm up!** and **5 more minutes**. Web apps can't ring while closed, so it rings while Mimi is open: tuck Mimi in at night and leave the phone open and charging, and Mimi keeps the screen awake until the alarm (Mimi says so at bedtime). It plays even with Mimi's sound off; on iPhone the silent switch still mutes it. **Add to calendar** sets a backup alert. **Try it now** rings once to hear it. The alarm stays on this device (it doesn't sync).
 - **Eyes follow your mouse** on desktop.
 - **Fur from a photo of your cat:** Settings → Fur → "Colors from a photo of your cat…" picks the main color near the middle of the photo and mixes a matching palette (darker outline, lighter chest, yellow eyes for dark cats). It shows up as a "From your photo" fur choice.
 
@@ -173,6 +178,7 @@ styles/
   layout.css            Page layout; desktop two-column layout
   cat.css               The room, sprite states, idle animations, effects
   panels.css            Journal, tabs, memories, scrapbook, month, calendar, dialogs
+  games.css             Games, the alarm sheet and the ringing alarm
 src/
   main.js               Startup: opens the database and wires the modules together
   config.js             Supabase project URL + public anon key (empty = no cloud sync)
@@ -192,6 +198,7 @@ src/
     sprite.js           Sprite data, fur palettes, accessories, SVG and canvas drawing
     mimi.js             Moods, reactions, idle habits, sleep schedule
     sound.js            Meow and purr playback
+    music.js            Mimi's songs (Web Audio chiptunes), notes and jingles for games
     fur-photo.js        Fur palette from a photo of your cat
   world/
     world.js            Unlock list, the pixel room, treasures
@@ -212,6 +219,10 @@ src/
     about.js            Memory pages: everything about one person, place or thing
     remember.js         "Mimi remembers before you do": something that went quiet
     reminders.js        Sticky notes: reading "text Mom tomorrow at 6", due and repeating notes
+  games/                The games in the Play sheet
+    catch.js            Catch the fish (canvas)
+    pairs.js            Pairs (memory cards)
+    song.js             Mimi's song (repeat the tune)
   ui/                   One module per part of the page
     habitat.js          Room on screen, pixel sizing, petting
     topbar.js           Days together, sound toggle, settings icon
@@ -234,6 +245,8 @@ src/
     month.js            Monthly recap
     calendar.js         Calendar and search
     play.js             Fish, water, cuddles, and laser play
+    games.js            The Play sheet: picking a game, results, bests
+    alarm.js            Wake-up alarm sheet, ringing, keeping the screen awake overnight
     settings.js         Settings dialog, reminder file, backup
     account.js          Account & sync section in Settings
     friends.js          Friends section in Settings: invites, friends list
@@ -259,9 +272,9 @@ Mimi is **local-first**: the on-device database is what the app reads and writes
 | Store | Contents |
 |---|---|
 | `entries` | One record per good thing: `{ id, day, text, createdAt, updatedAt, deleted, synced, photoId, tags }`; `tags` is `{ people, places, things }` from the AI, or null |
-| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` (fish)/`water`/`cuddles` counters, `quietDay` ("Nothing special today"), `chat` (Chat with Mimi, device only), `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`, `remembered`/`rememberedAt`; synced: `theories`, `wishes`, `roomThings`, `reminders`; per device: `stickyGreeted`, `stickySaid` |
+| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` (fish)/`water`/`cuddles` counters, `quietDay` ("Nothing special today"), `chat` (Chat with Mimi, device only), `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`, `remembered`/`rememberedAt`; synced: `theories`, `wishes`, `roomThings`, `reminders`; per device: `stickyGreeted`, `stickySaid`, `alarm`/`alarmRang`/`alarmSnooze`, `gameBests` |
 | `photos` | Photo details: `{ id, day, caption, entryId, createdAt, updatedAt, deleted, synced, uploaded, hasFull, hasThumb }` |
-| `photoFiles` | The image files, keyed `<photo id>:full` and `<photo id>:thumb` |
+| `photoFiles` | The image files, keyed `<photo id>:full` and `<photo id>:thumb`; also the alarm's own song (`alarm:song`, this device only) |
 
 Data from earlier versions (plain localStorage) moves into the database automatically. If IndexedDB isn't available (some private-browsing modes), the app falls back to localStorage.
 

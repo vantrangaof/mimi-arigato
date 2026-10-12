@@ -1,0 +1,206 @@
+/* Games (the Play sheet), the wake-up alarm sheet, and the ringing alarm. */
+
+/* ---- top bar alarm button ---- */
+
+.alarm-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 8px;
+  justify-content: center;
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.alarm-button svg { width: 19px; height: 19px; flex: none; }
+.alarm-button:hover { color: var(--ink); background: var(--grid-strong); }
+.alarm-button.is-on { color: var(--accent); }
+.alarm-button span { font-family: var(--font-pixel); white-space: nowrap; }
+
+@media (max-width: 380px) {
+  .alarm-button span { display: none; }
+}
+
+/* ---- games ---- */
+
+.game-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+
+.game-pick {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  text-align: left;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--sheet-edge);
+  border-radius: 4px;
+  box-shadow: 3px 3px 0 var(--cat-shadow);
+  cursor: pointer;
+}
+.game-pick:hover { border-color: var(--accent); }
+.game-pick:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--cat-shadow); }
+
+.game-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  background: var(--sheet-solid);
+  border: 2px solid var(--sheet-edge);
+  border-radius: 3px;
+}
+.game-icon svg { width: 30px; height: auto; max-height: 30px; }
+
+.game-text { display: grid; gap: 2px; min-width: 0; }
+.game-text .muted { margin: 0; }
+.game-name { font-family: var(--font-pixel); font-size: 17px; color: var(--accent); }
+.game-best { font-size: 0.75rem; color: var(--ink-soft); }
+
+.game-back { margin: -6px 0 6px; padding-left: 0; color: var(--ink-soft); }
+
+.game-area { display: grid; justify-items: center; gap: 10px; }
+
+.game-hud {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-pixel);
+  font-size: 16px;
+}
+.game-timer { color: var(--ink-soft); }
+.game-hint { margin: 0; text-align: center; }
+
+.game-canvas {
+  display: block;
+  max-width: 100%;
+  border: 2px solid var(--sheet-edge);
+  border-radius: 3px;
+  image-rendering: pixelated;
+  touch-action: none;
+  cursor: none;
+}
+
+.game-result { display: grid; justify-items: center; gap: 6px; padding: 18px 0 6px; text-align: center; }
+.game-result p { margin: 0; }
+.game-result .row { justify-content: center; margin-top: 10px; }
+.game-result-say { font-family: var(--font-pixel); font-size: 28px; color: var(--accent); }
+.game-result-line { font-size: 1.0625rem; line-height: 1.5; }
+
+/* Pairs */
+.pairs-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pair-card {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: var(--accent);
+  border: 2px solid var(--accent-edge);
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 var(--cat-shadow);
+  cursor: pointer;
+}
+.pair-back { font-size: 1.5rem; color: #fff; }
+.pair-face { display: none; width: 58%; height: auto; }
+.pair-card.is-up { background: var(--paper); border-color: var(--sheet-edge); }
+.pair-card.is-up .pair-back { display: none; }
+.pair-card.is-up .pair-face { display: block; }
+.pair-card.is-found { border-color: var(--accent); animation: found 500ms steps(4, end); }
+.pair-card:disabled { cursor: default; }
+
+@keyframes found { 50% { transform: translateY(-4px); } }
+
+/* Mimi's song */
+.song-paws {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.song-paw {
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--paw) 35%, var(--paper));
+  border: 2px solid color-mix(in srgb, var(--paw) 70%, var(--ink));
+  border-radius: 6px;
+  box-shadow: 3px 3px 0 var(--cat-shadow);
+  cursor: pointer;
+}
+.song-paw svg { width: 36%; height: auto; opacity: 0.55; }
+.song-paw:disabled { cursor: default; }
+.song-paw.is-lit { background: var(--paw); transform: translate(2px, 2px); box-shadow: 0 0 0 4px color-mix(in srgb, var(--paw) 45%, transparent); }
+.song-paw.is-lit svg { opacity: 1; }
+
+/* ---- alarm sheet ---- */
+
+.alarm-sheet .sheet-section:first-child { border-top: 0; padding-top: 4px; }
+
+.alarm-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.alarm-top .text-input.time { width: auto; font-size: 1.25rem; font-family: var(--font-pixel); }
+.alarm-next { flex-basis: 100%; margin: 0; font-size: 0.9375rem; color: var(--ink-soft); }
+
+.day-choices { gap: 6px; }
+.day-choice { padding: 6px 9px; font-size: 0.875rem; }
+
+.song-list { display: grid; gap: 8px; margin-bottom: 10px; }
+.song-row { display: flex; align-items: center; gap: 6px; }
+.song-choice { flex: 1; min-width: 0; }
+.song-choice > span { display: grid; min-width: 0; }
+.song-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.song-about { margin: 0; }
+.song-play { flex: none; font-size: 0.875rem; color: var(--accent); border-color: var(--sheet-edge); }
+.song-play[aria-pressed="true"] { background: color-mix(in srgb, var(--cat-blush) 25%, transparent); }
+.song-file { font-size: 0.875rem; }
+
+/* ---- the ringing alarm ---- */
+
+.ring-sheet { text-align: center; border-color: var(--accent); }
+.ring-time { margin: 0 0 10px; font-family: var(--font-pixel); font-size: 44px; line-height: 1.1; color: var(--accent); }
+.ring-line { margin: 12px 0 16px; font-size: 1.0625rem; line-height: 1.5; }
+.ring-actions { justify-content: center; }
+
+.ring-cat { position: relative; overflow: hidden; }
+.ring-cat .cat { animation: ring-bounce 600ms steps(2, end) infinite; }
+.ring-notes span {
+  position: absolute;
+  bottom: 30%;
+  font-size: 22px;
+  color: var(--accent);
+  animation: ring-note 1800ms linear infinite;
+}
+.ring-notes span:nth-child(1) { left: 22%; }
+.ring-notes span:nth-child(2) { left: 70%; animation-delay: 600ms; }
+.ring-notes span:nth-child(3) { left: 48%; animation-delay: 1200ms; }
+
+@keyframes ring-bounce { 50% { transform: translateY(-6px); } }
+@keyframes ring-note {
+  0% { transform: translateY(0); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-70px); opacity: 0; }
+}
+
+/* While the alarm rings, Mimi in the room bounces too. */
+.is-ringing .cat-wrap .cat { animation: ring-bounce 600ms steps(2, end) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ring-cat .cat, .is-ringing .cat-wrap .cat, .pair-card.is-found { animation: none; }
+  .ring-notes { display: none; }
+}

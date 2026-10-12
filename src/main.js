@@ -32,6 +32,8 @@ import { wirePhotos } from "./ui/photos.js";
 import { wireDiary } from "./ui/diary.js";
 import { wireJar } from "./ui/jar.js";
 import { wireBedtime } from "./ui/bedtime.js";
+import { wireAlarm } from "./ui/alarm.js";
+import { wireGames } from "./ui/games.js";
 import { wirePostcard, postcardGreeting } from "./ui/postcard.js";
 import { wireAbout } from "./ui/about.js";
 import { rememberGreeting } from "./memory/remember.js";
@@ -134,7 +136,10 @@ wireCare({ fish: $("fishBtn"), water: $("waterBtn"), cuddle: $("cuddleBtn") }, m
 });
 wireWardrobe(mimi, { open: $("dressBtn"), dialog: $("wardrobeDialog"), preview: $("wardrobePreview"), previewCat: $("wardrobeCat"), slots: $("wardrobeSlots"), next: $("wardrobeNext") });
 const play = wirePlay($("playBtn"), mimi, wrap, $("habitat"), look);
-wireBedtime($("tuckBtn"), mimi, $("habitat"));
+const games = wireGames(mimi, { dialog: $("gamesDialog"), title: $("gamesTitle"), body: $("gamesBody"), startLaser: play.start });
+play.onOpen(games.open);
+const alarm = wireAlarm(mimi, { open: $("alarmOpen"), dialog: $("alarmDialog"), body: $("alarmBody"), ring: { dialog: $("ringDialog"), body: $("ringBody") } });
+wireBedtime($("tuckBtn"), mimi, $("habitat"), alarm.bedtimeLine);
 followPointer(look, () => play.isPlaying());
 
 wireSettings({
