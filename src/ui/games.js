@@ -25,15 +25,21 @@ const GAMES = [
   {
     id: "catch",
     label: "Catch the fish",
-    about: "Fish fall from the sky. Gold ones count for three.",
+    about: "Fish fall from the sky. Cucumbers, rain and socks do too.",
     icon: [".bbbb.b", "bFeFFbb", "bFFFFbb", ".bbbb.b"],
     colors: { b: "#3f6797", F: "#a6d4f7", e: "#1b2a3a" },
     start: startCatch,
     higher: true,
     best: (n) => `best: ${n} fish`,
-    result(n, isBest) {
-      if (n === 0) return ["mrrp?", "didn't catch any, but loved watching them fall."];
-      return [isBest ? "new best!" : "nom nom", `caught ${n} fish!${isBest ? " That's the most ever." : ""}`];
+    result(n, isBest, { spooks = {} } = {}) {
+      const oops = [
+        spooks.cucumber && `got spooked by ${spooks.cucumber === 1 ? "a cucumber" : `${spooks.cucumber} cucumbers`}`,
+        spooks.rain && `got rained on${spooks.rain > 1 ? ` ${spooks.rain} times` : ""}`,
+        spooks.sock && `tried to eat ${spooks.sock === 1 ? "a sock" : `${spooks.sock} socks`}`,
+      ].filter(Boolean);
+      const also = oops.length ? ` (and ${oops.length > 1 ? `${oops.slice(0, -1).join(", ")} and ${oops.at(-1)}` : oops[0]})` : "";
+      if (n === 0) return ["mrrp?", `didn't catch any${also}, but loved watching them fall.`];
+      return [isBest ? "new best!" : "nom nom", `caught ${n} fish${also}!${isBest ? " That's the most ever." : ""}`];
     },
   },
   {
@@ -110,17 +116,17 @@ export function wireGames(mimi, { dialog, title, body, startLaser }) {
       root: area,
       sound: sound(),
       cat: { fur: store.settings.fur, wear: currentWear() },
-      onEnd: ({ score }) => finish(g, score, area),
+      onEnd: ({ score, ...extra }) => finish(g, score, area, extra),
     });
   }
 
-  function finish(g, score, area) {
+  function finish(g, score, area, extra) {
     cleanup = null;
     const bests = read(BESTS, {});
     const old = bests[g.id];
     const isBest = old == null ? score > 0 || !g.higher : g.higher ? score > old : score < old;
     if (isBest) write(BESTS, { ...bests, [g.id]: score });
-    const [say, line] = g.result(score, isBest && old != null);
+    const [say, line] = g.result(score, isBest && old != null, extra);
     lastResult = [say, line, isBest && old != null];
     if (sound()) jingle(score > 0 ? "win" : "miss");
     area.replaceChildren(el("div", { class: "game-result" },

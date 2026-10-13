@@ -19,8 +19,7 @@ function nightKey() {
   return dayKey(d);
 }
 
-// alarmLine(): what Mimi says about tomorrow's alarm, or null (see ui/alarm.js).
-export function wireBedtime(btn, mimi, habitat, alarmLine = () => null) {
+export function wireBedtime(btn, mimi, habitat) {
   let tucking = false;
   const tuckedTonight = () => read(KEY, null) === nightKey();
 
@@ -44,8 +43,6 @@ export function wireBedtime(btn, mimi, habitat, alarmLine = () => null) {
       for (const text of today) lines.push(["♡", `whispers “${text}”`, { hearts: 1, hold: 2600 }]);
     }
     else lines.push(["mrr", "had a cozy day with you.", { hearts: 1, hold: 2200 }]);
-    const alarm = alarmLine();
-    if (alarm) lines.push(alarm);
     lines.push(["night night", `whispers goodnight${you}.`, { hearts: 0, hold: 2200 }]);
     mimi.announce(lines, () => {
       write(KEY, nightKey());

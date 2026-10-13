@@ -219,12 +219,15 @@ export function applyLook(wrap, { fur, wear, customFur = null }) {
   wrap.dataset.wear = Object.values(wear).filter((id) => ACCESSORY_LAYERS[id]).join(" ");
 }
 
-export function drawSpriteCanvas(ctx, x0, y0, cell, { fur, wear = {} }) {
+// eyes: "open" | "happy" | "closed"; mouth: "closed" | "open" (the catch game uses these).
+const CANVAS_EYES = { open: EYES_OPEN, happy: EYES_HAPPY, closed: EYES_CLOSED };
+export function drawSpriteCanvas(ctx, x0, y0, cell, { fur, wear = {}, eyes = "open", mouth = "closed" }) {
   const palette = FURS[fur] ?? FURS.pink;
   const grid = BODY.map((r) => [...r]);
   const overlay = ([lx, ly, rows]) =>
     rows.forEach((row, y) => [...row].forEach((ch, x) => { if (ch !== ".") grid[ly + y][lx + x] = ch; }));
-  overlay(EYES_OPEN);
+  overlay(CANVAS_EYES[eyes] ?? EYES_OPEN);
+  if (mouth === "open") overlay(MOUTH_OPEN);
   overlay(TAIL_UP);
   for (const id of Object.values(wear)) if (ACCESSORY_LAYERS[id]) overlay(ACCESSORY_LAYERS[id]);
   grid.forEach((row, y) => row.forEach((ch, x) => {

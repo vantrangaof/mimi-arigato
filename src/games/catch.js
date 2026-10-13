@@ -1,18 +1,53 @@
-// Catch the fish: fish fall from the top and Mimi catches them. Steer with a finger, the
-// mouse or the arrow keys. 30 seconds; a missed fish just swims away (no penalty).
+// Catch the fish: things fall from the sky and Mimi catches them. Steer with a finger, the
+// mouse or the arrow keys. 30 seconds. Mimi opens their mouth when a fish is coming and chomps.
+// Not everything is a fish: a cucumber spooks Mimi (they jump and freeze), rain soaks them
+// (slow and shaky), a sock gets spat out ("blep"), and a heart gives zoomies (fast, wide catch).
+// None of them take fish away; they just cost time and your "in a row" streak.
 
 import { el } from "../core/dom.js";
 import { drawSpriteCanvas, FURS } from "../cat/sprite.js";
-import { playNote } from "../cat/music.js";
+import { playNote, jingle, sfx } from "../cat/music.js";
 
 const W = 100; // the field in sprite pixels
 const H = 112;
 const CAT_W = 32;
 const CAT_H = 29;
 const ROUND_MS = 30_000;
-const FISH = [".bbbb.b", "bFeFFbb", "bFFFFbb", ".bbbb.b"];
-const BLUE = { b: "#3f6797", F: "#a6d4f7", e: "#1b2a3a" };
-const GOLD = { b: "#b7791f", F: "#ffd76a", e: "#4a2f05" };
+const STREAK_BONUS = 5; // every 5 fish in a row: +2
+
+const KINDS = {
+  fish: {
+    weight: 60, worth: 1, food: true,
+    art: [".bbbb.b", "bFeFFbb", "bFFFFbb", ".bbbb.b"],
+    colors: { b: "#3f6797", F: "#a6d4f7", e: "#1b2a3a" },
+  },
+  gold: {
+    weight: 7, worth: 3, food: true, speed: 1.25,
+    art: [".bbbb.b", "bFeFFbb", "bFFFFbb", ".bbbb.b"],
+    colors: { b: "#b7791f", F: "#ffd76a", e: "#4a2f05" },
+  },
+  heart: {
+    weight: 4, speed: 1.1,
+    art: ["dd.dd", "dHHHd", "dHHHd", ".dHd.", "..d.."],
+    colors: { d: "#d64f86", H: "#ff9ebe" },
+  },
+  cucumber: {
+    weight: 11, speed: 1.1,
+    art: ["..gggggg.", ".gGgGgGgg", "gGgGgGgg.", ".gggggg.."],
+    colors: { g: "#3f8a4a", G: "#8fd19a" },
+  },
+  rain: {
+    weight: 9, speed: 0.9,
+    art: ["..cccc..", ".cCCCCc.", "cCCCCCCc", ".cccccc.", "..b..b..", ".b..b..."],
+    colors: { c: "#8d8aa0", C: "#e4e1ee", b: "#3f8fd2" },
+  },
+  sock: {
+    weight: 9,
+    art: ["kkkk..", "kaak..", "kwwk..", "kaak..", "kwwkk.", "kaaaak", ".kkkk."],
+    colors: { k: "#5a4a7a", a: "#9b7fe0", w: "#ffffff" },
+  },
+};
+const BAG = Object.entries(KINDS).flatMap(([id, k]) => Array(k.weight).fill(id));
 const NOTES = ["C5", "D5", "E5", "G5", "A5", "C6"];
 
 function drawArt(ctx, rows, colors, x0, y0) {
@@ -28,7 +63,11 @@ export function startCatch({ root, cat, sound, onEnd }) {
   const canvas = el("canvas", { class: "game-canvas", "aria-label": "Catch the fish. Move left and right with your finger, mouse or arrow keys.", tabindex: "0", role: "img" });
   const score = el("span", { class: "game-score", text: "0 fish" });
   const timer = el("span", { class: "game-timer", text: "0:30" });
-  root.replaceChildren(el("div", { class: "game-hud" }, score, timer), canvas, el("p", { class: "muted small game-hint", text: "Move Mimi under the fish. Gold ones count for three!" }));
+  root.replaceChildren(
+    el("div", { class: "game-hud" }, score, timer),
+    canvas,
+    el("p", { class: "muted small game-hint", text: "Fish are yummy (gold ones count for three) and hearts give zoomies. Watch out for cucumbers, rain and socks!" }),
+  );
 
   const ctx = canvas.getContext("2d");
   let scale = 3;
@@ -43,27 +82,89 @@ export function startCatch({ root, cat, sound, onEnd }) {
   size();
 
   const css = getComputedStyle(document.documentElement);
-  const colors = { paper: css.getPropertyValue("--paper").trim() || "#fcf2f6", grid: css.getPropertyValue("--grid-strong").trim(), floor: css.getPropertyValue("--floor-edge").trim(), ink: css.getPropertyValue("--ink").trim() };
+  const colors = { paper: css.getPropertyValue("--paper").trim() || "#fcf2f6", grid: css.getPropertyValue("--grid-strong").trim(), floor: css.getPropertyValue("--floor-edge").trim(), ink: css.getPropertyValue("--ink").trim(), accent: css.getPropertyValue("--accent").trim() || "#d64f86" };
+  const look = { fur: FURS[cat.fur] ? cat.fur : "pink", wear: cat.wear };
 
   let catX = (W - CAT_W) / 2;
   let target = catX;
-  let fish = [];
-  let pops = [];
+  let trail = []; // recent positions, for zoomies afterimages
+  let items = [];
+  let pops = []; // floating words
+  let bits = []; // crumbs and droplets
   let caught = 0;
   let streak = 0;
-  let nextFish = 0;
+  const spooks = { cucumber: 0, rain: 0, sock: 0 };
+  // Mimi's moods, as times (ms) they last until
+  let chompUntil = 0, spookUntil = 0, spookAt = 0, wetUntil = 0, blepUntil = 0, zoomUntil = 0;
+  let nextItem = 0;
   let raf;
   let last = performance.now();
   const started = last;
   let ended = false;
 
+  const play = (fn) => sound && fn();
+  const pop = (text, x, y, color = colors.ink) => pops.push({ text, x, y, age: 0, color });
+  const burst = (x, y, color, n, up = 1) => {
+    for (let i = 0; i < n; i++) bits.push({ x, y, vx: (Math.random() - 0.5) * 40, vy: -(15 + Math.random() * 30) * up, color, age: 0 });
+  };
+
   function spawn(now, elapsed) {
-    const gold = Math.random() < 0.1;
-    fish.push({ x: 4 + Math.random() * (W - 15), y: -5, speed: (18 + Math.random() * 14 + elapsed / 1500) * (gold ? 1.25 : 1), gold });
-    nextFish = now + Math.max(380, 900 - elapsed / 50) * (0.7 + Math.random() * 0.6);
+    const kind = BAG[Math.floor(Math.random() * BAG.length)];
+    const k = KINDS[kind];
+    const w = k.art[0].length;
+    items.push({ kind, x: 3 + Math.random() * (W - w - 6), y: -k.art.length, vy: (24 + Math.random() * 14 + elapsed / 1000) * (k.speed ?? 1), w, h: k.art.length });
+    nextItem = now + Math.max(330, 820 - elapsed / 45) * (0.7 + Math.random() * 0.6);
   }
 
-  function draw() {
+  function hit(item, now, center, mouthTop) {
+    const k = KINDS[item.kind];
+    if (k.food) {
+      streak += 1;
+      let worth = k.worth;
+      chompUntil = now + 260;
+      burst(center, mouthTop, k.colors.F, 4);
+      if (streak % STREAK_BONUS === 0) {
+        worth += 2;
+        pop(`${streak} in a row! +2`, W / 2, 28, colors.accent);
+        play(() => jingle("win"));
+      }
+      else play(() => playNote(NOTES[Math.min((streak - 1) % NOTES.length, NOTES.length - 1)], { dur: 0.12, volume: 0.6 }));
+      caught += worth;
+      score.textContent = `${caught} fish`;
+      pop(`+${k.worth}`, center, mouthTop - 4, item.kind === "gold" ? "#b7791f" : colors.ink);
+      return;
+    }
+    if (item.kind === "heart") {
+      zoomUntil = now + 5000;
+      pop("zoomies!", center, mouthTop - 6, colors.accent);
+      burst(center, mouthTop, "#ff9ebe", 8);
+      play(() => sfx("sparkle"));
+      return;
+    }
+    streak = 0;
+    spooks[item.kind] += 1;
+    if (item.kind === "cucumber") {
+      spookAt = now;
+      spookUntil = now + 1200;
+      pop("EEK!", center, mouthTop - 10, colors.accent);
+      play(() => sfx("boing"));
+    }
+    else if (item.kind === "rain") {
+      wetUntil = now + 1800;
+      pop("pfft!", center, mouthTop - 8);
+      burst(center, mouthTop - 6, "#3f8fd2", 10);
+      play(() => sfx("splash"));
+    }
+    else if (item.kind === "sock") {
+      blepUntil = now + 450;
+      pop("blep", center, mouthTop - 8);
+      play(() => sfx("blep"));
+      // Spat back out: it flies up and away.
+      items.push({ ...item, y: mouthTop - item.h - 2, vy: -70, vx: (Math.random() < 0.5 ? -1 : 1) * 30, spat: true });
+    }
+  }
+
+  function draw(now) {
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
     ctx.fillStyle = colors.paper;
     ctx.fillRect(0, 0, W, H);
@@ -72,48 +173,88 @@ export function startCatch({ root, cat, sound, onEnd }) {
     for (let y = 0; y < H; y += 8) ctx.fillRect(0, y, W, 0.15);
     ctx.fillStyle = colors.floor;
     ctx.fillRect(0, H - 3, W, 3);
-    for (const f of fish) drawArt(ctx, FISH, f.gold ? GOLD : BLUE, Math.round(f.x), Math.round(f.y));
-    drawSpriteCanvas(ctx, Math.round(catX), H - CAT_H - 1, 1, { fur: FURS[cat.fur] ? cat.fur : "pink", wear: cat.wear });
+    for (const it of items) drawArt(ctx, KINDS[it.kind].art, KINDS[it.kind].colors, Math.round(it.x), Math.round(it.y));
+
+    // Mimi's face follows what's going on.
+    const mouthTop = H - CAT_H + 4;
+    const spooked = now < spookUntil;
+    const wet = now < wetUntil;
+    const hungry = items.some((it) => KINDS[it.kind].food && !it.spat && it.y + it.h > mouthTop - 26 && it.y < mouthTop
+      && it.x + it.w / 2 > catX && it.x + it.w / 2 < catX + CAT_W);
+    const eyes = now < chompUntil ? "happy" : wet ? "closed" : now < blepUntil ? "closed" : "open";
+    const mouth = spooked || now < blepUntil || (hungry && now >= chompUntil) ? "open" : "closed";
+    const jump = spooked ? Math.max(0, Math.sin(Math.min(1, (now - spookAt) / 450) * Math.PI)) * 14 : 0;
+    const shake = wet ? (Math.floor(now / 60) % 2 ? 1 : -1) : 0;
+
+    if (now < zoomUntil) {
+      ctx.globalAlpha = 0.25;
+      for (const x of [trail[7], trail[4]]) if (x != null) drawSpriteCanvas(ctx, Math.round(x), H - CAT_H - 1, 1, look);
+      ctx.globalAlpha = 1;
+    }
+    drawSpriteCanvas(ctx, Math.round(catX) + shake, H - CAT_H - 1 - Math.round(jump), 1, { ...look, eyes, mouth });
+    if (spooked) {
+      ctx.fillStyle = colors.accent;
+      ctx.fillRect(Math.round(catX) + 29, H - CAT_H - 4 - Math.round(jump), 1, 4);
+      ctx.fillRect(Math.round(catX) + 29, H - CAT_H + 1 - Math.round(jump), 1, 1);
+    }
+
+    for (const b of bits) {
+      ctx.globalAlpha = Math.max(0, 1 - b.age / 600);
+      ctx.fillStyle = b.color;
+      ctx.fillRect(Math.round(b.x), Math.round(b.y), 1, 1);
+    }
     ctx.font = "6px DotGothic16, monospace";
     ctx.textAlign = "center";
     for (const p of pops) {
-      ctx.fillStyle = p.gold ? "#b7791f" : colors.ink;
-      ctx.globalAlpha = Math.max(0, 1 - p.age / 700);
-      ctx.fillText(p.text, p.x, p.y - p.age / 60);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.max(0, 1 - p.age / 900);
+      ctx.fillText(p.text, Math.min(W - 14, Math.max(14, p.x)), p.y - p.age / 60);
     }
     ctx.globalAlpha = 1;
   }
 
   function frame(now) {
-    const dt = Math.min(50, now - last) / 1000;
+    const dt = Math.max(0, Math.min(50, now - last)) / 1000;
     last = now;
     const elapsed = now - started;
     const left = Math.max(0, ROUND_MS - elapsed);
     timer.textContent = `0:${String(Math.ceil(left / 1000)).padStart(2, "0")}`;
-    if (now >= nextFish && left > 600) spawn(now, elapsed);
+    if (now >= nextItem && left > 600) spawn(now, elapsed);
 
-    catX += (target - catX) * Math.min(1, dt * 12);
+    // Spooked: frozen. Wet: slow. Zoomies: fast.
+    const pace = now < spookUntil ? 0 : now < wetUntil ? 3 : now < zoomUntil ? 26 : 12;
+    catX += (target - catX) * Math.min(1, dt * pace);
+    trail = [catX, ...trail].slice(0, 8);
+
     const mouthTop = H - CAT_H + 4;
-    fish = fish.filter((f) => {
-      f.y += f.speed * dt;
-      const center = f.x + 3.5;
-      if (f.y + 4 >= mouthTop && f.y < mouthTop + 6 && center > catX + 4 && center < catX + CAT_W - 4) {
-        const worth = f.gold ? 3 : 1;
-        caught += worth;
-        streak += 1;
-        score.textContent = `${caught} fish`;
-        pops.push({ x: center, y: mouthTop - 2, age: 0, text: `+${worth}`, gold: f.gold });
-        if (sound) playNote(NOTES[Math.min(streak - 1, NOTES.length - 1)], { dur: 0.12, volume: 0.6 });
+    const reach = now < zoomUntil ? [-3, CAT_W + 3] : [4, CAT_W - 4];
+    items = items.filter((it) => {
+      it.y += it.vy * dt;
+      if (it.spat) {
+        it.x += it.vx * dt;
+        it.vy += 120 * dt;
+        return it.y > -it.h - 2 && it.y < H;
+      }
+      const center = it.x + it.w / 2;
+      if (now >= spookUntil && it.y + it.h >= mouthTop && it.y < mouthTop + 6 && center > catX + reach[0] && center < catX + reach[1]) {
+        hit(it, now, center, mouthTop);
         return false;
       }
-      if (f.y > H) {
-        streak = 0;
+      if (it.y > H) {
+        if (KINDS[it.kind].food) streak = 0;
         return false;
       }
       return true;
     });
-    pops = pops.filter((p) => (p.age += dt * 1000) < 700);
-    draw();
+    for (const b of bits) {
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
+      b.vy += 90 * dt;
+      b.age += dt * 1000;
+    }
+    bits = bits.filter((b) => b.age < 600);
+    pops = pops.filter((p) => (p.age += dt * 1000) < 900);
+    draw(now);
 
     if (left <= 0) return finish();
     raf = requestAnimationFrame(frame);
@@ -121,9 +262,8 @@ export function startCatch({ root, cat, sound, onEnd }) {
 
   function finish() {
     if (ended) return;
-    ended = true;
     cleanup();
-    onEnd({ score: caught });
+    onEnd({ score: caught, spooks });
   }
 
   const steer = (e) => {

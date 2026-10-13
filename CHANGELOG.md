@@ -2,6 +2,17 @@
 
 Progress log for Mimi Arigato. Newest first.
 
+## 2026-10-13
+
+### Removed the wake-up alarm
+- A web app can only ring while it's open on screen, which doesn't work as a real alarm. Removed the alarm sheet, the bell in the top bar and the bedtime line about it. The calendar-file and device-file helpers it added are gone too, and `music.js` now only has what the games use.
+
+### Catch the fish, more fun
+- Mimi opens their mouth when a fish is coming, chomps with happy eyes, and crumbs fly. Every 5 fish in a row: +2.
+- New falling things: **heart** (zoomies: fast, wider catch, afterimages for 5 s, sparkle sound), **cucumber** (EEK! Mimi jumps and freezes for a moment, boing), **rain cloud** (soaked: eyes shut, slow and shaky, splash), **sock** (spat back out, "blep"). None take fish away; they break the streak and cost time.
+- The result mentions them: "caught 14 fish (and got spooked by 2 cucumbers and tried to eat a sock)!"
+- The canvas cat can now be drawn with open/happy/closed eyes and an open mouth (`drawSpriteCanvas`).
+
 ## 2026-10-12
 
 ### Wake-up alarm with Mimi's music

@@ -32,7 +32,6 @@ import { wirePhotos } from "./ui/photos.js";
 import { wireDiary } from "./ui/diary.js";
 import { wireJar } from "./ui/jar.js";
 import { wireBedtime } from "./ui/bedtime.js";
-import { wireAlarm } from "./ui/alarm.js";
 import { wireGames } from "./ui/games.js";
 import { wirePostcard, postcardGreeting } from "./ui/postcard.js";
 import { wireAbout } from "./ui/about.js";
@@ -138,8 +137,7 @@ wireWardrobe(mimi, { open: $("dressBtn"), dialog: $("wardrobeDialog"), preview: 
 const play = wirePlay($("playBtn"), mimi, wrap, $("habitat"), look);
 const games = wireGames(mimi, { dialog: $("gamesDialog"), title: $("gamesTitle"), body: $("gamesBody"), startLaser: play.start });
 play.onOpen(games.open);
-const alarm = wireAlarm(mimi, { open: $("alarmOpen"), dialog: $("alarmDialog"), body: $("alarmBody"), ring: { dialog: $("ringDialog"), body: $("ringBody") } });
-wireBedtime($("tuckBtn"), mimi, $("habitat"), alarm.bedtimeLine);
+wireBedtime($("tuckBtn"), mimi, $("habitat"));
 followPointer(look, () => play.isPlaying());
 
 wireSettings({

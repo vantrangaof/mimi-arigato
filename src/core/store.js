@@ -205,11 +205,6 @@ export function removePhoto(id) {
 
 export const photoFile = (id, size) => db.getFile(`${id}:${size}`);
 
-// Other files that stay on this device and never sync (the alarm's own song).
-export const deviceFile = (key) => db.getFile(key);
-export const saveDeviceFile = (key, blob) => db.putFile(key, blob);
-export const removeDeviceFile = (key) => db.deleteFiles([key]);
-
 // An object URL for a photo's image, or null if this device doesn't have the file yet.
 export async function photoURL(id, size = "thumb") {
   const key = `${id}:${size}`;

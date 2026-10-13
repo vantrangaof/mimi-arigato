@@ -32,7 +32,6 @@
         <p class="together" id="together"></p>
         <div class="topbar-actions">
           <button class="cloud-button" id="cloudButton" type="button" hidden></button>
-          <button class="alarm-button" id="alarmOpen" type="button" aria-label="Alarm"></button>
           <button class="icon-button" id="soundToggle" type="button" aria-pressed="true" aria-label="Sound"></button>
           <button class="icon-button" id="settingsOpen" type="button" aria-label="Settings" title="Settings"></button>
         </div>
@@ -347,18 +346,6 @@
       <button class="icon-button small" value="close" aria-label="Close">×</button>
     </form>
     <div id="gamesBody"></div>
-  </dialog>
-
-  <dialog class="sheet alarm-sheet" id="alarmDialog" aria-labelledby="alarmTitle">
-    <form method="dialog" class="sheet-head">
-      <h2 class="card-title" id="alarmTitle">Wake-up alarm</h2>
-      <button class="icon-button small" value="close" aria-label="Close">×</button>
-    </form>
-    <div id="alarmBody"></div>
-  </dialog>
-
-  <dialog class="sheet ring-sheet" id="ringDialog" aria-label="Alarm">
-    <div id="ringBody"></div>
   </dialog>
 
   <script type="module" src="src/main.js"></script>
