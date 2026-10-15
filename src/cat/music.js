@@ -70,8 +70,8 @@ export function jingle(kind = "win") {
   notes.forEach((n, i) => voice(ac, ac.destination, frequency(n), ac.currentTime + 0.02 + i * 0.1, 0.12, INSTRUMENTS.chip, 0.8));
 }
 
-// Sound effects for the catch game: "boing" (spooked), "splash" (rain), "blep" (a sock),
-// "sparkle" (zoomies).
+// Sound effects for the games: "boing" (spooked), "splash" (rain), "blep" (a sock),
+// "sparkle" (zoomies), "trap" (Belly trap).
 export function sfx(kind) {
   const ac = context();
   if (!ac) return;
@@ -110,5 +110,9 @@ export function sfx(kind) {
   }
   else if (kind === "sparkle") {
     ["C6", "E6", "G6", "C7"].forEach((n, i) => voice(ac, ac.destination, frequency(n), t + i * 0.05, 0.06, INSTRUMENTS.box, 0.6));
+  }
+  else if (kind === "trap") {
+    // four quick grabs, low and scrabbly
+    ["D4", "C#4", "D4", "A3"].forEach((n, i) => voice(ac, ac.destination, frequency(n), t + i * 0.06, 0.05, INSTRUMENTS.chip, 1));
   }
 }

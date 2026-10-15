@@ -43,6 +43,9 @@ const BODY = [
 const EYES_OPEN = [8, 11, ["WEE..........WEE", "EEE..........EEE", "EEE..........EEE"]];
 const EYES_CLOSED = [8, 12, ["EEE..........EEE"]];
 const EYES_HAPPY = [8, 11, [".E............E.", "E.E..........E.E"]];
+// Sad (waiting for a fish or water): droopy outer corners, a low shine and one little tear.
+const EYES_SAD = [8, 11, [".EE..........EE.", "EEE..........EEE", "EWE..........EWE", "i..............."]];
+const MOUTH_SAD = [13, 15, ["OOHHOO", "OHOOHO"]];
 const MOUTH_OPEN = [13, 15, ["OHHHHO", "OHNNHO"]];
 const PAW_UP = [9, 16, [".dddd.", "dOOOOd", "dOdOdd", ".dddd."]];
 const TAIL_UP = [26, 19, [
@@ -179,12 +182,14 @@ export function renderCat(svg) {
   drawLayer(svg, "", [0, 0, BODY], { map: { H: "O" } });
   drawLayer(svg, "mouth mouth-closed", [0, 0, BODY], { only: "H" });
   drawLayer(svg, "mouth mouth-open", MOUTH_OPEN);
+  drawLayer(svg, "mouth mouth-sad", MOUTH_SAD);
   drawLayer(svg, "tail tail-up", TAIL_UP);
   drawLayer(svg, "tail tail-flick", TAIL_FLICK);
   const eyes = group(svg, "look");
   drawLayer(eyes, "eyes eyes-open", EYES_OPEN);
   drawLayer(eyes, "eyes eyes-closed", EYES_CLOSED);
   drawLayer(eyes, "eyes eyes-happy", EYES_HAPPY);
+  drawLayer(eyes, "eyes eyes-sad", EYES_SAD);
   drawLayer(svg, "paw-up", PAW_UP);
   for (const [id, layer] of Object.entries(ACCESSORY_LAYERS)) drawLayer(svg, `acc acc-${id}`, layer);
   drawLayer(svg, "blanket", BLANKET);
@@ -219,9 +224,10 @@ export function applyLook(wrap, { fur, wear, customFur = null }) {
   wrap.dataset.wear = Object.values(wear).filter((id) => ACCESSORY_LAYERS[id]).join(" ");
 }
 
-// eyes: "open" | "happy" | "closed"; mouth: "closed" | "open" (the catch game uses these).
+// eyes: "open" | "happy" | "closed"; mouth: "closed" | "open" (the games use these).
+// shadow: false leaves out the floor shadow (Belly trap draws Mimi upside down).
 const CANVAS_EYES = { open: EYES_OPEN, happy: EYES_HAPPY, closed: EYES_CLOSED };
-export function drawSpriteCanvas(ctx, x0, y0, cell, { fur, wear = {}, eyes = "open", mouth = "closed" }) {
+export function drawSpriteCanvas(ctx, x0, y0, cell, { fur, wear = {}, eyes = "open", mouth = "closed", shadow = true }) {
   const palette = FURS[fur] ?? FURS.pink;
   const grid = BODY.map((r) => [...r]);
   const overlay = ([lx, ly, rows]) =>
@@ -231,7 +237,7 @@ export function drawSpriteCanvas(ctx, x0, y0, cell, { fur, wear = {}, eyes = "op
   overlay(TAIL_UP);
   for (const id of Object.values(wear)) if (ACCESSORY_LAYERS[id]) overlay(ACCESSORY_LAYERS[id]);
   grid.forEach((row, y) => row.forEach((ch, x) => {
-    const color = ch === "s" ? "rgba(201, 88, 138, 0.16)" : FUR_KEY[ch] ? palette[FUR_KEY[ch]] : ACCESSORY_COLORS[ch];
+    const color = ch === "s" ? shadow && "rgba(201, 88, 138, 0.16)" : FUR_KEY[ch] ? palette[FUR_KEY[ch]] : ACCESSORY_COLORS[ch];
     if (!color) return;
     ctx.fillStyle = color;
     ctx.fillRect(x0 + x * cell, y0 + y * cell, cell, cell);

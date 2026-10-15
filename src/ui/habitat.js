@@ -13,6 +13,7 @@ import { weekPostcard, postcardSeen } from "../memory/postcard.js";
 import { roomThingIds } from "../memory/themes.js";
 import { openWishes } from "../memory/wishes.js";
 import { dueReminders } from "../memory/reminders.js";
+import { fedToday, needs, needsLine } from "../memory/needs.js";
 
 const wide = matchMedia("(min-width: 960px)");
 
@@ -125,7 +126,9 @@ export function wireHabitat({ mimi, look, wrap, sprite, room, tally, onJar, onPo
       things: roomThingIds(MAX_THINGS),
       wishes: openWishes().length > 0,
       sticky: dueReminders().length > 0,
+      bowls: fedToday(),
     });
+    mimi.setNeed(needsLine(needs()));
     const framed = framedPhoto();
     if (framed && isUnlocked("picture", totalThings())) {
       pixelatedPhoto(framed.id).then((url) => {

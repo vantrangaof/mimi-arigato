@@ -1,5 +1,5 @@
 // How long you and Mimi have known each other, and the milestones along the way.
-// Deliberately no streaks: missing a day never takes anything away.
+// Missing a day never takes anything away here (the gentle paw-print run is in streak.js).
 
 import { store, KEYS, read, write, totalThings } from "../core/store.js";
 import { dayKey, daysBetween } from "../core/dates.js";

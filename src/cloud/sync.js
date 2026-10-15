@@ -111,6 +111,31 @@ export async function signIn(email, password) {
   }
 }
 
+// No password: emails a sign-in link (and a 6-digit code, if the Supabase email template
+// includes {{ .Token }}). The code matters on iPhone, where a link opens in Safari rather than
+// in the Home Screen app. Creates the account if there isn't one yet.
+export async function sendSignInLink(email) {
+  try {
+    const { error } = await (await getClient()).auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: true },
+    });
+    return error ? { error: authError(error) } : {};
+  } catch (err) {
+    return { error: authError(err) };
+  }
+}
+
+export async function signInWithCode(email, code) {
+  try {
+    const { error } = await (await getClient()).auth.verifyOtp({ email, token: code, type: "email" });
+    if (/expired|invalid/i.test(error?.message ?? "")) return { error: "That code didn't work. Check it, or send a new one." };
+    return error ? { error: authError(error) } : {};
+  } catch (err) {
+    return { error: authError(err) };
+  }
+}
+
 export async function signUp(email, password) {
   try {
     const { data, error } = await (await getClient()).auth.signUp({

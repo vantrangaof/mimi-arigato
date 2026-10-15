@@ -17,7 +17,9 @@ export const KEYS = {
   treats: "treats", // fish given today (see ui/play.js)
   water: "water",
   cuddles: "cuddles",
+  fed: "fed", // the last day Mimi got a fish and water: { food: "YYYY-MM-DD", water: "YYYY-MM-DD" } (see memory/needs.js)
   quietDay: "quietDay", // "Nothing special today" was tapped (see ui/journal.js)
+  quietDays: "quietDays", // every day it was tapped, so those days get a paw print too (see memory/streak.js)
   visit: "lastVisit",
   firstMet: "firstMet",
   milestones: "milestones",
@@ -343,6 +345,8 @@ export function setDailyCount(key, count) {
 export const quietToday = () => dailyCount(KEYS.quietDay) > 0;
 export function markQuietDay() {
   setDailyCount(KEYS.quietDay, 1);
+  const quiet = read(KEYS.quietDays, []);
+  if (!quiet.includes(dayKey())) write(KEYS.quietDays, [...quiet, dayKey()].slice(-400));
   emit();
 }
 
@@ -494,7 +498,16 @@ export function cloudState() {
     wishes: store.wishes,
     roomThings: store.roomThings,
     reminders: store.reminders,
+    fed: read(KEYS.fed, {}),
+    quietDays: read(KEYS.quietDays, []),
   };
+}
+
+// The newest day wins for each key ({ food, water } days, from any device).
+function latestDays(a = {}, b = {}) {
+  const out = { ...a };
+  for (const [key, day] of Object.entries(b)) if (typeof day === "string" && !(out[key] >= day)) out[key] = day;
+  return out;
 }
 
 // Sticky notes change after they're made (done, moved, removed): the newer version of each wins.
@@ -544,6 +557,8 @@ export function mergeCloudState(remote = {}) {
     wishes: mergeWishes(local.wishes, remote.wishes),
     roomThings: unionBy(local.roomThings, remote.roomThings, (t) => t.id),
     reminders: mergeNewest(local.reminders, remote.reminders),
+    fed: latestDays(local.fed, remote.fed),
+    quietDays: [...new Set([...local.quietDays, ...(remote.quietDays ?? [])])].sort().slice(-400),
   };
 
   if (JSON.stringify(merged) !== JSON.stringify(local)) {
@@ -555,7 +570,7 @@ export function mergeCloudState(remote = {}) {
     store.wishes = merged.wishes;
     store.roomThings = merged.roomThings;
     store.reminders = merged.reminders;
-    for (const key of ["settings", "settingsTimes", "scrapbook", "treasures", "milestones", "firstMet", "theories", "wishes", "roomThings", "reminders"]) {
+    for (const key of ["settings", "settingsTimes", "scrapbook", "treasures", "milestones", "firstMet", "theories", "wishes", "roomThings", "reminders", "fed", "quietDays"]) {
       if (merged[key] != null) write(KEYS[key], merged[key]);
     }
     emit();

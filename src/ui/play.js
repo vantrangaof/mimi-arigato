@@ -6,27 +6,32 @@ import { el, replay, pick, capitalize } from "../core/dom.js";
 import { pixelSVG } from "../core/pixel.js";
 import { purr } from "../cat/sound.js";
 import { heartSVG } from "../cat/mimi.js";
+import { markFed, needs } from "../memory/needs.js";
 
 // Each good thing told today earns one fish, one drink of water and one cuddle to give
 // whenever you like, and so does "Nothing special today" (being here is enough).
-// Mimi never gets hungry or thirsty: these are treats, not needs.
+// Mimi looks a little sad on a day without a fish or water (see memory/needs.js), never more.
 const MAX_EARNED = 5;
 const CARE = {
   fish: {
     key: KEYS.treats,
+    need: "food",
     label: "Fish",
     art: [".bbbb.b", "bFeFFbb", "bFFFFbb", ".bbbb.b"],
     colors: { b: "#3f6797", F: "#a6d4f7", e: "#1b2a3a" },
     spot: "spots a fish!",
+    cheer: ["yay!!", "was so hungry. Thank you! ♡"],
     done: [["nom nom", "loved that fish."], ["mrrp!", "ate the whole fish, tail first."], ["nom", "licks their whiskers. Delicious."]],
   },
   water: {
     key: KEYS.water,
+    need: "water",
     label: "Water",
     art: ["..b..", ".bWb.", "bWWWb", "bWWWb", ".bbb."],
     colors: { b: "#3f8fd2", W: "#bfe6ff" },
     className: "water-drop",
     spot: "hears the water bowl!",
+    cheer: ["lap lap lap!", "was so thirsty. Thank you! ♡"],
     done: [["lap lap", "drinks a little water. Refreshing!"], ["slurp", "got water on their nose."], ["lap", "sips very politely."]],
   },
   cuddle: {
@@ -54,6 +59,8 @@ export function wireCare(buttons, mimi, wrap, tray) {
     const name = catName();
     const n = earned();
     const toGive = Object.values(CARE).some((care) => left(care));
+    const hungry = needs().food || needs().water;
+    if (n === 0 && hungry) return { text: `${capitalize(name)}'s bowls are empty! Tell them a good thing to earn a fish and water ↓`, ask: true };
     if (n === 0) return { text: `Tell ${name} a good thing to earn a fish, water and a cuddle ↓`, ask: true };
     if (toGive) return { text: `You earned treats! Tap Fish, Water or Cuddle to give them to ${name}.`, ask: false };
     if (n < MAX_EARNED) return { text: `All given! Tell ${name} another good thing to earn more ↓ (${n} of ${MAX_EARNED} today)`, ask: true };
@@ -94,11 +101,13 @@ export function wireCare(buttons, mimi, wrap, tray) {
   }
 
   function finish(care) {
+    const waited = care.need && needs()[care.need];
     setDailyCount(care.key, dailyCount(care.key) + 1);
-    label();
+    if (care.need) markFed(care.need);
+    store.save(); // the bowl fills and Mimi cheers up
     mimi.setActivity(null);
     if (store.settings.sound) purr();
-    mimi.react(pick(care.done), { hearts: care === CARE.cuddle ? 4 : 2, hold: 2200 });
+    mimi.react(waited ? care.cheer : pick(care.done), { hearts: care === CARE.cuddle || waited ? 4 : 2, hold: 2200 });
     busy = false;
   }
 

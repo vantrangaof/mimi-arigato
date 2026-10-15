@@ -217,6 +217,12 @@ const THING_COLORS = {
   b: "#e8c9b0", W: "#a8714f", g: "#b7aeb9", p: "#ff8fb1", G: "#4f9a5c", l: "#7cc47f",
   o: "#ff9f43", n: "#4a4560", s: "#f2d29b",
 };
+// Mimi's food and water bowls on the floor by the bookshelf: full once given today (see memory/needs.js).
+const BOWLS = { food: 37, water: 42 };
+const BOWL = ["k..k", "kbbk", ".kk."];
+const BOWL_FILL = { food: [".Ff."], water: [".Ww."] };
+const BOWL_COLORS = { k: "var(--room-line)", b: "#f4c7d8", F: "#c98a4b", f: "#a96a33", W: "#7fc8f8", w: "#bfe6ff" };
+
 const THING_SLOTS = [[7, 30], [22, 30], [27, 30], [32, 30], [29, 0], [34, 0]];
 const SHELF = [29, 4, ["WWWWWWWWWW"]];
 export const MAX_THINGS = THING_SLOTS.length;
@@ -299,6 +305,21 @@ export function renderRoom(svg, { onItem, onThing, onJar, onPostcard, onSticky }
   sticky.addEventListener("click", () => onSticky());
   svg.appendChild(sticky);
 
+  // Bowls only appear in your own room (update() gets `bowls`), not on a friend's visit.
+  const bowls = {};
+  for (const [kind, x] of Object.entries(BOWLS)) {
+    const g = svgEl("g", { class: `room-item bowl bowl-${kind}` });
+    drawArt(g, [x, 30, BOWL], BOWL_COLORS);
+    const fill = svgEl("g", { class: "bowl-fill" });
+    drawArt(fill, [x, 30, BOWL_FILL[kind]], BOWL_COLORS);
+    g.appendChild(fill);
+    g.addEventListener("click", () => onItem(g.classList.contains("is-full")
+      ? (kind === "food" ? "has a full food bowl. Happy!" : "has fresh water. Lap lap.")
+      : (kind === "food" ? "looks into the empty food bowl, then at you." : "taps the empty water bowl with a paw.")));
+    svg.appendChild(g);
+    bowls[kind] = g;
+  }
+
   const treasures = svgEl("g", { class: "treasures" });
   const things = svgEl("g", { class: "things" });
   svg.append(things, treasures, postcard);
@@ -309,7 +330,11 @@ export function renderRoom(svg, { onItem, onThing, onJar, onPostcard, onSticky }
   drawArt(wishTag, [6, 13, ["k.", "ee", "ey"]], { k: "var(--room-line)", e: "#fff7d6", y: "#ffd166" });
   jar.appendChild(wishTag);
 
-  return function update({ total, found, season = null, photo: photoURL = null, postcard: card = null, glow = false, things: mine = [], wishes = false, sticky: noteDue = false }) {
+  return function update({ total, found, season = null, photo: photoURL = null, postcard: card = null, glow = false, things: mine = [], wishes = false, sticky: noteDue = false, bowls: fed = null }) {
+    for (const [kind, g] of Object.entries(bowls)) {
+      g.classList.toggle("is-on", Boolean(fed));
+      g.classList.toggle("is-full", Boolean(fed?.[kind]));
+    }
     svg.dataset.sky = skyFor();
     const framed = Boolean(photoURL) && isUnlocked("picture", total);
     for (const [id, g] of Object.entries(items)) {

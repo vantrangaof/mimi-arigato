@@ -2,6 +2,23 @@
 
 Progress log for Mimi Arigato. Newest first.
 
+## 2026-10-14
+
+### Four new games
+- **Box shuffle** (find Mimi's box; more swaps and faster each round), **Belly trap** (pet where Mimi asks; don't rub the belly; 3 hearts), **Cushion tower** (tap to stack; overhang is trimmed; Mimi climbs to the top), **Treat toss** (slingshot treats into Mimi's mouth; breeze from treat 3, a sleepy swaying Mimi from treat 6). Results mention the extras ("got you with the belly trap 2 times", "3 perfect drops", "got bonked on the head once").
+- `drawSpriteCanvas` takes `shadow: false` (Belly trap's upside-down Mimi); new `sfx("trap")`.
+
+### Food and water bowls, and a sad Mimi
+- Two bowls on the room's floor, full once Mimi got a fish or water today. From 9 am an empty bowl makes Mimi a little sad: droopy eyes with a tear, a frown, a slow tail, "is sitting by their empty bowls…", and the tray says how to earn a treat. The first fish or drink gets a big thank-you. Not on your first day, not at night. "Nothing special today" always earns a fish and water.
+- The last day fed and watered (`fed`) syncs, so the bowls match across devices. Logic in `src/memory/needs.js`.
+
+### Paw prints (a gentle streak)
+- This week's days under "Tell Mimi something good": a paw print for each day you told Mimi something good (or "Nothing special today"); missed days are naps. "4 paw prints this week · a 9-day run · longest 12". A run continues through up to 2 naps a week. Mimi cheers runs of 3, 7, 14, 30… once. "Nothing special" days are now kept and synced (`quietDays`). Logic in `src/memory/streak.js`.
+
+### Staying signed in
+- **Keep Mimi safe on this phone:** a card suggesting Add to Home Screen (install button where the browser offers one, Share steps on iPhone), after your first good thing; "Not now" waits two weeks. Mimi also calls `navigator.storage.persist()`.
+- **Email me a sign-in link:** sign in without a password (Supabase magic link), with a code box for the Home Screen app on iPhone. Needs `{{ .Token }}` in the Magic Link email template (see README).
+
 ## 2026-10-13
 
 ### Removed the wake-up alarm

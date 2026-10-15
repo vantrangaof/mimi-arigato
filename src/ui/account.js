@@ -1,7 +1,10 @@
-// Settings → Account & sync: sign in or create an account with email + password, see sync status, sign out.
+// Settings → Account & sync: sign in or create an account with email + password (or an emailed
+// link/code, no password), see sync status, sign out.
 
 import { el } from "../core/dom.js";
-import { cloudConfigured, cloudStatus, onCloudChange, signIn, signOut, signUp, syncNow } from "../cloud/sync.js";
+import {
+  cloudConfigured, cloudStatus, onCloudChange, signIn, signOut, signUp, syncNow, sendSignInLink, signInWithCode,
+} from "../cloud/sync.js";
 
 const relative = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
 
@@ -14,12 +17,60 @@ function ago(ms) {
 }
 
 export function wireAccount(body) {
-  let mode = "sign-in"; // sign-in | sign-up
+  let mode = "sign-in"; // sign-in | sign-up | link (email me a link) | code (link sent: type the code)
   let typedEmail = "";
   let message = null; // { text, error? }
   let confirmSignOut = false;
 
+  // Sign in without a password: send a link, then (optionally) type the code from the email.
+  function linkView() {
+    const sent = mode === "code";
+    const email = el("input", { class: "text-input", id: "accountEmail", type: "email", autocomplete: "email", placeholder: "you@example.com", required: true, value: typedEmail });
+    const code = el("input", {
+      class: "text-input", id: "accountCode", type: "text", inputmode: "numeric", autocomplete: "one-time-code",
+      pattern: "[0-9]{6,10}", maxlength: 10, placeholder: "Code from the email", required: true,
+    });
+    const button = el("button", { class: "pixel-button", type: "submit", text: sent ? "Sign in" : "Email me a link" });
+    const form = el("form", {
+      class: "account-form",
+      onsubmit: async (e) => {
+        e.preventDefault();
+        button.disabled = true;
+        if (sent) {
+          button.textContent = "Signing in…";
+          const result = await signInWithCode(typedEmail, code.value.trim());
+          message = result.error ? { error: true, text: result.error } : null;
+        }
+        else {
+          typedEmail = email.value.trim();
+          if (!typedEmail) return;
+          button.textContent = "Sending…";
+          const result = await sendSignInLink(typedEmail);
+          message = result.error ? { error: true, text: result.error } : null;
+          if (!result.error) mode = "code";
+        }
+        render();
+      },
+    },
+    sent ? el("label", { class: "visually-hidden", for: "accountCode", text: "Code from the email" }) : el("label", { class: "visually-hidden", for: "accountEmail", text: "Email" }),
+    sent ? code : email,
+    button);
+    const back = () => { mode = "sign-in"; message = null; render(); };
+    return [
+      el("p", { class: "muted", text: sent
+        ? `Sent! Open the email to ${typedEmail} and tap the link, or type its code here.`
+        : "No password needed: we'll email you a link to sign in (and make your account if you're new)." }),
+      form,
+      message && el("p", { class: `muted${message.error ? " error" : ""}`, "aria-live": "polite", text: message.text }),
+      el("p", { class: "muted" },
+        sent && el("button", { type: "button", class: "link-button", text: "Send a new link", onclick: () => { mode = "link"; message = null; render(); } }),
+        sent && " · ",
+        el("button", { type: "button", class: "link-button", text: "Use a password instead", onclick: back })),
+    ];
+  }
+
   function signedOutView() {
+    if (mode === "link" || mode === "code") return linkView();
     const creating = mode === "sign-up";
     const email = el("input", { class: "text-input", id: "accountEmail", type: "email", autocomplete: "email", placeholder: "you@example.com", required: true, value: typedEmail });
     const password = el("input", {
@@ -55,6 +106,8 @@ export function wireAccount(body) {
       el("p", { class: "muted" },
         creating ? "Already have an account? " : "New here? ",
         el("button", { type: "button", class: "link-button", text: creating ? "Sign in" : "Create an account", onclick: switchMode })),
+      el("p", { class: "muted" },
+        el("button", { type: "button", class: "link-button", text: "Forgot your password? Email me a sign-in link", onclick: () => { typedEmail = email.value.trim(); mode = "link"; message = null; render(); } })),
     ];
   }
 

@@ -2,7 +2,7 @@
 // immediately; the cached copy is the fallback when offline.
 // Add new files to SHELL so they're available offline from the first visit.
 
-const CACHE_VERSION = "mimi-v27";
+const CACHE_VERSION = "mimi-v28";
 const SHELL = [
   "./",
   "./index.html",
@@ -49,6 +49,8 @@ const SHELL = [
   "./src/memory/reminders.js",
   "./src/core/ics.js",
   "./src/ui/reminders.js",
+  "./src/ui/streak.js",
+  "./src/ui/install.js",
   "./src/ui/year-ago.js",
   "./src/memory/scrapbook.js",
   "./src/memory/quotes.js",
@@ -56,6 +58,8 @@ const SHELL = [
   "./src/memory/postcard.js",
   "./src/memory/about.js",
   "./src/memory/remember.js",
+  "./src/memory/needs.js",
+  "./src/memory/streak.js",
   "./src/ui/habitat.js",
   "./src/ui/topbar.js",
   "./src/ui/intro.js",
@@ -87,6 +91,10 @@ const SHELL = [
   "./src/games/catch.js",
   "./src/games/pairs.js",
   "./src/games/song.js",
+  "./src/games/shuffle.js",
+  "./src/games/belly.js",
+  "./src/games/tower.js",
+  "./src/games/toss.js",
 ];
 
 self.addEventListener("install", (event) => {

@@ -44,6 +44,7 @@
 .item-jar:focus-visible { outline: none; }
 .item-jar.is-glowing .jar-stars { animation: twinkle 2.4s step-end infinite; }
 .item-postcard:not(.is-new) .postcard-new { display: none; }
+.bowl:not(.is-full) .bowl-fill { display: none; }
 
 /* Tucked in for the night: the lights go down. */
 .habitat.is-tucked .room-art { filter: brightness(0.62) saturate(0.85); }
@@ -114,7 +115,9 @@
 
 /* Eyes: open with a two-frame blink by default. */
 .eyes-closed,
-.eyes-happy { visibility: hidden; }
+.eyes-happy,
+.eyes-sad,
+.mouth-sad { visibility: hidden; }
 
 .eyes-open   { animation: blink-open 5.2s step-end infinite; }
 .eyes-closed { animation: blink-closed 5.2s step-end infinite; }
@@ -127,6 +130,15 @@
 :is(.is-happy, .is-grooming) .eyes-closed { animation: none; visibility: hidden; }
 :is(.is-happy, .is-grooming) .eyes-happy { visibility: visible; }
 :is(.is-happy, .is-staring) .blush { fill: var(--cat-blush-hot); }
+
+/* Sad: waiting for a fish or water (memory/needs.js). Any reaction (happy) wins over it. */
+.is-sad:not(.is-happy, .is-grooming, .is-dozing, .is-yawning) .eyes-open,
+.is-sad:not(.is-happy, .is-grooming, .is-dozing, .is-yawning) .eyes-closed { animation: none; visibility: hidden; }
+.is-sad:not(.is-happy, .is-grooming, .is-dozing, .is-yawning) .eyes-sad { visibility: visible; }
+.is-sad:not(.is-happy, .is-grooming, .is-yawning, .is-chomping) .mouth-closed { visibility: hidden; }
+.is-sad:not(.is-happy, .is-grooming, .is-yawning, .is-chomping) .mouth-sad { visibility: visible; }
+.is-sad:not(.is-happy) :is(.tail-up, .tail-flick) { animation-duration: 7s; }
+.is-sad:not(.is-happy) .cat { transform: translateY(calc(var(--px) * 0.5)); }
 
 /* Closed: asleep, dozing, yawning. */
 :is(.is-asleep, .is-dozing, .is-yawning) .eyes-open { animation: none; visibility: hidden; }

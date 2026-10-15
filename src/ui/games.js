@@ -11,8 +11,12 @@ import { currentWear } from "./habitat.js";
 import { startCatch } from "../games/catch.js";
 import { startPairs } from "../games/pairs.js";
 import { startSong } from "../games/song.js";
+import { startShuffle } from "../games/shuffle.js";
+import { startBelly } from "../games/belly.js";
+import { startTower } from "../games/tower.js";
+import { startToss } from "../games/toss.js";
 
-const BESTS = "gameBests"; // { catch, pairs, song } on this device
+const BESTS = "gameBests"; // { catch, pairs, song, shuffle, belly, tower, toss } on this device
 
 const GAMES = [
   {
@@ -67,6 +71,69 @@ const GAMES = [
     result(n, isBest) {
       if (n === 0) return ["hehe", "lost the tune too. Again?"];
       return [isBest ? "new best!" : "♪", `sang ${n} ${n === 1 ? "note" : "notes"} with you!${isBest ? " The longest song yet." : ""}`];
+    },
+  },
+  {
+    id: "shuffle",
+    label: "Box shuffle",
+    about: "Mimi hides in a box. Keep your eye on the right one!",
+    icon: ["dddddddd", "dTTTTTTd", "dddddddd", ".dBBBBd.", ".dBttBd.", ".dBBBBd.", ".dddddd."],
+    colors: { d: "#8a5a2b", B: "#d9a066", t: "#8a5a2b", T: "#e8b67a" },
+    start: startShuffle,
+    higher: true,
+    best: (n) => `best: ${n} found`,
+    result(n, isBest) {
+      if (n === 0) return ["hehe", "was hiding in the other box! Again?"];
+      return [isBest ? "new best!" : "found!", `${n === 1 ? "was found once!" : `was found ${n} times in a row!`}${isBest ? " Sharpest eyes yet." : ""}`];
+    },
+  },
+  {
+    id: "belly",
+    label: "Belly trap",
+    about: "Pet Mimi where they ask. If they show their belly… don't.",
+    icon: [".h.h.h.", "hHhHhHh", "hHHHHHh", "hHHHHHh", ".hHHHh.", "..hhh.."],
+    colors: { h: "#b5774f", H: "#ffd2b0" },
+    start: startBelly,
+    higher: true,
+    best: (n) => `best: ${n} pets`,
+    result(n, isBest, { traps = 0, resisted = 0 } = {}) {
+      const also = [
+        traps && `got you with the belly trap${traps > 1 ? ` ${traps} times` : ""}`,
+        resisted && `was impressed you resisted the belly${resisted > 1 ? ` ${resisted} times` : ""}`,
+      ].filter(Boolean);
+      const and = also.length ? ` (and ${also.join(" and ")})` : "";
+      if (n === 0) return ["hmph", `wanted more pets${and}.`];
+      return [isBest ? "new best!" : "prrrr", `got ${n} ${n === 1 ? "pet" : "pets"}${and}!${isBest ? " The most ever." : ""}`];
+    },
+  },
+  {
+    id: "tower",
+    label: "Cushion tower",
+    about: "Stack cushions as high as you can. Mimi climbs to the top!",
+    icon: ["..yyyy..", ".pppppp.", "bbbbbbbb", ".gggggg."],
+    colors: { y: "#ffd76a", p: "#ff9ebe", b: "#a6d4f7", g: "#8fd19a" },
+    start: startTower,
+    higher: true,
+    best: (n) => `best: ${n} cushions`,
+    result(n, isBest, { perfects = 0 } = {}) {
+      if (n === 0) return ["mrrp?", "watched the cushion tumble. Try again?"];
+      const neat = perfects ? ` (${perfects === 1 ? "one perfect drop" : `${perfects} perfect drops`})` : "";
+      return [isBest ? "new best!" : "so high!", `climbed a tower of ${n} ${n === 1 ? "cushion" : "cushions"}${neat}!${isBest ? " The tallest yet." : ""}`];
+    },
+  },
+  {
+    id: "toss",
+    label: "Treat toss",
+    about: "Flick treats into Mimi's mouth. Mind the breeze!",
+    icon: [".bb.b", "bBBbb", ".bb.b"],
+    colors: { b: "#b7791f", B: "#ffd76a" },
+    start: startToss,
+    higher: true,
+    best: (n) => `best: ${n} of 10`,
+    result(n, isBest, { bonks = 0 } = {}) {
+      const bonked = bonks ? ` (and got bonked on the head ${bonks === 1 ? "once" : `${bonks} times`})` : "";
+      if (n === 0) return ["mrrp?", `didn't catch any treats${bonked}, but had fun trying.`];
+      return [isBest ? "new best!" : "nom!", `caught ${n} of 10 treats${bonked}!${isBest ? " Best aim yet." : ""}`];
     },
   },
 ];

@@ -57,6 +57,7 @@ export function makeMimi({ wrap, bubble, state, look, context }) {
   let full = false;
   let activity = null;
   let tucked = false; // tucked in for the night: asleep even before 10 pm
+  let need = null; // waiting for a fish or water today (see memory/needs.js): a sad face and this line
 
   const asleep = () => !activity && (isNight() || tucked) && Date.now() > awakeUntil;
   const busy = () => reacting || queued || activity || asleep() || document.hidden;
@@ -72,10 +73,11 @@ export function makeMimi({ wrap, bubble, state, look, context }) {
     const sleeping = asleep();
     wrap.classList.toggle("is-asleep", sleeping);
     wrap.classList.toggle("is-talking", sleeping);
+    wrap.classList.toggle("is-sad", Boolean(need) && !sleeping && !activity);
     if (sleeping) bubble.textContent = "z z z";
     speak(activity ?? (sleeping ? (tucked ? "is tucked in, fast asleep." : "is asleep. Tap gently to wake them.")
-      : full ? "is glowing with thanks."
-      : restingLine(new Date().getHours())), { announce: false });
+      : need ?? (full ? "is glowing with thanks."
+      : restingLine(new Date().getHours()))), { announce: false });
   }
 
   function endIdle() {
@@ -175,6 +177,11 @@ export function makeMimi({ wrap, bubble, state, look, context }) {
       settle();
     },
     isTucked: () => tucked,
+    setNeed(line) {
+      if (line === need) return;
+      need = line;
+      settle();
+    },
     setActivity(text) {
       activity = text;
       if (text) awakeUntil = Date.now() + AWAKE_MS;

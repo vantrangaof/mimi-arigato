@@ -6,9 +6,9 @@ Every day, tell Mimi one small thing worth remembering. Mimi listens. Mimi remem
 
 > Notice → Tell Mimi → Mimi reacts → Mimi remembers → Mimi connects things → Mimi knows you
 
-Mimi is a pet that never asks anything of you: no hunger bars, no punishments, no broken streaks. Missing a day takes nothing away. "Arigato" means thank you in Japanese; you can rename the cat (for example, Xiao Mi).
+Mimi is a gentle pet: no hunger bars, no punishments, no streaks that break. Mimi looks a little sad on a day without a fish or water, and one treat cheers them right up. Missing a day takes nothing away. "Arigato" means thank you in Japanese; you can rename the cat (for example, Xiao Mi).
 
-It's an installable web app (PWA). It works offline and without an account; sign in with your email to sync your good things to the cloud and across devices.
+It's an installable web app (PWA). It works offline and without an account; sign in with your email to sync your good things to the cloud and across devices. Once you've told Mimi something, a **Keep Mimi safe on this phone** card suggests adding Mimi to the Home Screen (an install button on Android and Chrome, Share → Add to Home Screen steps on iPhone; "Not now" hides it for two weeks). Safari on iPhone can clear a website's data after about a week away, which signs you out; Home Screen apps are spared. Mimi also asks the browser to keep its data.
 
 ---
 
@@ -46,8 +46,9 @@ It's an installable web app (PWA). It works offline and without an account; sign
 - The first question of each day rotates ("Tell me something tiny…", "What made you smile?").
 - Remove an entry with × (for typos).
 
-### Days together (instead of streaks)
+### Days together and paw prints
 - The top bar shows **"Day 37 together"**: how long you've known Mimi, which never resets.
+- **Paw prints:** a row of this week's days (Monday first) under "Tell Mimi something good". A day gets a paw print when you tell Mimi a good thing (or tap "Nothing special today"). Missed days show as **naps** ("z"), never as gaps. Under it: *"4 paw prints this week · a 9-day run · longest 12"*. A run keeps going through up to 2 naps a week, so it only ends after a really quiet week, and nothing says it broke. Mimi cheers runs of 3, 7, 14, 30, 50, 100, 200 and 365 days once. Worked out from your good things (plus synced "Nothing special" days), so it follows you to new devices.
 - Milestones are celebrated once: Day 1 "nice to meet you", Day 7 "recognizes you now", Day 30 "knows some of your favorite things", Day 100, one year; and 50 / 100 / 250 / 500 / 1,000 good things.
 - After a few days away: *"you're back! Mimi kept your room cozy while you were away."*
 
@@ -64,7 +65,8 @@ It's an installable web app (PWA). It works offline and without an account; sign
 - **Sound on/off:** speaker button at the top right (remembered). On iPhone, the ring/silent switch also mutes web sounds.
 - **Idle habits:** every so often Mimi grooms a paw, yawns, dozes, stretches, chases their tail, stares at you, looks out the window, watches the aquarium fish, admires their accessory, or sits by the journal "waiting to hear about your day."
 - **Time of day:** asleep 10 pm to 6 am ("z z z"; tap to wake). Morning stretch, lunchtime thoughts, evening "ready to hear about your day."
-- **Fish, water, cuddles:** each good thing you tell Mimi today earns one of each to give whenever you like (a fish drops in, a water drop, a purring snuggle). Mimi never gets hungry or thirsty.
+- **Fish, water, cuddles:** each good thing you tell Mimi today earns one of each to give whenever you like (a fish drops in, a water drop, a purring snuggle).
+- **Food and water bowls:** two little bowls on the floor of Mimi's room, full once you've given a fish or water today. From 9 am, if a bowl is still empty, Mimi looks a little sad (droopy eyes, a tiny tear, a frown, a slow tail) and says *"is sitting by their empty bowls…"*; the tray says the bowls are empty and how to earn a treat. The first fish or drink gets a big *"yay!! was so hungry. Thank you! ♡"*. Never on your first day, never at night, and never worse than a little sad. "Nothing special today" always earns a fish and water, so there's always a way. Feeding syncs, so feeding on your phone fills the bowls on your laptop too.
 - **Mimi reads your good things:** when signed in, Mimi (AI) reads each one first, replies to that exact thing, and notes who, where and what it's about (people, places, things) so memory pages and theories get them right. Mimi keeps every one, however small ("idk, today was okay" → *"i'll keep this little one."*). Only keyboard mashing stays in the box ("did a paw slip?"), and something painful gets comfort instead. Offline, Mimi uses keyword reactions.
 - **Nothing special today:** before your first good thing, tap it and Mimi says *"some days are just days. Here's a fish anyway."* You get a fish, water and cuddle to give. Being here is enough.
 - **Bedtime:** from 9 pm to 6 am a **Tuck in** button appears. Mimi climbs under a blanket, whispers today's good things back to you one by one, says goodnight, and the room's lights dim. Mimi stays asleep until morning (petting still wakes them for a moment).
@@ -74,6 +76,10 @@ It's an installable web app (PWA). It works offline and without an account; sign
   - **Catch the fish:** 30 seconds of things falling from the sky; move Mimi under them (finger, mouse or arrow keys). Mimi opens their mouth when a fish is coming and chomps with happy ^ ^ eyes. Fish are +1, gold fish +3, and every 5 in a row is +2 more. A heart gives **zoomies** (fast, wider catch, afterimages, 5 s). Not everything is food: a **cucumber** spooks Mimi ("EEK!", they jump and freeze), **rain** soaks them (eyes shut, slow and shaky), and a **sock** gets spat back out ("blep"). They never take fish away; they just cost time and the streak, and the result says so ("caught 14 fish (and got spooked by 2 cucumbers and tried to eat a sock)!").
   - **Pairs:** twelve cards, six pairs of Mimi's favorite things (fish, heart, yarn, toy mouse, star, leaf). No timer, it only counts tries.
   - **Mimi's song:** Mimi plays a tune on four colored paws, one note longer each round, and you play it back. A wrong note ends it gently (*"lost the tune too. Again?"*).
+  - **Box shuffle:** Mimi peeks out of one of three boxes, ducks in, and the boxes shuffle. Tap Mimi's box. Each round adds a swap and goes faster; a wrong box ends it and Mimi pops out of the right one.
+  - **Belly trap:** Mimi lies down and asks for pets ("Chin, please!", head, cheeks). Pet the right spot before their patience runs out. Sometimes Mimi shows their belly: rub it and all four paws grab your hand ("TRAP!"). 3 hearts; a trap or running out of patience costs one, and resisting the belly is a bonus.
+  - **Cushion tower:** a cushion slides back and forth; tap (or Space) to drop it on the stack. Overhang is trimmed off, perfect drops snap into place, and Mimi hops up to the top each time. A total miss ends it.
+  - **Treat toss:** pull back and let go like a slingshot (with a dotted aim line) to land a treat in Mimi's mouth; arrows and Space on a keyboard. 10 treats. A breeze starts on the third, and from the sixth Mimi sways sleepily. Miss and it bonks off their head.
 - **Eyes follow your mouse** on desktop.
 - **Fur from a photo of your cat:** Settings → Fur → "Colors from a photo of your cat…" picks the main color near the middle of the photo and mixes a matching palette (darker outline, lighter chest, yellow eyes for dark cats). It shows up as a "From your photo" fur choice.
 
@@ -138,7 +144,7 @@ Everything unlocks by total good things and never goes away:
 ### Settings
 - Your name, the cat's name, fur color (Strawberry, Peach, Cloud, Midnight, Snow).
 - **Appearance:** Day & night (default: light from 6 am, dark from 7 pm, like the sky in Mimi's window), Match my phone, Light or Dark. Follows you to your other devices.
-- **Account & sync** (also the **Sign in** / cloud button at the top): create an account with your email and a password (or sign in to an existing one). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
+- **Account & sync** (also the **Sign in** / cloud button at the top): create an account with your email and a password (or sign in to an existing one), or tap **Forgot your password? Email me a sign-in link** to sign in with no password (a link, plus a code to type, which is what works in the Home Screen app on iPhone). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
 - **Daily reminder:** adds a repeating event to your calendar app (web apps can't schedule notifications on their own). For other reminders, use Sticky notes.
 - **Friends** (when signed in): "Invite a friend" makes a code like `ABC-234` and a link to share; a friend opens the link or types the code under "Have a code?" and says yes. Tap a friend to **visit their room**: their cat, unlocks, treasures, seasonal decor and things from their life. Never their good things, diary or photos. "Show my things to friends" hides your things from your life from visitors. Either of you can remove the friendship.
 - **Chat with Mimi** (when signed in): the Chat button opens a little conversation with your cat. Mimi knows your names, your recent good things and wishes (never your diary). The chat stays on this device.
@@ -218,10 +224,16 @@ src/
     about.js            Memory pages: everything about one person, place or thing
     remember.js         "Mimi remembers before you do": something that went quiet
     reminders.js        Sticky notes: reading "text Mom tomorrow at 6", due and repeating notes
+    needs.js            Fish and water as gentle needs: when Mimi looks a little sad
+    streak.js           Paw prints: this week, runs with naps, run milestones
   games/                The games in the Play sheet
     catch.js            Catch the fish (canvas)
     pairs.js            Pairs (memory cards)
     song.js             Mimi's song (repeat the tune)
+    shuffle.js          Box shuffle (find Mimi's box)
+    belly.js            Belly trap (pet where asked, not the belly)
+    tower.js            Cushion tower (canvas stacker)
+    toss.js             Treat toss (canvas slingshot)
   ui/                   One module per part of the page
     habitat.js          Room on screen, pixel sizing, petting
     topbar.js           Days together, sound toggle, settings icon
@@ -245,6 +257,8 @@ src/
     calendar.js         Calendar and search
     play.js             Fish, water, cuddles, and laser play
     games.js            The Play sheet: picking a game, results, bests
+    streak.js           This week's paw prints under the journal
+    install.js          "Keep Mimi safe": Add to Home Screen, and asking to keep the app's data
     settings.js         Settings dialog, reminder file, backup
     account.js          Account & sync section in Settings
     friends.js          Friends section in Settings: invites, friends list
@@ -270,7 +284,7 @@ Mimi is **local-first**: the on-device database is what the app reads and writes
 | Store | Contents |
 |---|---|
 | `entries` | One record per good thing: `{ id, day, text, createdAt, updatedAt, deleted, synced, photoId, tags }`; `tags` is `{ people, places, things }` from the AI, or null |
-| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` (fish)/`water`/`cuddles` counters, `quietDay` ("Nothing special today"), `chat` (Chat with Mimi, device only), `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`, `remembered`/`rememberedAt`; synced: `theories`, `wishes`, `roomThings`, `reminders`; per device: `stickyGreeted`, `stickySaid`, `gameBests` |
+| `kv` | `settings` (+ when each setting changed; includes `customFur` and `framePhoto`), `scrapbook`, `treasures`, `firstMet`, `milestones`, `surprises`, daily `pets`/`treats` (fish)/`water`/`cuddles` counters, `quietDay` ("Nothing special today"), `installLater`, `runSaid`, `chat` (Chat with Mimi, device only), `lastVisit`, sync bookmarks, and per-device bits: `mimiGood` (today's line), `tucked` (tonight), `postcardSeen`/`postcardAnnounced`, `seasonsGreeted`, `motionAsked`, `yearAgoGreeted`, `remembered`/`rememberedAt`; synced: `theories`, `wishes`, `roomThings`, `reminders`, `fed` (last day fed/watered), `quietDays`; per device: `stickyGreeted`, `stickySaid`, `gameBests` |
 | `photos` | Photo details: `{ id, day, caption, entryId, createdAt, updatedAt, deleted, synced, uploaded, hasFull, hasThumb }` |
 | `photoFiles` | The image files, keyed `<photo id>:full` and `<photo id>:thumb` |
 
@@ -300,7 +314,7 @@ Row-level security means each person can only read and write their own rows. The
 - **Deletions** are kept as tombstones (`deleted = true`) so every device learns about them.
 - **Settings** merge field by field (the most recent change to each setting wins); **scrapbook, treasures, milestones, theories, wishes and room things** are combined, so a new device never wipes your history. A wish that came true on either device stays true; for sticky notes the most recent change to each note wins.
 - Anything you wrote before signing in is uploaded to your account when you sign in.
-- Pet, fish, water and cuddle counters and the chat stay on each device.
+- Pet, fish, water and cuddle counters and the chat stay on each device; the days Mimi was fed and watered, and your "Nothing special today" days, sync.
 
 ## Cloud sync setup (about 5 minutes)
 
@@ -324,13 +338,13 @@ Row-level security means each person can only read and write their own rows. The
 
 Notes:
 - Passwords need at least 6 characters (Supabase's default).
-- There's no "forgot password" in Mimi yet; you can reset someone's password from **Authentication → Users** in Supabase.
+- **Sign-in links and codes:** "Email me a sign-in link" uses Supabase's magic link email. On iPhone a link opens in Safari, not in the Home Screen app, so add the code to the email: **Authentication → Emails → Magic Link**, add a line like `Or type this code in Mimi: {{ .Token }}`. Also add your site to **Authentication → URL Configuration → Redirect URLs** so the link comes back to Mimi.
 - If **Confirm email** is on, Supabase's built-in email sender only sends a few emails per hour; set up your own SMTP under **Authentication → Emails** for real use.
 - The Supabase client library is loaded from a CDN only when cloud sync is configured, so offline use is unaffected.
 
 ## Not doing (on purpose)
 
-Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing accessories, streak freezes, coins, energy, ads, quests. Mimi says one thing: *"Tell me one nice thing."*
+Hunger or health bars (Mimi only looks a little sad on a day with empty bowls, and cheers up at once), punishment, "Mimi is sad you didn't visit", streaks that reset, losing accessories, coins, energy, ads, quests. Mimi says one thing: *"Tell me one nice thing."*
 
 ## Next up
 
@@ -341,7 +355,8 @@ Hunger or health bars, punishment, "Mimi is sad you didn't visit", losing access
 Then: letters to future you, the Let-It-Go jar (never saved), diary weather showing in the room. Not now: a memory graph screen, personality modes, friendship tree; save stats and chapters for Mimi Wrapped.
 
 - **Pick up here (2026-10-07):** the AI check, earned fish/water/cuddles and Chat with Mimi are built (`ec41a7d`) but only tested with a fake Gemini. Before testing for real: push the 4 local commits, add `GEMINI_API_KEY` in Vercel, re-run `supabase/schema.sql`. Then check real Gemini replies and that Vercel runs `api/mimi.mjs`.
-- **Tasks that earn food and water** (still to design): right now only good things earn fish/water/cuddles. Ideas: small daily kindnesses ("drink a glass of water", "text someone you love"), finishing your own sticky notes, or both. Must keep the no-guilt rule (no missed-task penalties, Mimi never hungry).
+- **Tasks that earn food and water** (still to design): right now only good things earn fish/water/cuddles. Ideas: small daily kindnesses ("drink a glass of water", "text someone you love"), finishing your own sticky notes, or both. Keep it gentle (no missed-task penalties; empty bowls only make Mimi a little sad).
+- **A daily nudge:** a Web Push notification at a time you pick ("Mimi saved you a spot ♡", or "Mimi's bowls are empty"), for the installed app. Needs a push subscription table and a scheduled job (Vercel cron or Supabase).
 - **Hide a treasure** (step 2 of the first multiplayer game; friends and visiting are done): hide one of your treasures in a spot in your room for a friend to find ("*sniff sniff* warmer!"); the finder keeps a copy tagged with where it came from. Then step 3, your cat visiting a friend's room for a day. Design: [docs/superpowers/specs/2026-10-04-visiting-cats-hide-a-treasure-design.md](docs/superpowers/specs/2026-10-04-visiting-cats-hide-a-treasure-design.md). Later games on the same friends: paint together (a shared pixel canvas that hangs in both rooms), fishing together (live, co-op).
 - **Real notifications for sticky notes:** Web Push from a Supabase scheduled function (needs sign-in; on iPhone only for the installed app).
 - **"Mimi Wrapped" in December:** a year-in-review story you tap through (total good things, top people, favorite things, mood weather across the year, scrapbook highlights), built from Month, Memories and Scrapbook, with a share card at the end.

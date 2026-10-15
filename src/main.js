@@ -39,6 +39,8 @@ import { rememberGreeting } from "./memory/remember.js";
 import { wireThanks } from "./ui/thanks.js";
 import { wireYearAgo, yearAgoGreeting } from "./ui/year-ago.js";
 import { wireReminders, stickyGreeting } from "./ui/reminders.js";
+import { wireStreak } from "./ui/streak.js";
+import { wireInstall, keepData } from "./ui/install.js";
 import { discoverTheory } from "./memory/theories.js";
 import { claimRoomThings, roomThingLine } from "./memory/themes.js";
 import { initCloud } from "./cloud/sync.js";
@@ -138,6 +140,9 @@ const play = wirePlay($("playBtn"), mimi, wrap, $("habitat"), look);
 const games = wireGames(mimi, { dialog: $("gamesDialog"), title: $("gamesTitle"), body: $("gamesBody"), startLaser: play.start });
 play.onOpen(games.open);
 wireBedtime($("tuckBtn"), mimi, $("habitat"));
+wireStreak($("pawWeek"), mimi);
+wireInstall($("installCard"));
+keepData();
 followPointer(look, () => play.isPlaying());
 
 wireSettings({
