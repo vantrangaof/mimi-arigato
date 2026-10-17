@@ -169,8 +169,8 @@
 /* ---- tabs ---- */
 
 .tabs {
-  display: flex;
-  flex-wrap: wrap; /* six tabs: wrap to a second row on narrow phones rather than hide one */
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* seven tabs in two even rows rather than hide one */
   gap: 4px;
   margin: -8px -8px 16px;
   padding: 4px;
@@ -179,9 +179,8 @@
 }
 
 .tab {
-  flex: 1 0 auto;
-  padding: 8px 10px;
-  white-space: nowrap;
+  padding: 8px 6px;
+  line-height: 1.2;
   font-size: 0.875rem;
   color: var(--ink-soft);
   background: none;
@@ -983,3 +982,50 @@ mark {
 .challenge-note { margin: 10px 0 0; }
 .challenge-note:empty { display: none; }
 .challenge-card.is-complete .challenge-text { color: var(--ink-soft); }
+
+/* ---- the cat's photo diary (ui/cat-diary.js) ---- */
+
+.cat-diary-count { margin: 0 0 8px; }
+.cat-diary-nav { align-items: center; }
+.cat-diary-nav .panel-heading { flex: 1; text-align: center; }
+.cat-diary-page { display: grid; gap: 12px; margin-top: 10px; }
+.cat-diary-photo {
+  display: block;
+  width: 100%;
+  padding: 8px 8px 0;
+  background: #fffdf8;
+  border: 2px solid var(--sheet-edge);
+  border-radius: 3px;
+  box-shadow: 4px 4px 0 var(--cat-shadow);
+  transform: rotate(-0.6deg);
+  cursor: zoom-in;
+}
+.cat-diary-photo img { display: block; width: 100%; max-height: 60vh; object-fit: cover; aspect-ratio: 4 / 3; background: var(--grid-strong); }
+.cat-diary-photo::after { content: ""; display: block; height: 22px; }
+.cat-diary-photo.is-missing { padding: 24px; text-align: center; cursor: default; }
+.cat-diary-line { margin: 0; }
+.cat-diary-line blockquote { margin: 0; font-size: 1.125rem; line-height: 1.5; overflow-wrap: anywhere; }
+.cat-diary-line figcaption { margin-top: 4px; font-family: var(--font-pixel); color: var(--accent); text-align: right; }
+.cat-diary-actions { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.cat-diary-actions label { cursor: pointer; }
+.cat-diary-edit { width: 100%; resize: vertical; }
+.cat-diary-editing .row { margin-top: 8px; }
+.cat-diary-empty { display: grid; justify-items: start; gap: 10px; margin-top: 10px; padding: 16px; border: 2px dashed var(--grid-strong); border-radius: 4px; }
+.cat-diary-empty p { margin: 0; }
+.cat-diary-empty-title { font-weight: 700; }
+.cat-diary-who { display: flex; flex-wrap: wrap; gap: 8px; }
+.cat-diary-who-option {
+  padding: 6px 12px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--sheet-edge);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.cat-diary-who-option[aria-pressed="true"] { color: #fff; background: var(--accent); border-color: var(--accent-edge); }
+.cat-diary-add { cursor: pointer; }
+.cat-diary-add.is-busy { opacity: 0.6; pointer-events: none; }
+.cat-diary-strip { display: flex; gap: 8px; margin-top: 16px; padding-bottom: 4px; overflow-x: auto; }
+.cat-diary-thumb { flex: none; width: 52px; height: 52px; padding: 0; border: 2px solid var(--sheet-edge); border-radius: 3px; overflow: hidden; cursor: pointer; background: var(--grid-strong); }
+.cat-diary-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cat-diary-thumb.is-current { border-color: var(--accent); }

@@ -44,3 +44,8 @@ export const chatWithMimi = (messages, context) =>
 // image = base64 JPEG (the thumbnail). → { found, reply } or { error }
 export const lookAtPhoto = (look, image, { catName }) =>
   ask({ kind: "look", look, image, catName }, LOOK_TIMEOUT_MS);
+
+// The cat's photo diary: today's line, written by the cat about the photo. who = "cat" | "both".
+// → { line } or { error }
+export const captionPhoto = (image, who, { catName }) =>
+  ask({ kind: "caption", image, who, catName }, LOOK_TIMEOUT_MS);

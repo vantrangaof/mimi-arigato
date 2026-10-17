@@ -130,6 +130,7 @@ Everything unlocks by total good things and never goes away:
 - When signed in, photos sync to a **private** Supabase Storage bucket; other devices download thumbnails right away and full images when opened.
 
 ### Mimi's things (tabs)
+- **Your cat's diary** (the tab is named after your cat, like "Xiao Mi's diary"): a photo a day of your real cat, or of the two of you (pick **Xiao Mi** or **Xiao Mi & me** before adding it). The cat writes a line about it in their own voice: *"Sat in the sunbeam. Refused to move. 10/10."* When you're signed in, Mimi's AI looks at the photo and writes it; otherwise it's one of a few built-in lines. **Change the words** or **Change the photo** any time. Flip back with ‹ ›, or tap a page in the strip underneath. Pages sync, and the photos are in Photos too. (Your own private diary is now called **My diary**.)
 - **Memories:** **Mimi's theories** first: every few days (at most one every 3 days, after 10 good things) Mimi connects some of your good things into a numbered theory, mentions it when you open the app, and keeps it forever. Mimi looks for:
   - people who are around when good things happen (*"Good things happen suspiciously often when Anna is around."*), who make you laugh, and what's better with whom (*"Coffee is better with Lin, apparently."*), plus family who keep showing up
   - things that go together (*"Coffee on a rainy day might be your favorite thing in the world. Just a theory."*)

@@ -38,6 +38,7 @@ import { wireAbout } from "./ui/about.js";
 import { wireGuide } from "./ui/guide.js";
 import { wireGoodReminder } from "./ui/good-reminder.js";
 import { wireChallenge } from "./ui/challenge.js";
+import { wireCatDiary } from "./ui/cat-diary.js";
 import { needsGreeting } from "./memory/needs.js";
 import { rememberGreeting } from "./memory/remember.js";
 import { wireThanks } from "./ui/thanks.js";
@@ -129,6 +130,7 @@ wirePhotos(mimi, {
   viewer: { dialog: $("photoViewer"), image: $("photoFull"), caption: $("photoCaption"), meta: $("photoMeta"), actions: $("photoActions") },
 });
 wireDiary(mimi, { panel: $("panel-diary"), tab: $("tab-diary") });
+wireCatDiary(mimi, { panel: $("panel-catdiary"), tab: $("tab-catdiary"), input: $("catDiaryInput") });
 wireMemories($("panel-memories"), { mimi, openAbout: about.open });
 wireScrapbook($("panel-scrapbook"));
 wireMonth($("panel-month"));
