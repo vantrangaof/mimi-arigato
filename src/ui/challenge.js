@@ -11,6 +11,7 @@ import {
   todaysChallenge, challengeProgress, challengeComplete, challengeRewarded, rewardChallenge,
   alreadySeen, markFound, markSeen, foundToday,
 } from "../memory/challenges.js";
+import { savePhotoComment } from "../memory/photo-comments.js";
 import { photoThumb } from "./photos.js";
 
 const base64 = (blob) => new Promise((resolve, reject) => {
@@ -81,6 +82,7 @@ export function wireChallenge(mimi, { card, text, count, slots, add, input, note
       if (found) {
         const photo = await addPhoto({ full: prepared.full, thumb: prepared.thumb, caption: c.text(name) });
         markFound(photo.id, fingerprint);
+        if (!seen.error) savePhotoComment(photo.id, reply);
         if (store.settings.sound) purr({ volume: 0.5 });
         note.textContent = `${name}: “${reply}”`;
         mimi.setActivity(null);

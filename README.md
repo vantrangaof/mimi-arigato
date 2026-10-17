@@ -125,6 +125,7 @@ Everything unlocks by total good things and never goes away:
 
 ### Photos
 - **Photos tab:** add photos of you and your cat ("Add photos", several at once). Tap one to see it large, write a caption, or delete it.
+- **Mimi looks at your photos:** when you're signed in, every photo you share (in Photos, or attached to a good thing) gets a look from Mimi's AI, and Mimi says something about it: *"ooh, is that ramen? can i have some."* The line stays under the photo in the photo viewer and syncs. Older photos, or ones added offline, have an **Ask Mimi about this photo** button. When you add many photos at once, Mimi looks at the first 5.
 - **Attach a photo to a good thing:** tap the camera button next to the journal box; the photo shows beside that entry, in the calendar, on its scrapbook page, and as the monthly favorite.
 - Photos are shrunk on the device before saving (longest side 1600 px, plus a small thumbnail) and turned upright automatically.
 - When signed in, photos sync to a **private** Supabase Storage bucket; other devices download thumbnails right away and full images when opened.

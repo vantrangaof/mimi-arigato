@@ -49,3 +49,8 @@ export const lookAtPhoto = (look, image, { catName }) =>
 // → { line } or { error }
 export const captionPhoto = (image, who, { catName }) =>
   ask({ kind: "caption", image, who, catName }, LOOK_TIMEOUT_MS);
+
+// A photo you shared: what the cat says about it. text = its caption or good thing (optional).
+// → { line } or { error }
+export const commentOnPhoto = (image, { text = "", catName, userName }) =>
+  ask({ kind: "comment", image, text, catName, userName }, LOOK_TIMEOUT_MS);

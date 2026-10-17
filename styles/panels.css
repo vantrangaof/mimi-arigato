@@ -1029,3 +1029,9 @@ mark {
 .cat-diary-thumb { flex: none; width: 52px; height: 52px; padding: 0; border: 2px solid var(--sheet-edge); border-radius: 3px; overflow: hidden; cursor: pointer; background: var(--grid-strong); }
 .cat-diary-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cat-diary-thumb.is-current { border-color: var(--accent); }
+
+/* What the cat said about a photo (memory/photo-comments.js). */
+.photo-comment { margin: 10px 0 4px; }
+.photo-comment p { margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
+.photo-comment-name { font-family: var(--font-pixel); color: var(--accent); }
+.photo-comment .link-button { padding-left: 0; }

@@ -128,7 +128,7 @@ wireTabs($("thingsTabs"));
 wirePhotos(mimi, {
   panel: $("panel-photos"),
   input: $("photoInput"),
-  viewer: { dialog: $("photoViewer"), image: $("photoFull"), caption: $("photoCaption"), meta: $("photoMeta"), actions: $("photoActions") },
+  viewer: { dialog: $("photoViewer"), image: $("photoFull"), caption: $("photoCaption"), meta: $("photoMeta"), actions: $("photoActions"), comment: $("photoComment") },
 });
 wireDiary(mimi, { panel: $("panel-diary"), tab: $("tab-diary") });
 wireCatDiary(mimi, { panel: $("panel-catdiary"), tab: $("tab-catdiary"), input: $("catDiaryInput") });

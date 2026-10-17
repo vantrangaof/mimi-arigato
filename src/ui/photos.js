@@ -9,6 +9,9 @@ import {
 import { isUnlocked, WORLD } from "../world/world.js";
 import { preparePhoto, photoErrorMessage } from "../core/images.js";
 import { meow } from "../cat/sound.js";
+import { photoComment, scanPhoto } from "../memory/photo-comments.js";
+
+const SCAN_AT_MOST = 5; // photos the cat looks at when you add many at once
 import { cloudConfigured, cloudStatus, fetchPhotoFile } from "../cloud/sync.js";
 
 const REACTIONS = [
@@ -41,9 +44,37 @@ export function openPhoto(id) {
   viewer?.open(id);
 }
 
-function wireViewer({ dialog, image, caption, meta, actions }) {
+function wireViewer({ dialog, image, caption, meta, actions, comment }) {
   let currentId = null;
   let confirming = false;
+  let asking = null; // the photo the cat is looking at right now
+
+  // What the cat said about this photo, or a button to ask (older photos, or added offline).
+  function renderComment() {
+    const name = catName();
+    const line = currentId && photoComment(currentId);
+    if (line) comment.replaceChildren(el("p", {}, el("span", { class: "photo-comment-name", text: `${name}: ` }), `“${line}”`));
+    else if (asking === currentId) comment.replaceChildren(el("p", { class: "muted small", text: `${name} is looking closely…` }));
+    else {
+      comment.replaceChildren(el("button", {
+        type: "button",
+        class: "link-button",
+        text: `Ask ${name} about this photo`,
+        onclick: async () => {
+          const photo = photoById(currentId);
+          if (!photo) return;
+          asking = photo.id;
+          renderComment();
+          const said = await scanPhoto(photo);
+          asking = null;
+          if (!said && currentId === photo.id) {
+            comment.replaceChildren(el("p", { class: "muted small", text: `${name} can only look at photos when you're signed in and online.` }));
+          }
+          else renderComment();
+        },
+      }));
+    }
+  }
 
   function renderActions() {
     actions.replaceChildren(...(confirming
@@ -85,6 +116,7 @@ function wireViewer({ dialog, image, caption, meta, actions }) {
     caption.value = photo.caption;
     meta.textContent = `${formatLong(photo.day)}${photo.entryId ? ", with a good thing" : ""}`;
     renderActions();
+    renderComment();
     dialog.showModal();
     const thumb = await photoURL(id, "thumb");
     if (thumb && currentId === id) image.src = thumb;
@@ -98,6 +130,7 @@ function wireViewer({ dialog, image, caption, meta, actions }) {
   dialog.addEventListener("click", (e) => {
     if (e.target === dialog) dialog.close();
   });
+  store.on(() => dialog.open && renderComment()); // a comment arrived (or synced in)
   return { open };
 }
 
@@ -117,20 +150,30 @@ export function wirePhotos(mimi, { panel, input, viewer: viewerEls }) {
     let added = null;
     status = files.length > 1 ? `Saving ${files.length} photos…` : "Saving your photo…";
     render();
+    const fresh = [];
     for (const file of files) {
       try {
-        added = await addPhoto(await preparePhoto(file));
+        const prepared = await preparePhoto(file);
+        added = await addPhoto(prepared);
+        fresh.push({ photo: added, thumb: prepared.thumb });
       } catch (err) {
         errors.push(photoErrorMessage(err));
       }
     }
     status = errors[0] ?? "";
     render();
-    if (added) {
-      if (store.settings.sound) meow();
-      mimi.react(pick(REACTIONS), { hearts: 3, hold: 2600 });
-      if (files.length === 1) openPhoto(added.id); // straight to adding a caption
+    if (!added) return;
+    if (store.settings.sound) meow();
+    if (files.length === 1) openPhoto(added.id); // straight to adding a caption
+    // The cat looks at each new photo (a few at most) and says what they think of the first.
+    mimi.setActivity("is looking closely at your photo…");
+    let first = null;
+    for (const { photo, thumb } of fresh.slice(0, SCAN_AT_MOST)) {
+      const line = await scanPhoto(photo, { thumb });
+      first ??= line;
     }
+    mimi.setActivity(null);
+    mimi.react(first ? ["!", `“${first}”`] : pick(REACTIONS), { hearts: 3, hold: first ? 4200 : 2600 });
   }
 
   input.addEventListener("change", () => {

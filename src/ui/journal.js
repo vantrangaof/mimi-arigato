@@ -18,6 +18,7 @@ import { fillScrapbook } from "../memory/scrapbook.js";
 import { newMilestones } from "../memory/relationship.js";
 import { claimRoomThings, roomThingLine } from "../memory/themes.js";
 import { noticeWish, forgetWish, madeLine, cameTrueLine } from "../memory/wishes.js";
+import { scanPhoto } from "../memory/photo-comments.js";
 import { checkGoodThing } from "../cloud/ai.js";
 
 const DAILY = 5;
@@ -206,9 +207,11 @@ export function wireJournal(mimi, els) {
     const record = addEntry(text, today, Date.now(), null, check.tags); // tags: who, where and what (AI)
     els.input.value = "";
     prompt = null;
+    let shared = null; // a photo shared with this good thing: the cat looks at it after reacting
     if (pending) {
       const photo = await addPhoto({ full: pending.full, thumb: pending.thumb, caption: text, day: today, entryId: record.id });
       linkEntryPhoto(record.id, photo.id);
+      shared = { photo, thumb: pending.thumb };
       URL.revokeObjectURL(pending.url);
       pending = null;
       renderAttachment();
@@ -245,6 +248,10 @@ export function wireJournal(mimi, els) {
     mimi.announce(events);
     saving = false;
     if (n < DAILY) els.input.focus();
+    if (shared) {
+      const line = await scanPhoto(shared.photo, { thumb: shared.thumb, text });
+      if (line) mimi.later([["!", `looks at your photo: “${line}”`, { hearts: 2, hold: 4200 }]]);
+    }
   });
 
   store.on(render);

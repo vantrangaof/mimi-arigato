@@ -2,7 +2,7 @@
 // immediately; the cached copy is the fallback when offline.
 // Add new files to SHELL so they're available offline from the first visit.
 
-const CACHE_VERSION = "mimi-v33";
+const CACHE_VERSION = "mimi-v34";
 const SHELL = [
   "./",
   "./index.html",
@@ -60,6 +60,7 @@ const SHELL = [
   "./src/memory/remember.js",
   "./src/memory/needs.js",
   "./src/memory/challenges.js",
+  "./src/memory/photo-comments.js",
   "./src/memory/streak.js",
   "./src/ui/habitat.js",
   "./src/ui/topbar.js",
