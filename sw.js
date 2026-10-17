@@ -2,7 +2,7 @@
 // immediately; the cached copy is the fallback when offline.
 // Add new files to SHELL so they're available offline from the first visit.
 
-const CACHE_VERSION = "mimi-v32";
+const CACHE_VERSION = "mimi-v33";
 const SHELL = [
   "./",
   "./index.html",
@@ -86,12 +86,14 @@ const SHELL = [
   "./src/ui/good-reminder.js",
   "./src/ui/challenge.js",
   "./src/ui/cat-diary.js",
+  "./src/ui/push.js",
   "./src/ui/thanks.js",
   "./src/ui/friends.js",
   "./src/ui/visit.js",
   "./src/ui/theme.js",
   "./src/ui/chat.js",
   "./src/cloud/ai.js",
+  "./src/cloud/push.js",
   "./src/ui/games.js",
   "./src/games/catch.js",
   "./src/games/pairs.js",
@@ -130,4 +132,31 @@ self.addEventListener("fetch", (event) => {
       })
       .catch(() => caches.match(req, { ignoreSearch: true }))
   );
+});
+
+// Notifications from Mimi (api/nudge.mjs): show it, and open the app when it's tapped.
+self.addEventListener("push", (event) => {
+  let msg = {};
+  try {
+    msg = event.data?.json() ?? {};
+  } catch {
+    msg = { body: event.data?.text() };
+  }
+  event.waitUntil(self.registration.showNotification(msg.title || "Mimi", {
+    body: msg.body || "Mimi is thinking about you.",
+    tag: msg.tag || "mimi",
+    icon: "assets/icons/icon-192.png",
+    badge: "assets/icons/icon-192.png",
+    data: { url: msg.url || "./" },
+  }));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    const open = windows.find((w) => new URL(w.url).origin === self.location.origin);
+    if (open) return open.focus();
+    return self.clients.openWindow(event.notification.data?.url || "./");
+  })());
 });

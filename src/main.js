@@ -39,6 +39,7 @@ import { wireGuide } from "./ui/guide.js";
 import { wireGoodReminder } from "./ui/good-reminder.js";
 import { wireChallenge } from "./ui/challenge.js";
 import { wireCatDiary } from "./ui/cat-diary.js";
+import { wirePush } from "./ui/push.js";
 import { needsGreeting } from "./memory/needs.js";
 import { rememberGreeting } from "./memory/remember.js";
 import { wireThanks } from "./ui/thanks.js";
@@ -176,6 +177,7 @@ wireSettings({
   backupNote: $("backupNote"),
 });
 wireAccount($("accountBody"));
+wirePush({ button: $("pushToggle"), note: $("pushNote"), settings: $("settingsOpen") });
 const friends = wireFriends(mimi, {
   section: $("friendsSection"),
   body: $("friendsBody"),

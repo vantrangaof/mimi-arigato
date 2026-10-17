@@ -60,7 +60,7 @@ It's an installable web app (PWA). It works offline and without an account; sign
 - **Mimi holds them:** when you open the app with notes due, Mimi says *"psst… is holding a note for you: “Text Mom.”"*, and a little yellow sticky note appears on the room's wall (tap it to jump to the notes). If the app is open at a note's time, Mimi taps your hand.
 - On each note: **✓** (Mimi: *"hopes Mom says hi back."*, *"doesn't understand money, but is proud of you."*), **later** (moves it to tomorrow), **add to calendar** (a calendar event with an alert, repeating if the note repeats), and **×**. A repeating note moves on to its next day when checked.
 - Mimi never scolds: a note from an earlier day just says "from Oct 2". **Coming up** lists the next few notes.
-- Web apps can't send notifications on their own, so the alert at the right time comes from your calendar app ("add to calendar"). Notes sync and are in backups.
+- With notifications turned on (Settings → Daily reminder), Mimi sends a note in the hour it's due: *"Xiao Mi is holding a note for you: Text Mom"*. Otherwise the alert comes from your calendar app ("add to calendar"). Notes sync and are in backups.
 
 ### Mimi, the cat
 - **Tap Mimi** to pet them: a **meow** or **purr** (real recordings), happy ^ ^ eyes, blush, tail wags, a floating heart, and a little line ("leans into your hand."). Sometimes Mimi recalls one of your past entries.
@@ -150,7 +150,7 @@ Everything unlocks by total good things and never goes away:
 - Your name, the cat's name, fur color (Strawberry, Peach, Cloud, Midnight, Snow).
 - **Appearance:** Day & night (default: light from 6 am, dark from 7 pm, like the sky in Mimi's window), Match my phone, Light or Dark. Follows you to your other devices.
 - **Account & sync** (also the **Sign in** / cloud button at the top): create an account with your email and a password (or sign in to an existing one), or tap **Forgot your password? Email me a sign-in link** to sign in with no password (a link, plus a code to type, which is what works in the Home Screen app on iPhone). Your good things sync to the cloud and to every device you sign in on. "Sync now" shows when it last synced. Signing out asks whether to keep a copy on this device or remove it (for shared devices).
-- **Daily reminder:** adds a repeating event to your calendar app (web apps can't schedule notifications on their own). For other reminders, use Sticky notes.
+- **Daily reminder:** adds a repeating event to your calendar app. Or tap **Turn on notifications** (signed in; on iPhone, from the Home Screen app, iOS 16.4 or later): at your reminder time, on a day you haven't told Mimi anything yet, Mimi sends one gentle note (*"Xiao Mi is sitting by their empty bowls… one good thing earns a fish."*), never more than one a day. Sticky notes with a time arrive in their hour too. It's per device, follows the device's time zone, and is sent by `api/nudge.mjs`, which a GitHub Actions schedule (`.github/workflows/nudge.yml`) calls every hour.
 - **Friends** (when signed in): "Invite a friend" makes a code like `ABC-234` and a link to share; a friend opens the link or types the code under "Have a code?" and says yes. Tap a friend to **visit their room**: their cat, unlocks, treasures, seasonal decor and things from their life. Never their good things, diary or photos. "Show my things to friends" hides your things from your life from visitors. Either of you can remove the friendship.
 - **Chat with Mimi** (when signed in): the Chat button opens a little conversation with your cat. Mimi knows your names, your recent good things and wishes (never your diary). The chat stays on this device.
 - **Backup / Restore:** download everything as a file; restoring merges and never deletes.
@@ -347,6 +347,13 @@ Notes:
 - If **Confirm email** is on, Supabase's built-in email sender only sends a few emails per hour; set up your own SMTP under **Authentication → Emails** for real use.
 - The Supabase client library is loaded from a CDN only when cloud sync is configured, so offline use is unaffected.
 
+### Notifications setup (one time)
+1. Re-run `supabase/schema.sql` (adds `push_subscriptions`).
+2. In Vercel → Project → Settings → Environment Variables, add `VAPID_PUBLIC_KEY` (the same value as in `src/config.js`), `VAPID_PRIVATE_KEY`, `CRON_SECRET` (any long random string), and `SUPABASE_SERVICE_ROLE_KEY` (Supabase → Project Settings → API → service_role; it stays on the server). Redeploy.
+3. In GitHub → the repo → Settings → Secrets and variables → Actions, add `CRON_SECRET` with the same value as in Vercel.
+4. Try it: GitHub → Actions → "Mimi's notes" → Run workflow. The run's log shows `{"devices":…,"sent":…}`.
+To make a new key pair: `node -e 'const c=require("crypto");const k=c.generateKeyPairSync("ec",{namedCurve:"prime256v1"});const p=k.publicKey.export({format:"jwk"});console.log(Buffer.concat([Buffer.from([4]),Buffer.from(p.x,"base64url"),Buffer.from(p.y,"base64url")]).toString("base64url"),k.privateKey.export({format:"jwk"}).d)'` (public, then private).
+
 ## Not doing (on purpose)
 
 Hunger or health bars (Mimi only looks a little sad on a day with empty bowls, and cheers up at once), punishment, "Mimi is sad you didn't visit", streaks that reset, losing accessories, coins, energy, ads, quests. Mimi says one thing: *"Tell me one nice thing."*
@@ -360,10 +367,8 @@ Hunger or health bars (Mimi only looks a little sad on a day with empty bowls, a
 Then: letters to future you, the Let-It-Go jar (never saved), diary weather showing in the room. Not now: a memory graph screen, personality modes, friendship tree; save stats and chapters for Mimi Wrapped.
 
 - **Pick up here (2026-10-07):** the AI check, earned fish/water/cuddles and Chat with Mimi are built (`ec41a7d`) but only tested with a fake Gemini. Before testing for real: push the 4 local commits, add `GEMINI_API_KEY` in Vercel, re-run `supabase/schema.sql`. Then check real Gemini replies and that Vercel runs `api/mimi.mjs`.
-- **Tasks that earn food and water** (still to design): right now only good things earn fish/water/cuddles. Ideas: small daily kindnesses ("drink a glass of water", "text someone you love"), finishing your own sticky notes, or both. Keep it gentle (no missed-task penalties; empty bowls only make Mimi a little sad).
-- **A daily nudge:** a Web Push notification at a time you pick ("Mimi saved you a spot ♡", or "Mimi's bowls are empty"), for the installed app. Needs a push subscription table and a scheduled job (Vercel cron or Supabase).
+- **Built 2026-10-17:** today's challenge (earns a treat bag; one treat per good thing now), the cat's photo diary, Pumpkin patch (Halloween), and notifications (daily nudge + sticky notes). Next seasonal games: one for Christmas (from Dec 18) and one for the Lunar New Year.
 - **Hide a treasure** (step 2 of the first multiplayer game; friends and visiting are done): hide one of your treasures in a spot in your room for a friend to find ("*sniff sniff* warmer!"); the finder keeps a copy tagged with where it came from. Then step 3, your cat visiting a friend's room for a day. Design: [docs/superpowers/specs/2026-10-04-visiting-cats-hide-a-treasure-design.md](docs/superpowers/specs/2026-10-04-visiting-cats-hide-a-treasure-design.md). Later games on the same friends: paint together (a shared pixel canvas that hangs in both rooms), fishing together (live, co-op).
-- **Real notifications for sticky notes:** Web Push from a Supabase scheduled function (needs sign-in; on iPhone only for the installed app).
 - **"Mimi Wrapped" in December:** a year-in-review story you tap through (total good things, top people, favorite things, mood weather across the year, scrapbook highlights), built from Month, Memories and Scrapbook, with a share card at the end.
 
 ## Ideas for later

@@ -307,3 +307,25 @@ $$;
 
 revoke execute on function public.mimi_ai_call(text) from public, anon;
 grant execute on function public.mimi_ai_call(text) to authenticated;
+
+-- Notifications from Mimi (Web Push). One row per device that turned them on. The app writes
+-- its own rows; api/nudge.mjs (run every hour by .github/workflows/nudge.yml) reads them with the
+-- service role key and sends at most one gentle nudge a day, at your daily reminder time, only
+-- on a day you haven't told Mimi anything yet, plus your sticky notes at their time.
+create table if not exists public.push_subscriptions (
+  endpoint    text primary key,
+  user_id     uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  p256dh      text not null,
+  auth        text not null,
+  tz          text not null default 'UTC',   -- IANA time zone, like 'Asia/Ho_Chi_Minh'
+  time        text not null default '20:00', -- the daily reminder time, HH:MM in tz
+  sent        jsonb not null default '{}'::jsonb, -- { day, keys: [...] } what went out today
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+alter table public.push_subscriptions enable row level security;
+
+drop policy if exists "own push subscriptions" on public.push_subscriptions;
+create policy "own push subscriptions" on public.push_subscriptions
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

@@ -7,3 +7,7 @@
 
 export const SUPABASE_URL = "https://gbcobrwtrbsfdhqvnmow.supabase.co";
 export const SUPABASE_ANON_KEY = "sb_publishable_bzx2uSoGkBcj3q8UMwJxYg_7mFnfbyR";
+
+// Notifications from Mimi (Web Push): the public half of the VAPID key pair. The private half
+// lives only in Vercel (VAPID_PRIVATE_KEY), used by api/nudge.mjs.
+export const VAPID_PUBLIC_KEY = "BEXVxSdWnHADR2VuffR0HxlxXr7R6ovulc_eNiad_ZBkEF78chn05UFzVhj8BItlWMw5rLTD_V7XMWuhM8JHH5E";

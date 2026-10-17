@@ -1,0 +1,22 @@
+# Every hour, ask api/nudge.mjs to send Mimi's notifications that are due (daily nudges at each
+# person's reminder time, sticky notes at theirs). Needs the CRON_SECRET repository secret, the
+# same value as CRON_SECRET in Vercel.
+name: Mimi's notes
+
+on:
+  schedule:
+    - cron: "2 * * * *"
+  workflow_dispatch:
+
+jobs:
+  nudge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Send what's due
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -fsS --max-time 60 -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            https://mimi-arigato.vercel.app/api/nudge
