@@ -933,3 +933,29 @@ mark {
   .chat-msg { animation: none; }
   .chat-typing span { animation-duration: 2.4s; }
 }
+
+/* ---- guide (ui/guide.js) ---- */
+
+.guide-lead { margin: 0 0 12px; line-height: 1.5; }
+.guide-section { padding: 12px 0; }
+.guide-section .sheet-label { margin: 0 0 6px; }
+.guide-list { margin: 0; padding-left: 1.25rem; line-height: 1.5; font-size: 0.9375rem; }
+.guide-list li + li { margin-top: 4px; }
+#guideDialog .row { margin-top: 8px; justify-content: flex-end; }
+
+/* ---- a good thing to remember (ui/good-reminder.js) ---- */
+
+.good-reminder-when { margin: 0 0 8px; font-family: var(--font-pixel); color: var(--accent); }
+.good-reminder-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 10px;
+  padding: 12px 14px;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  border: 1px dashed var(--grid-strong);
+  border-radius: 3px;
+  overflow-wrap: anywhere;
+}
+.good-reminder-mimi { margin: 0 0 14px; font-size: 0.875rem; color: var(--ink-soft); }

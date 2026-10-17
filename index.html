@@ -32,6 +32,7 @@
         <p class="together" id="together"></p>
         <div class="topbar-actions">
           <button class="cloud-button" id="cloudButton" type="button" hidden></button>
+          <button class="icon-button" id="guideOpen" type="button" aria-label="How Mimi works" title="How Mimi works"></button>
           <button class="icon-button" id="soundToggle" type="button" aria-pressed="true" aria-label="Sound"></button>
           <button class="icon-button" id="settingsOpen" type="button" aria-label="Settings" title="Settings"></button>
         </div>
@@ -294,6 +295,29 @@
       <button class="icon-button small" value="close" aria-label="Close">×</button>
     </form>
     <div id="postcardBody"></div>
+  </dialog>
+
+  <dialog class="sheet" id="guideDialog" aria-labelledby="guideTitle">
+    <form method="dialog" class="sheet-head">
+      <h2 class="card-title" id="guideTitle">How Mimi works</h2>
+      <button class="icon-button small" value="close" aria-label="Close">×</button>
+    </form>
+    <div id="guideBody"></div>
+    <div class="row">
+      <button class="pixel-button primary" id="guideDone" type="button">Got it</button>
+    </div>
+  </dialog>
+
+  <dialog class="sheet good-reminder" id="goodReminder" aria-labelledby="goodReminderTitle">
+    <form method="dialog" class="sheet-head">
+      <h2 class="card-title" id="goodReminderTitle">A good thing to remember</h2>
+      <button class="icon-button small" value="close" aria-label="Close">×</button>
+    </form>
+    <div id="goodReminderBody"></div>
+    <div class="row">
+      <button class="pixel-button primary" id="goodReminderTell" type="button">Tell Mimi about today</button>
+      <button class="pixel-button" id="goodReminderAnother" type="button">Another one</button>
+    </div>
   </dialog>
 
   <dialog class="sheet" id="aboutDialog" aria-labelledby="aboutTitle">

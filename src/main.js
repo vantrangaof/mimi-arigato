@@ -35,6 +35,9 @@ import { wireBedtime } from "./ui/bedtime.js";
 import { wireGames } from "./ui/games.js";
 import { wirePostcard, postcardGreeting } from "./ui/postcard.js";
 import { wireAbout } from "./ui/about.js";
+import { wireGuide } from "./ui/guide.js";
+import { wireGoodReminder } from "./ui/good-reminder.js";
+import { needsGreeting } from "./memory/needs.js";
 import { rememberGreeting } from "./memory/remember.js";
 import { wireThanks } from "./ui/thanks.js";
 import { wireYearAgo, yearAgoGreeting } from "./ui/year-ago.js";
@@ -64,6 +67,8 @@ const mimi = makeMimi({
 const jar = wireJar(mimi);
 const about = wireAbout({ dialog: $("aboutDialog"), title: $("aboutTitle"), body: $("aboutBody") });
 const postcard = wirePostcard(mimi, { dialog: $("postcardDialog"), body: $("postcardBody") });
+const guide = wireGuide({ button: $("guideOpen"), dialog: $("guideDialog"), title: $("guideTitle"), body: $("guideBody"), done: $("guideDone") });
+const goodReminder = wireGoodReminder({ dialog: $("goodReminder"), body: $("goodReminderBody"), another: $("goodReminderAnother"), tell: $("goodReminderTell"), input: $("thanksInput") });
 const thanks = wireThanks(mimi, { dialog: $("thanksDialog"), to: $("thanksTo"), img: $("thanksImg"), save: $("thanksSave"), share: $("thanksShare") });
 
 const stickies = wireReminders(mimi, {
@@ -211,6 +216,8 @@ const mail = postcardGreeting();
 if (mail) greetings.push(mail);
 const notes = stickyGreeting();
 if (notes) greetings.push(notes);
+const hungry = needsGreeting();
+if (hungry) greetings.push(hungry);
 const memory = yearAgoGreeting();
 if (memory) greetings.push(memory);
 // Something you used to mention, on a quiet day (not when Mimi already has lots to say).
@@ -228,6 +235,8 @@ if (things.length) {
 }
 if (needsIntro()) greetings.push(["hi!", "would love to know your name.", { hearts: 0, hold: 3000 }]);
 if (greetings.length) setTimeout(() => mimi.later(greetings), 700);
+// First visit: the guide. Every other time: one of your past good things.
+if (!guide.maybeOpen()) goodReminder.show();
 
 preloadSound();
 initCloud();
