@@ -351,7 +351,7 @@ Notes:
 - The Supabase client library is loaded from a CDN only when cloud sync is configured, so offline use is unaffected.
 
 ### Cat café setup (one time)
-Re-run `supabase/schema.sql` (adds the café's Realtime policies). Realtime must be on for the project (it is by default). If cafés show "The café's door is stuck", check Supabase → Realtime → Settings: private channels need those policies, so don't turn on "allow public access only".
+Re-run `supabase/schema.sql` (adds the café's Realtime policies). Realtime must be on for the project (it is by default). Cafés are private channels, so they work whether or not Realtime's "Allow public access" is on. If a café says "The café's door is stuck", the policies are probably missing: re-run the schema.
 
 ### Notifications setup (one time)
 1. Re-run `supabase/schema.sql` (adds `push_subscriptions`).
