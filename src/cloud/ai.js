@@ -7,6 +7,7 @@ import { cloud } from "./sync.js";
 const ENDPOINT = "/api/mimi";
 const CHECK_TIMEOUT_MS = 6_000;
 const CHAT_TIMEOUT_MS = 15_000;
+const LOOK_TIMEOUT_MS = 15_000;
 
 async function ask(body, timeout) {
   const session = await cloud();
@@ -38,3 +39,8 @@ export const checkGoodThing = (text, { catName, userName }) =>
 // messages: [{ role: "you" | "mimi", text }], context: what Mimi knows (see ui/chat.js). → { reply } or { error }
 export const chatWithMimi = (messages, context) =>
   ask({ kind: "chat", messages, context }, CHAT_TIMEOUT_MS);
+
+// A daily challenge photo: is the thing it asks for in it? look = a key of LOOK_FOR in api/mimi.mjs,
+// image = base64 JPEG (the thumbnail). → { found, reply } or { error }
+export const lookAtPhoto = (look, image, { catName }) =>
+  ask({ kind: "look", look, image, catName }, LOOK_TIMEOUT_MS);

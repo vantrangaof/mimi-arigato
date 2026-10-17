@@ -134,6 +134,19 @@
           <p class="muted small world-next" id="worldNext"></p>
         </section>
 
+        <!-- Today's challenge (ui/challenge.js) -->
+        <section class="card challenge-card" id="challengeCard" aria-labelledby="challengeTitle">
+          <div class="card-head">
+            <h2 class="card-title" id="challengeTitle">Today's challenge</h2>
+            <span class="challenge-count" id="challengeCount" aria-live="polite"></span>
+          </div>
+          <p class="challenge-text" id="challengeText"></p>
+          <div class="challenge-slots" id="challengeSlots"></div>
+          <label class="pixel-button primary challenge-add" id="challengeAdd" for="challengeInput">Add a photo</label>
+          <input class="visually-hidden" id="challengeInput" type="file" accept="image/*" tabindex="-1">
+          <p class="muted small challenge-note" id="challengeNote" aria-live="polite"></p>
+        </section>
+
         <!-- Sticky notes: things to remind you of -->
         <section class="card stickies-card" id="stickyCard" aria-labelledby="stickyTitle">
           <h2 class="card-title" id="stickyTitle">Sticky notes</h2>

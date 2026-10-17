@@ -959,3 +959,27 @@ mark {
   overflow-wrap: anywhere;
 }
 .good-reminder-mimi { margin: 0 0 14px; font-size: 0.875rem; color: var(--ink-soft); }
+
+/* ---- today's challenge (ui/challenge.js) ---- */
+
+.challenge-count { font-family: var(--font-pixel); color: var(--accent); }
+.challenge-text { margin: 4px 0 12px; font-size: 1.0625rem; line-height: 1.4; }
+.challenge-slots { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.challenge-slot {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  font-family: var(--font-pixel);
+  color: var(--ink-soft);
+  border: 2px dashed var(--grid-strong);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.challenge-slot.is-done { color: var(--accent); border-style: solid; border-color: var(--accent); }
+.challenge-slot img { width: 100%; height: 100%; object-fit: cover; }
+.challenge-add { cursor: pointer; }
+.challenge-add.is-busy { opacity: 0.6; pointer-events: none; }
+.challenge-note { margin: 10px 0 0; }
+.challenge-note:empty { display: none; }
+.challenge-card.is-complete .challenge-text { color: var(--ink-soft); }

@@ -7,11 +7,15 @@ import { pixelSVG } from "../core/pixel.js";
 import { purr } from "../cat/sound.js";
 import { heartSVG } from "../cat/mimi.js";
 import { markFed, needs } from "../memory/needs.js";
+import { challengeRewarded } from "../memory/challenges.js";
 
-// Each good thing told today earns one fish, one drink of water and one cuddle to give
-// whenever you like, and so does "Nothing special today" (being here is enough).
+// Each good thing told today earns ONE treat, in turn: a fish, then water, then a cuddle, then a
+// fish again (up to 5 good things). "Nothing special today" earns a fish. Today's challenge
+// (memory/challenges.js) earns a treat bag: one more of each. So feeding Mimi AND giving them
+// water takes two good things, or one and the challenge.
 // Mimi looks a little sad on a day without a fish or water (see memory/needs.js), never more.
 const MAX_EARNED = 5;
+const ORDER = ["fish", "water", "cuddle"];
 const CARE = {
   fish: {
     key: KEYS.treats,
@@ -45,9 +49,18 @@ const CARE = {
 // empty button) takes you to the good-things box.
 export function wireCare(buttons, mimi, wrap, tray) {
   let busy = false;
-  const earned = () => Math.min(entriesToday().length + (quietToday() ? 1 : 0), MAX_EARNED);
-  const left = (care) => Math.max(0, earned() - dailyCount(care.key));
-  let seen = earned();
+  const told = () => Math.min(entriesToday().length, MAX_EARNED); // good things that earn a treat
+  const earned = () => told() + (quietToday() ? 1 : 0) + (challengeRewarded() ? ORDER.length : 0);
+  // How many of one kind you've earned today.
+  const earnedOf = (id) => {
+    const n = told();
+    const turns = Math.floor(n / ORDER.length) + (ORDER.indexOf(id) < n % ORDER.length ? 1 : 0);
+    return turns + (id === "fish" && quietToday() ? 1 : 0) + (challengeRewarded() ? 1 : 0);
+  };
+  const idOf = (care) => Object.keys(CARE).find((id) => CARE[id] === care);
+  const left = (care) => Math.max(0, earnedOf(idOf(care)) - dailyCount(care.key));
+  const nextTreat = () => CARE[ORDER[told() % ORDER.length]].label.toLowerCase();
+  let seen = Object.fromEntries(ORDER.map((id) => [id, earnedOf(id)]));
 
   tray.icons.replaceChildren(
     pixelSVG(CARE.fish.art, CARE.fish.colors, "tray-icon"),
@@ -57,13 +70,14 @@ export function wireCare(buttons, mimi, wrap, tray) {
 
   function trayLine() {
     const name = catName();
-    const n = earned();
+    const n = told();
     const toGive = Object.values(CARE).some((care) => left(care));
     const hungry = needs().food || needs().water;
-    if (n === 0 && hungry) return { text: `${capitalize(name)}'s bowls are empty! Tell them a good thing to earn a fish and water ↓`, ask: true };
-    if (n === 0) return { text: `Tell ${name} a good thing to earn a fish, water and a cuddle ↓`, ask: true };
-    if (toGive) return { text: `You earned treats! Tap Fish, Water or Cuddle to give them to ${name}.`, ask: false };
-    if (n < MAX_EARNED) return { text: `All given! Tell ${name} another good thing to earn more ↓ (${n} of ${MAX_EARNED} today)`, ask: true };
+    const bag = challengeRewarded() ? "" : " or do today's challenge";
+    if (earned() === 0 && hungry) return { text: `${capitalize(name)}'s bowls are empty! Tell them a good thing to earn a fish ↓`, ask: true };
+    if (earned() === 0) return { text: `Tell ${name} a good thing to earn a fish ↓`, ask: true };
+    if (toGive) return { text: `You earned treats! Tap them to give them to ${name}.`, ask: false };
+    if (n < MAX_EARNED) return { text: `All given! Your next good thing earns ${nextTreat() === "cuddle" ? "a cuddle" : nextTreat() === "fish" ? "a fish" : "water"}${bag} ↓`, ask: true };
     return { text: `${capitalize(name)} is completely spoiled today ♡`, ask: false };
   }
 
@@ -73,7 +87,7 @@ export function wireCare(buttons, mimi, wrap, tray) {
       const n = left(care);
       btn.textContent = n ? `${care.label} ×${n}` : care.label;
       btn.classList.toggle("is-empty", !n);
-      btn.setAttribute("aria-label", n ? `${care.label}: ${n} to give` : `${care.label}: tell ${catName()} a good thing to earn one`);
+      btn.setAttribute("aria-label", n ? `${care.label}: ${n} to give` : `${care.label}: none to give yet`);
     }
     const line = trayLine();
     tray.text.textContent = line.text;
@@ -89,10 +103,12 @@ export function wireCare(buttons, mimi, wrap, tray) {
     replay(tray.form, "is-calling");
   }
 
-  // A good thing was just accepted: show what it earned.
-  function celebrate(gained) {
+  // A good thing (or the challenge) was just accepted: show what it earned, on the buttons it earned.
+  function celebrate(gains) {
     replay(tray.tray, "is-earned");
-    for (const btn of Object.values(buttons)) {
+    for (const [id, gained] of Object.entries(gains)) {
+      const btn = buttons[id];
+      if (!btn || gained <= 0) continue;
       replay(btn, "is-earned");
       const pop = el("span", { class: "earn-pop", text: `+${gained}`, "aria-hidden": "true" });
       pop.addEventListener("animationend", () => pop.remove());
@@ -115,11 +131,13 @@ export function wireCare(buttons, mimi, wrap, tray) {
     if (busy) return;
     if (!left(care)) {
       replay(wrap, "is-shake");
-      if (earned() >= MAX_EARNED) {
+      if (told() >= MAX_EARNED && challengeRewarded()) {
         mimi.react(["♡", "is completely spoiled today. Thank you!"], { hearts: 0, hold: 2600 });
         return;
       }
-      mimi.react(["mrrp?", `would love a ${care.label.toLowerCase()}! Tell them something good to earn one.`], { hearts: 0, hold: 3200 });
+      const want = care === CARE.water ? "some water" : `a ${care.label.toLowerCase()}`;
+      const bag = challengeRewarded() ? "" : " (or do today's challenge)";
+      mimi.react(["mrrp?", `would love ${want}! Tell them something good${bag} to earn one.`], { hearts: 0, hold: 3200 });
       guide();
       return;
     }
@@ -146,8 +164,9 @@ export function wireCare(buttons, mimi, wrap, tray) {
   tray.tray.addEventListener("click", guide);
   store.on(() => {
     label();
-    const now = earned();
-    if (now > seen) celebrate(now - seen);
+    const now = Object.fromEntries(ORDER.map((id) => [id, earnedOf(id)]));
+    const gains = Object.fromEntries(ORDER.map((id) => [id, now[id] - seen[id]]));
+    if (Object.values(gains).some((g) => g > 0)) celebrate(gains);
     seen = now;
   });
   label();

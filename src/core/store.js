@@ -28,6 +28,7 @@ export const KEYS = {
   wishes: "wishes",
   roomThings: "roomThings",
   reminders: "reminders",
+  challengeBonus: "challengeBonus", // today's challenge treat bag was given (see memory/challenges.js)
 };
 
 const DEFAULT_SETTINGS = {
@@ -341,7 +342,7 @@ export function setDailyCount(key, count) {
   write(key, { date: dayKey(), count });
 }
 
-// "Nothing special today": Mimi says that's okay and gives you a fish, water and cuddle anyway.
+// "Nothing special today": Mimi says that's okay and gives you a fish anyway.
 export const quietToday = () => dailyCount(KEYS.quietDay) > 0;
 export function markQuietDay() {
   setDailyCount(KEYS.quietDay, 1);

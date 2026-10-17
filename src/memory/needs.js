@@ -1,7 +1,7 @@
 // Fish and water as little needs: Mimi gets a bit sad when they haven't had either today.
 // Gentle on purpose: no sadness on your first day, before 9 am, or at night (Mimi's asleep), and
 // one fish or drink cheers them right up. Nothing is ever lost, and "Nothing special today"
-// still earns a fish and water, so there's always a way to feed them.
+// still earns a fish, so there's always a way to feed them.
 // If a bowl stayed empty all of yesterday, Mimi is waiting from the moment they wake up.
 
 import { KEYS, read, write } from "../core/store.js";

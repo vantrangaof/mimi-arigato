@@ -126,7 +126,7 @@ export function wireJournal(mimi, els) {
     els.nothing.hidden = list.length > 0 || quietToday();
     els.earnHint.hidden = full;
     els.earnHint.classList.remove("is-warning");
-    els.earnHint.textContent = `Each good thing earns ${name} a fish, water and a cuddle.`;
+    els.earnHint.textContent = `Each good thing earns ${name} one treat: a fish, then water, then a cuddle.`;
     els.done.hidden = !full;
     els.done.textContent = `${name} will keep these safe. See you tomorrow${userName() ? `, ${userName()}` : ""}.`;
     els.send.textContent = name.length <= 8 ? `Tell ${name}` : "Tell";

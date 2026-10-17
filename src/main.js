@@ -37,6 +37,7 @@ import { wirePostcard, postcardGreeting } from "./ui/postcard.js";
 import { wireAbout } from "./ui/about.js";
 import { wireGuide } from "./ui/guide.js";
 import { wireGoodReminder } from "./ui/good-reminder.js";
+import { wireChallenge } from "./ui/challenge.js";
 import { needsGreeting } from "./memory/needs.js";
 import { rememberGreeting } from "./memory/remember.js";
 import { wireThanks } from "./ui/thanks.js";
@@ -111,6 +112,15 @@ wireJournal(mimi, {
 });
 
 wireYearAgo($("yearAgo"));
+wireChallenge(mimi, {
+  card: $("challengeCard"),
+  text: $("challengeText"),
+  count: $("challengeCount"),
+  slots: $("challengeSlots"),
+  add: $("challengeAdd"),
+  input: $("challengeInput"),
+  note: $("challengeNote"),
+});
 
 wireTabs($("thingsTabs"));
 wirePhotos(mimi, {

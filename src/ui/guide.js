@@ -21,7 +21,8 @@ const sections = (name) => [
   {
     title: `Looking after ${name}`,
     items: [
-      "Each good thing earns a fish, water and a cuddle. Tap them to give.",
+      "Each good thing earns one treat, in turn: a fish, then water, then a cuddle. Tap them to give.",
+      "Today's challenge (like “take photos of 3 cats”) earns a treat bag: one of each.",
       `${name}'s bowls are empty each morning. Forget them and ${name} gets a little sad; one fish cheers them right up.`,
       "A paw print marks each day you visit. Missed days are naps, never gaps.",
       `Tap ${name} to pet them. From 9 pm, tap Tuck in to say goodnight.`,
