@@ -329,3 +329,34 @@ alter table public.push_subscriptions enable row level security;
 drop policy if exists "own push subscriptions" on public.push_subscriptions;
 create policy "own push subscriptions" on public.push_subscriptions
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
+-- The cat café (added later; re-running this whole file is safe)
+-- ---------------------------------------------------------------------------
+
+-- Everyone hosts a café: a private Realtime channel named 'cafe:<host user id>' (ui/cafe.js).
+-- Who's there (presence), pets and chat (broadcast) are live only: nothing is stored.
+-- Only the host and the host's friends can join, listen or send.
+create or replace function public.mimi_can_enter_cafe(topic text) returns boolean
+language sql stable security definer set search_path = public as $$
+  select split_part(topic, ':', 1) = 'cafe' and (
+    split_part(topic, ':', 2) = auth.uid()::text
+    or exists (
+      select 1 from public.friends f
+      where f.user_id = auth.uid() and f.friend_id::text = split_part(topic, ':', 2)
+    )
+  );
+$$;
+
+revoke execute on function public.mimi_can_enter_cafe(text) from public, anon;
+grant execute on function public.mimi_can_enter_cafe(text) to authenticated;
+
+drop policy if exists "cafe: listen" on realtime.messages;
+create policy "cafe: listen" on realtime.messages
+  for select to authenticated
+  using (realtime.messages.extension in ('broadcast', 'presence') and public.mimi_can_enter_cafe(realtime.topic()));
+
+drop policy if exists "cafe: talk" on realtime.messages;
+create policy "cafe: talk" on realtime.messages
+  for insert to authenticated
+  with check (realtime.messages.extension in ('broadcast', 'presence') and public.mimi_can_enter_cafe(realtime.topic()));

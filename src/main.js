@@ -41,6 +41,7 @@ import { wireChallenge } from "./ui/challenge.js";
 import { wireCatDiary } from "./ui/cat-diary.js";
 import { wirePush } from "./ui/push.js";
 import { wireTranslator } from "./ui/translator.js";
+import { wireCafe } from "./ui/cafe.js";
 import { needsGreeting } from "./memory/needs.js";
 import { rememberGreeting } from "./memory/remember.js";
 import { wireThanks } from "./ui/thanks.js";
@@ -179,6 +180,7 @@ wireSettings({
   backupNote: $("backupNote"),
 });
 wireAccount($("accountBody"));
+wireCafe(mimi, { button: $("cafeBtn"), dialog: $("cafeDialog"), title: $("cafeTitle"), body: $("cafeBody") });
 wirePush({ button: $("pushToggle"), note: $("pushNote"), settings: $("settingsOpen") });
 const friends = wireFriends(mimi, {
   section: $("friendsSection"),

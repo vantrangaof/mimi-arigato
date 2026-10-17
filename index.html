@@ -73,6 +73,7 @@
           <button class="pixel-button primary" id="chatBtn" type="button">Chat</button>
           <button class="pixel-button" id="playBtn" type="button" aria-pressed="false">Play</button>
           <button class="pixel-button" id="dressBtn" type="button">Dress up</button>
+          <button class="pixel-button" id="cafeBtn" type="button" hidden>Café</button>
           <button class="pixel-button" id="tuckBtn" type="button" hidden>Tuck in</button>
         </div>
       </section>
@@ -316,6 +317,14 @@
       <button class="icon-button small" value="close" aria-label="Close">×</button>
     </form>
     <div id="postcardBody"></div>
+  </dialog>
+
+  <dialog class="sheet cafe-sheet" id="cafeDialog" aria-labelledby="cafeTitle">
+    <form method="dialog" class="sheet-head">
+      <h2 class="card-title" id="cafeTitle">The cat café</h2>
+      <button class="icon-button small" value="close" aria-label="Close">×</button>
+    </form>
+    <div id="cafeBody"></div>
   </dialog>
 
   <dialog class="sheet" id="translatorDialog" aria-labelledby="translatorTitle">
