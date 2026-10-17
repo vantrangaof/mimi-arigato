@@ -82,6 +82,7 @@ It's an installable web app (PWA). It works offline and without an account; sign
   - **Belly trap:** Mimi lies down and asks for pets ("Chin, please!", head, cheeks). Pet the right spot before their patience runs out. Sometimes Mimi shows their belly: rub it and all four paws grab your hand ("TRAP!"). 3 hearts; a trap or running out of patience costs one, and resisting the belly is a bonus.
   - **Cushion tower:** a cushion slides back and forth; tap (or Space) to drop it on the stack. Overhang is trimmed off, perfect drops snap into place, and Mimi hops up to the top each time. A total miss ends it.
   - **Treat toss:** pull back and let go like a slingshot (with a dotted aim line) to land a treat in Mimi's mouth; arrows and Space on a keyboard. 10 treats. A breeze starts on the third, and from the sixth Mimi sways sleepily. Miss and it bonks off their head.
+  - **Seasonal games** show up only during their season, at the top of the list. **Pumpkin patch** (Halloween, Oct 18 to Nov 1): things pop out of nine pumpkins for a moment. Tap candy (+1), gold candy (+3) and bats (+2); a ghost is a "BOO!" and costs one of 3 hearts. 30 seconds, and things pop faster as time runs out.
 - **Eyes follow your mouse** on desktop.
 - **Fur from a photo of your cat:** Settings → Fur → "Colors from a photo of your cat…" picks the main color near the middle of the photo and mixes a matching palette (darker outline, lighter chest, yellow eyes for dark cats). It shows up as a "From your photo" fur choice.
 

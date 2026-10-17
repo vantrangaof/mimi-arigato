@@ -15,10 +15,32 @@ import { startShuffle } from "../games/shuffle.js";
 import { startBelly } from "../games/belly.js";
 import { startTower } from "../games/tower.js";
 import { startToss } from "../games/toss.js";
+import { startPumpkins } from "../games/pumpkins.js";
+import { seasonOn } from "../world/seasons.js";
 
-const BESTS = "gameBests"; // { catch, pairs, song, shuffle, belly, tower, toss } on this device
+const BESTS = "gameBests"; // { catch, pairs, song, shuffle, belly, tower, toss, pumpkins } on this device
 
 const GAMES = [
+  {
+    id: "pumpkins",
+    season: "halloween", // only while it's Halloween in Mimi's room (world/seasons.js)
+    label: "Pumpkin patch",
+    about: "Halloween only! Tap the candy and bats. Leave the ghosts alone.",
+    icon: ["..gg...", ".oOoOo.", "oOoOoOo", "oOoOoOo", ".ooooo."],
+    colors: { g: "#3f8a4a", o: "#e8762b", O: "#b8531a" },
+    start: startPumpkins,
+    higher: true,
+    best: (n) => `best: ${n} candy`,
+    result(n, isBest, { boos = 0, bats = 0 } = {}) {
+      const also = [
+        bats && `caught ${bats === 1 ? "a bat" : `${bats} bats`}`,
+        boos && `got BOO'd ${boos === 1 ? "once" : `${boos} times`}`,
+      ].filter(Boolean);
+      const and = also.length ? ` (and ${also.join(" and ")})` : "";
+      if (n === 0) return ["boo!", `hid behind you the whole time${and}.`];
+      return [isBest ? "new best!" : "trick or treat!", `collected ${n} candy${and}!${isBest ? " The biggest haul yet." : ""}`];
+    },
+  },
   {
     id: "laser",
     label: "Laser dot",
@@ -152,7 +174,9 @@ export function wireGames(mimi, { dialog, title, body, startLaser }) {
     stopGame();
     title.textContent = `Play with ${catName()}`;
     const bests = read(BESTS, {});
-    body.replaceChildren(el("ul", { class: "game-list" }, ...GAMES.map((g) => el("li", {},
+    const season = seasonOn()?.id;
+    const games = GAMES.filter((g) => !g.season || g.season === season);
+    body.replaceChildren(el("ul", { class: "game-list" }, ...games.map((g) => el("li", { class: g.season ? "is-seasonal" : null },
       el("button", { type: "button", class: "game-pick", onclick: () => choose(g) },
         el("span", { class: "game-icon" }, pixelSVG(g.icon, g.colors)),
         el("span", { class: "game-text" },

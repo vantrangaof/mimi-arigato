@@ -157,6 +157,39 @@
 .belly-ask { margin: 0; min-height: 1.4em; font-family: var(--font-pixel); font-size: 20px; color: var(--accent); text-align: center; }
 
 /* The shuffle swaps still slide with reduced motion: you have to watch them to play. */
+/* Pumpkin patch (Halloween): things pop up out of nine pumpkins. */
+.is-seasonal .game-pick { border-color: #e8762b; }
+.pumpkin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 320px; }
+.pumpkin {
+  position: relative;
+  display: grid;
+  align-items: end;
+  aspect-ratio: 1;
+  padding: 0 6px 6px;
+  background: var(--paper);
+  border: 2px solid var(--sheet-edge);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.pumpkin-art { position: relative; z-index: 2; justify-self: center; width: 80%; height: auto; }
+.pumpkin-pop {
+  position: absolute;
+  left: 50%;
+  bottom: 38%;
+  z-index: 1;
+  width: 50%;
+  transform: translate(-50%, 60%);
+  visibility: hidden;
+  transition: transform 120ms steps(3, end);
+}
+.pumpkin-pop svg { width: 100%; height: auto; }
+.pumpkin.is-up .pumpkin-pop { transform: translate(-50%, -12%); visibility: visible; }
+.pumpkin.is-got { animation: earned 400ms steps(4, end); }
+.pumpkin.is-boo { animation: boo 500ms steps(4, end); }
+@keyframes boo { 0%, 100% { transform: none; } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
 @media (prefers-reduced-motion: reduce) {
   .pair-card.is-found { animation: none; }
   .shuffle-lid { transition: none; }
