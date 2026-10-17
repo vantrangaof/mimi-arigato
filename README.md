@@ -374,6 +374,16 @@ Then: letters to future you, the Let-It-Go jar (never saved), diary weather show
 
 ## Ideas for later
 
+**Big ideas (logged 2026-10-17)**
+- **Mimi becomes your cat:** the AI reads your cat's markings from the cat diary photos (tabby stripes, white chest, socks, a patch over one eye, ear color) and the pixel sprite gets matching marking layers, not just one fur color.
+- **Mimi's dreams:** after Tuck in, Mimi "dreams" a 3-panel pixel comic from your week's good things (people, foods, places), delivered as a morning notification and kept in a dream book.
+- **Your life as a little town:** a door in Mimi's room opens onto a pixel town that grows from your memories: places become buildings, people who come up often become residents, tap a building for its memory page.
+- **Mimi goes on trips:** now and then Mimi travels to a place from your wish jar, sends pixel postcards for a couple of days (empty cushion, "back soon" note), and comes home with a souvenir.
+- **Today's song:** a 20-second chiptune at bedtime composed from your day (mood sets tempo and key, each good thing is a phrase), collected into a year's playlist (`cat/music.js`).
+- **More notes from Mimi:** notifications for the Sunday postcard, "something from a year ago", a wish come true, a new theory (still at most one a day).
+- **Letters to future you** delivered by notification; **a thank-you nudge** ("Lin came up 5 times this month: send a card?"); **gentler hard days** (several hard days in a row bring back good things about your people); **tell Mimi out loud** (speech to text).
+- **Private usage numbers:** anonymous daily counts (came back, challenges finished, notifications tapped) to see what actually helps.
+
 **Diary extras**
 - "Let it go": write a worry, give it to Mimi, she bats it away. Never saved.
 - Gentle prompts on a blank page ("What happened today?"), never required.
