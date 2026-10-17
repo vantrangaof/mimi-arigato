@@ -45,7 +45,7 @@ function savePage(page) {
   store.save(); // re-renders, and sync picks it up
 }
 
-export function wireCatDiary(mimi, { panel, tab, input }) {
+export function wireCatDiary(mimi, { panel, tab, input, openTranslator }) {
   let showing = dayKey(); // the day on screen
   let who = "cat"; // who's in the next photo
   let busy = false;
@@ -143,6 +143,7 @@ export function wireCatDiary(mimi, { panel, tab, input }) {
     );
 
     panel.replaceChildren(...[
+      el("button", { type: "button", class: "pixel-button cat-diary-translate", onclick: openTranslator }, `What is ${name} saying? Cat translator`),
       el("p", { class: "muted small cat-diary-count", text: all.length ? `${plural(all.length, "day")} of ${name} so far.` : `A photo a day of ${name}, and what ${name} thinks about it.` }),
       nav,
       page ? pageView(page) : emptyToday(),

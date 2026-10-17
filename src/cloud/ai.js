@@ -54,3 +54,8 @@ export const captionPhoto = (image, who, { catName }) =>
 // → { line } or { error }
 export const commentOnPhoto = (image, { text = "", catName, userName }) =>
   ask({ kind: "comment", image, text, catName, userName }, LOOK_TIMEOUT_MS);
+
+// The cat translator: reads a real cat's body language in a photo.
+// → { cat, signs, says, mood } or { error }
+export const translateCat = (image, { catName }) =>
+  ask({ kind: "translate", image, catName }, LOOK_TIMEOUT_MS);

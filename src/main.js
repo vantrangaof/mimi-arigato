@@ -40,6 +40,7 @@ import { wireGoodReminder } from "./ui/good-reminder.js";
 import { wireChallenge } from "./ui/challenge.js";
 import { wireCatDiary } from "./ui/cat-diary.js";
 import { wirePush } from "./ui/push.js";
+import { wireTranslator } from "./ui/translator.js";
 import { needsGreeting } from "./memory/needs.js";
 import { rememberGreeting } from "./memory/remember.js";
 import { wireThanks } from "./ui/thanks.js";
@@ -131,7 +132,8 @@ wirePhotos(mimi, {
   viewer: { dialog: $("photoViewer"), image: $("photoFull"), caption: $("photoCaption"), meta: $("photoMeta"), actions: $("photoActions"), comment: $("photoComment") },
 });
 wireDiary(mimi, { panel: $("panel-diary"), tab: $("tab-diary") });
-wireCatDiary(mimi, { panel: $("panel-catdiary"), tab: $("tab-catdiary"), input: $("catDiaryInput") });
+const translator = wireTranslator(mimi, { dialog: $("translatorDialog"), body: $("translatorBody"), input: $("translatorInput"), title: $("translatorTitle") });
+wireCatDiary(mimi, { panel: $("panel-catdiary"), tab: $("tab-catdiary"), input: $("catDiaryInput"), openTranslator: translator.open });
 wireMemories($("panel-memories"), { mimi, openAbout: about.open });
 wireScrapbook($("panel-scrapbook"));
 wireMonth($("panel-month"));

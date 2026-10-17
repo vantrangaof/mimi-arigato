@@ -30,6 +30,7 @@ export const KEYS = {
   reminders: "reminders",
   catDiary: "catDiary", // the cat's photo diary: [{ id: day, day, photoId, who: "cat" | "both", line, updatedAt }] (see ui/cat-diary.js)
   photoComments: "photoComments", // what the cat said about shared photos: [{ id: photo id, line, updatedAt }] (see memory/photo-comments.js)
+  catTranslations: "catTranslations", // the cat translator's phrasebook: [{ id, photoId, day, signs, says, mood, updatedAt }] (see ui/translator.js)
   challengeBonus: "challengeBonus", // today's challenge treat bag was given (see memory/challenges.js)
 };
 
@@ -505,6 +506,7 @@ export function cloudState() {
     quietDays: read(KEYS.quietDays, []),
     catDiary: read(KEYS.catDiary, []),
     photoComments: read(KEYS.photoComments, []),
+    catTranslations: read(KEYS.catTranslations, []),
   };
 }
 
@@ -566,6 +568,7 @@ export function mergeCloudState(remote = {}) {
     quietDays: [...new Set([...local.quietDays, ...(remote.quietDays ?? [])])].sort().slice(-400),
     catDiary: mergeNewest(local.catDiary, remote.catDiary),
     photoComments: mergeNewest(local.photoComments, remote.photoComments),
+    catTranslations: mergeNewest(local.catTranslations, remote.catTranslations),
   };
 
   if (JSON.stringify(merged) !== JSON.stringify(local)) {
@@ -577,7 +580,7 @@ export function mergeCloudState(remote = {}) {
     store.wishes = merged.wishes;
     store.roomThings = merged.roomThings;
     store.reminders = merged.reminders;
-    for (const key of ["settings", "settingsTimes", "scrapbook", "treasures", "milestones", "firstMet", "theories", "wishes", "roomThings", "reminders", "fed", "quietDays", "catDiary", "photoComments"]) {
+    for (const key of ["settings", "settingsTimes", "scrapbook", "treasures", "milestones", "firstMet", "theories", "wishes", "roomThings", "reminders", "fed", "quietDays", "catDiary", "photoComments", "catTranslations"]) {
       if (merged[key] != null) write(KEYS[key], merged[key]);
     }
     emit();
