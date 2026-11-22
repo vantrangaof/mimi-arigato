@@ -1,5 +1,5 @@
-// Notifications from Mimi (Vercel serverless function), called every hour by
-// .github/workflows/nudge.yml with "Authorization: Bearer <CRON_SECRET>".
+// Notifications from Mimi (Vercel serverless function), meant to be called every hour with
+// "Authorization: Bearer <CRON_SECRET>". Paused: the hourly caller was removed (README → Next up).
 // For each device that turned notifications on (push_subscriptions in supabase/schema.sql), in
 // that device's own time zone:
 //   - at your daily reminder time, one gentle nudge, only on a day you haven't told Mimi anything
